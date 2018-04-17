@@ -179,13 +179,11 @@ void Simulator::RunSimulation() {
 			
 			float current_time_at_stimulus_beginning = current_time_in_seconds;
 
-			if (!pseudo_stimulus)
-				perform_pre_stimulus_presentation_instructions(stimuli_presentation_order[stimulus_index]);
-
 			int number_of_timesteps_per_stimulus_per_epoch = simulator_options->run_simulation_general_options->presentation_time_per_stimulus_per_epoch / spiking_model->timestep;
 			int corrected_number_of_timesteps_per_stimulus_per_epoch = (number_of_timesteps_per_stimulus_per_epoch / spiking_model->timestep_grouping);
 
-			perform_pre_stimulus_presentation_instructions(stimuli_presentation_order[stimulus_index], stimulus_index, simulator_options->run_simulation_general_options->presentation_time_per_stimulus_per_epoch);
+			if (!pseudo_stimulus)
+				perform_pre_stimulus_presentation_instructions(stimuli_presentation_order[stimulus_index], stimulus_index, simulator_options->run_simulation_general_options->presentation_time_per_stimulus_per_epoch);
 
 			for (int timestep_index = 0; timestep_index < corrected_number_of_timesteps_per_stimulus_per_epoch; timestep_index++){
 				spiking_model->perform_per_timestep_model_instructions(current_time_in_seconds, simulator_options->run_simulation_general_options->apply_plasticity_to_relevant_synapses);
