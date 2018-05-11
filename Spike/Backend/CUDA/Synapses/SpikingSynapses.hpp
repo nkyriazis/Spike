@@ -82,6 +82,10 @@ namespace Backend {
 
 
     __global__ void get_active_synapses_kernel(
+      int* d_per_neuron_efferent_synapse_total,
+                int* d_per_neuron_efferent_synapse_indices,
+        	int* d_per_input_neuron_efferent_synapse_total,
+                int* d_per_input_neuron_efferent_synapse_indices,
 		int* d_per_neuron_efferent_synapse_count,
 		int* d_per_input_neuron_efferent_synapse_count,
                 float* d_last_spike_time_of_each_neuron,
@@ -90,10 +94,17 @@ namespace Backend {
                 float timestep,
 		int num_input_neurons,
 		int* group_indices,
+		int* circular_spikenum_buffer,
+		int* spikeid_buffer,
+		int bufferloc,
+		int buffersize,
+    int* d_delays,
+		int timestep_grouping,
 		int* num_active_synapses,
 		int* num_activated_neurons,
 		int* active_synapse_counts,
 		int* presynaptic_neuron_indices,
+		int total_number_of_synapses,
                 size_t total_number_of_neurons);
     
     __global__ void activate_synapses

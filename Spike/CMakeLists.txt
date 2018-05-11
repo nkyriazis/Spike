@@ -31,7 +31,10 @@ target_link_libraries(SpikeMain PRIVATE ${WHOLE_ARCHIVE_FLAG}
 
 
 set(CUDA_NVCC_FLAGS "-std=c++11")
-set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} "-arch=sm_60")
+set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} "-gencode=arch=compute_52,code=sm_52")
+set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} "-gencode=arch=compute_60,code=sm_60")
+set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} "-gencode=arch=compute_61,code=sm_61")
+set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} "-gencode=arch=compute_62,code=sm_62")
 function(add_cuda_exe_lib name files libraries is_lib)
     set (obj_list)
     foreach(file ${files})
@@ -96,6 +99,7 @@ add_dependencies(SpikeMain
 target_link_libraries(SpikeMain PRIVATE ${WHOLE_ARCHIVE_FLAG}
   ${CMAKE_CURRENT_BINARY_DIR}/libSpikeCUDA.a
   ${CUDA_LIBRARIES}
+  -L/usr/local/cuda/lib64 -lcudadevrt
   ${NO_WHOLE_ARCHIVE_FLAG}
 )
 
