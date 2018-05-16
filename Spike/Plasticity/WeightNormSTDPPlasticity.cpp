@@ -41,14 +41,14 @@ void WeightNormSTDPPlasticity::prepare_backend_early(){
 		for (int synindex = 0; synindex < num_synapses; synindex++){
 			int postneuron = syns->postsynaptic_neuron_indices[synindex];
 			neuron_in_plasticity_set[postneuron] = true;
-			sum_squared_afferent_values[postneuron] += pow(syns->synaptic_efficacies_or_weights[synindex], 2.0f);
+			sum_squared_afferent_values[postneuron] += pow(syns->synaptic_efficacies_or_weights[synindex], 1.0f);
 		}
 		// If there is a target total, then meet it:
 		if (plasticity_parameters->settarget){
 			for (int synindex = 0; synindex < num_synapses; synindex++){
 				int postneuron = syns->postsynaptic_neuron_indices[synindex];
 				if (postneuron >= 0){
-					syns->synaptic_efficacies_or_weights[synindex] /= sqrt(sum_squared_afferent_values[postneuron]);
+					syns->synaptic_efficacies_or_weights[synindex] /= (sum_squared_afferent_values[postneuron]);
 					syns->synaptic_efficacies_or_weights[synindex] *= plasticity_parameters->target;
 				}
 			}
