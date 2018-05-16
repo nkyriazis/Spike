@@ -44,7 +44,7 @@ struct Simulator_Run_Simulation_General_Options {
 
 	Simulator_Run_Simulation_General_Options(): presentation_time_per_stimulus_per_epoch(0.1), 
 												number_of_epochs(1), 
-												apply_plasticity_to_relevant_synapses(true),
+												apply_plasticity_to_relevant_synapses(false),
 												stimulus_presentation_order_seed(1),
 												reset_current_time_between_each_epoch(false),
 												delete_spike_analyser_on_simulator_destruction(true),
@@ -176,7 +176,7 @@ protected:
 	int* setup_stimuli_presentation_order();
 
 	void perform_per_timestep_recording_electrode_instructions(float current_time_in_seconds, int timestep_index, int number_of_timesteps_per_stimulus_per_epoch, int epoch_number);
-	void perform_pre_stimulus_presentation_instructions(int stimulus_index);
+	void perform_pre_stimulus_presentation_instructions(int stimulus_index, int stimulus_ordered_index, float timesteps_per_stimulus);
 	void perform_post_stimulus_presentation_instructions(int epoch_number);
 	void perform_post_epoch_instructions(int epoch_number, TimerWithMessages * epoch_timer);
 	void perform_end_of_simulation_instructions(TimerWithMessages * simulation_timer);

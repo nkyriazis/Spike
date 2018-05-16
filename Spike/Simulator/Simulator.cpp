@@ -143,8 +143,7 @@ void Simulator::RunSimulation() {
 	// Set seed for stimulus presentation order
 	srand(simulator_options->run_simulation_general_options->stimulus_presentation_order_seed);
 
-  // Activate plasticity if required
-  spiking_model->ActivatePlasticity(simulator_options->run_simulation_general_options->apply_plasticity_to_relevant_synapses);
+
 	
 
 	if (simulator_options->file_storage_options->write_initial_synaptic_weights_to_file_bool) {
@@ -180,11 +179,11 @@ void Simulator::RunSimulation() {
 			
 			float current_time_at_stimulus_beginning = current_time_in_seconds;
 
-			if (!pseudo_stimulus)
-				perform_pre_stimulus_presentation_instructions(stimuli_presentation_order[stimulus_index]);
-
 			int number_of_timesteps_per_stimulus_per_epoch = simulator_options->run_simulation_general_options->presentation_time_per_stimulus_per_epoch / spiking_model->timestep;
 			int corrected_number_of_timesteps_per_stimulus_per_epoch = (number_of_timesteps_per_stimulus_per_epoch / spiking_model->timestep_grouping);
+
+			if (!pseudo_stimulus)
+				perform_pre_stimulus_presentation_instructions(stimuli_presentation_order[stimulus_index], stimulus_index, simulator_options->run_simulation_general_options->presentation_time_per_stimulus_per_epoch);
 
 			for (int timestep_index = 0; timestep_index < corrected_number_of_timesteps_per_stimulus_per_epoch; timestep_index++){
 				spiking_model->perform_per_timestep_model_instructions(current_time_in_seconds);
@@ -338,12 +337,14 @@ void Simulator::perform_per_timestep_recording_electrode_instructions(float curr
 }
 
 
-void Simulator::perform_pre_stimulus_presentation_instructions(int stimulus_index) {
+void Simulator::perform_pre_stimulus_presentation_instructions(int stimulus_index, int stimulus_ordered_index, float time_per_stimulus) {
 
 	printf("Stimulus Index: %d\n", stimulus_index);
 	// printf("simulator_options->stimuli_presentation_options->presentation_format: %d\n", simulator_options->stimuli_presentation_options->presentation_format);
 
 	dynamic_cast<InputSpikingNeurons*>(spiking_model->input_spiking_neurons)->current_stimulus_index = stimulus_index;
+	dynamic_cast<InputSpikingNeurons*>(spiking_model->input_spiking_neurons)->stimulus_ordered_index = stimulus_ordered_index;
+	dynamic_cast<InputSpikingNeurons*>(spiking_model->input_spiking_neurons)->time_per_stimulus = time_per_stimulus;
 	
 	switch (simulator_options->stimuli_presentation_options->presentation_format) {
 		case PRESENTATION_FORMAT_OBJECT_BY_OBJECT_RESET_BETWEEN_STIMULI: case PRESENTATION_FORMAT_RANDOM_RESET_BETWEEN_EACH_STIMULUS:

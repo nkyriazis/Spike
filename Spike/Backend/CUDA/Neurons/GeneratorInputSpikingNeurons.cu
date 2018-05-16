@@ -36,12 +36,14 @@ namespace Backend {
     }
 
     void GeneratorInputSpikingNeurons::state_update(float current_time_in_seconds, float timestep) {
-      if ((frontend()->temporal_lengths_of_stimuli[frontend()->current_stimulus_index] +  timestep) > current_time_in_seconds){
+      float adapted_time = current_time_in_seconds - frontend()->time_per_stimulus*frontend()->stimulus_ordered_index;
+      if ((frontend()->temporal_lengths_of_stimuli[frontend()->current_stimulus_index] +  timestep) > adapted_time){
         check_for_generator_spikes_kernel<<<number_of_neuron_blocks_per_grid, threads_per_block>>>
           (neuron_ids_for_stimulus,
            spike_times_for_stimulus,
            last_spike_time_of_each_neuron,
            current_time_in_seconds,
+	   adapted_time,
            timestep,
 	   frontend()->model->timestep_grouping,
            num_spikes_in_current_stimulus);
@@ -55,6 +57,7 @@ namespace Backend {
                                                       float *d_spike_times_for_stimulus,
                                                       float* d_last_spike_time_of_each_neuron,
                                                       float current_time_in_seconds,
+                                                      float adapted_time,
                                                       float timestep,
 						      int timestep_grouping,
                                                       size_t number_of_spikes_in_stimulus){
@@ -63,7 +66,7 @@ namespace Backend {
       int idx = threadIdx.x + blockIdx.x * blockDim.x;
       while (idx < number_of_spikes_in_stimulus) {
 	for (int g=0; g < timestep_grouping; g++){
-          if (fabs((current_time_in_seconds + g*timestep) - d_spike_times_for_stimulus[idx]) < 0.5 * timestep) {
+          if (fabs((adapted_time + g*timestep) - d_spike_times_for_stimulus[idx]) < 0.5 * timestep) {
             d_last_spike_time_of_each_neuron[d_neuron_ids_for_stimulus[idx]] = current_time_in_seconds + (g*timestep);
           }
 	}

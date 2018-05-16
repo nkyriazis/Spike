@@ -36,6 +36,7 @@ namespace Backend {
                                                       float *d_spike_times_for_stimulus,
                                                       float* d_last_spike_time_of_each_neuron,
                                                       float current_time_in_seconds,
+                                                      float adapted_time,
                                                       float timestep,
 						      int timestep_grouping,
                                                       size_t number_of_spikes_in_stimulus);
