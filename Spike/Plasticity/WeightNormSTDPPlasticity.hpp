@@ -43,6 +43,7 @@ struct weightnorm_stdp_plasticity_parameters_struct : stdp_plasticity_parameters
 	// The normalization can be either done with the initialized total or with a specific target
 	bool settarget = false;
 	float target = 0.0;
+  int norm_order = 1.0;
 };
 
 
@@ -58,6 +59,7 @@ public:
 
   float* sum_squared_afferent_values = nullptr;
   float* afferent_weight_change_updater = nullptr;
+  float* plastic_weights = nullptr;
   bool* neuron_in_plasticity_set = nullptr;
 
   void init_backend(Context* ctx = _global_ctx) override;

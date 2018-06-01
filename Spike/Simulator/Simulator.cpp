@@ -147,10 +147,10 @@ void Simulator::RunSimulation() {
 	
 
 	if (simulator_options->file_storage_options->write_initial_synaptic_weights_to_file_bool) {
-	
 		network_state_archive_recording_electrodes->write_initial_synaptic_weights_to_file();
-	
 	}
+
+  spiking_model->ActivatePlasticity(simulator_options->run_simulation_general_options->apply_plasticity_to_relevant_synapses);
 
 	
 	reset_all_recording_electrodes();

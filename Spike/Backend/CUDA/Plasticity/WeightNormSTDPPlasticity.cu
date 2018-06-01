@@ -17,7 +17,7 @@ namespace Backend {
 	if (total_number_of_plastic_synapses > 0) {
 
 		// Now load values into device memory
-		CudaSafeCall(cudaMemcpy((void*)initial_weights, &(frontend()->plastic_synapses[0]), sizeof(float)*total_number_of_plastic_synapses, cudaMemcpyHostToDevice));
+		CudaSafeCall(cudaMemcpy((void*)initial_weights, &(frontend()->plastic_weights[0]), sizeof(float)*total_number_of_plastic_synapses, cudaMemcpyHostToDevice));
 
 		CudaSafeCall(cudaMemcpy((void*)afferent_weight_change_updater,
 				(void*)frontend()->afferent_weight_change_updater,
