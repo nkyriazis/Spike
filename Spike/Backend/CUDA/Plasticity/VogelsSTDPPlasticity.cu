@@ -141,7 +141,7 @@ namespace Backend {
         // Update vogels memory trace values
         vogels_pre_memory_trace[indx] = vogels_pre_memory_trace_val;
         vogels_post_memory_trace[indx] = vogels_post_memory_trace_val;
-        if (updated)
+        if (weightupdate != 0.0f)
           vogels_prevupdate[indx] = weightupdate;
 
         indx += blockDim.x * gridDim.x;

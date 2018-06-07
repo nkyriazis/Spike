@@ -45,6 +45,7 @@ struct vanrossum_stdp_plasticity_parameters_struct : stdp_plasticity_parameters_
   float tau_minus;
   float tau_plus;
   float weight_dependency_factor;
+  float w_max;
   bool nearest_spike;
 };
 

@@ -91,7 +91,8 @@ namespace Backend {
 		synapses_backend->postsynaptic_neuron_indices,
 		neuron_in_plasticity_set,
 		synapses_backend->synaptic_efficacies_or_weights,
-		weight_divisor,
+		afferent_weight_change_updater,
+		//weight_divisor,
 		plastic_synapse_indices,
 		total_number_of_plastic_synapses);
 	CudaCheckError();
@@ -165,7 +166,7 @@ namespace Backend {
 				//if (division_value != 1.0)
 				//printf("%f, %f, %f wat \n", division_value, current_weight[idx], (current_weight[idx] / division_value));
 				if (division_value != 1.0)
-					current_weight[idx] /= division_value;
+					current_weight[idx] -= (division_value / 100.0);
 			}
 			indx += blockDim.x * gridDim.x;
 		}

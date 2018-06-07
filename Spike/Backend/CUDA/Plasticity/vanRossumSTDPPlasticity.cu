@@ -88,6 +88,7 @@ namespace Backend {
         float stdp_pre_memory_trace_val = stdp_pre_memory_trace[indx];
         float stdp_post_memory_trace_val = stdp_post_memory_trace[indx];
         int postid = d_postsyns[idx];
+    float new_synaptic_weight = d_synaptic_efficacies_or_weights[idx];
 
 	for (int g=0; g < timestep_grouping; g++){	
 	  stdp_post_memory_trace_val *= expf( - timestep / stdp_vars.tau_minus);
@@ -101,9 +102,7 @@ namespace Backend {
 		    stdp_pre_memory_trace_val = stdp_vars.a_plus;
             // Carry out the necessary LTD
 	    float old_synaptic_weight = d_synaptic_efficacies_or_weights[idx];
-            float new_synaptic_weight = old_synaptic_weight - powf(old_synaptic_weight, stdp_vars.weight_dependency_factor) * stdp_post_memory_trace_val;
-	    if (new_synaptic_weight >= 0.0f)
-              d_synaptic_efficacies_or_weights[idx] = new_synaptic_weight;
+            new_synaptic_weight -= powf(old_synaptic_weight, stdp_vars.weight_dependency_factor) * stdp_post_memory_trace_val;
 	  }	
           // Dealing with LTP
 	  if (fabs(d_last_spike_time_of_each_neuron[postid] - (current_time_in_seconds + g*timestep)) < 0.5f*timestep){
@@ -111,9 +110,18 @@ namespace Backend {
             if (stdp_vars.nearest_spike)
 		    stdp_post_memory_trace_val = stdp_vars.a_minus;
             // If output neuron just fired, do LTP
-            d_synaptic_efficacies_or_weights[idx] += stdp_pre_memory_trace_val;
-          }
+	    float old_synaptic_weight = d_synaptic_efficacies_or_weights[idx];
+            new_synaptic_weight += powf((stdp_vars.w_max - old_synaptic_weight), stdp_vars.weight_dependency_factor)*stdp_pre_memory_trace_val;
+
+            //d_synaptic_efficacies_or_weights[idx] += stdp_pre_memory_trace_val;
+    }
 	}
+	    if ((new_synaptic_weight >= 0.0f) & (new_synaptic_weight <= stdp_vars.w_max))
+              d_synaptic_efficacies_or_weights[idx] = new_synaptic_weight;
+      else if (new_synaptic_weight > stdp_vars.w_max)
+        d_synaptic_efficacies_or_weights[idx] = stdp_vars.w_max;
+      else
+        d_synaptic_efficacies_or_weights[idx] = 0.0f;
 
 	// Correctly set the trace values
 	stdp_pre_memory_trace[indx] = stdp_pre_memory_trace_val;
