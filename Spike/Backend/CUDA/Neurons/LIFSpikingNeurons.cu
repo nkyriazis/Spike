@@ -177,6 +177,7 @@ namespace Backend {
 
               neuron_data->last_spike_time_of_each_neuron[idx] = current_time_in_seconds + (g*timestep);
               membrane_potential_Vi = neuron_data->after_spike_reset_potentials_vreset[idx];
+              /*
               #ifndef INLINEDEVICEFUNCS
                 syn_activation_kernel(
               #else
@@ -187,6 +188,7 @@ namespace Backend {
                   g,
                   idx,
                   false);
+                  */
               //break;
               continue;
             }

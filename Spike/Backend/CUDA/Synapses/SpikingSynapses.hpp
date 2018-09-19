@@ -111,16 +111,15 @@ namespace Backend {
       int timestep_group_index,
       int preneuron_idx,
       bool is_input);
-    
+
     __global__ void activate_synapses(
-        int* d_per_neuron_efferent_synapse_total,
-        int* d_per_neuron_efferent_synapse_indices,
-        int* d_per_input_neuron_efferent_synapse_total,
-        int* d_per_input_neuron_efferent_synapse_indices,
+        spiking_neurons_data_struct* input_neuron_data,
+        spiking_neurons_data_struct* neuron_data,
         int bufferloc,
         int buffersize,
         neuron_inputs_struct neuron_inputs,
         int* postsynaptic_neuron_indices,
+        int* presynaptic_neuron_indices,
         float* synaptic_efficacies_or_weights,
         float* weight_scaling_constants,
         int* d_delays,
@@ -128,13 +127,7 @@ namespace Backend {
         int * d_syn_labels,
         float timestep,
         float current_time_in_seconds,
-        int total_number_of_synapses,
-        int total_number_of_neurons,
-        int* group_indices,
         int timestep_grouping,
-        int* active_presynaptic_neuron_indices,
-        int* active_synapse_counts,
-        int* num_activated_neurons,
-        int* num_active_synapses);
+        int total_number_of_synapses);
   }
 }
