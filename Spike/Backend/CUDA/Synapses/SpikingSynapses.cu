@@ -222,6 +222,11 @@ namespace Backend {
 
         idx += blockDim.x * gridDim.x;
       }
+
+      __syncthreads();
+      if ((threadIdx.x + blockIdx.x * blockDim.x) == 0){
+        num_activated_neurons[0] = 0;
+      }
     }
 
       __device__ float spiking_current_injection_kernel(
