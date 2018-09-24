@@ -31,12 +31,18 @@ namespace Backend {
       neuron_inputs_struct neuron_inputs;
       int synapse_type = EMPTY;
       int num_syn_labels = 0;
+      int* syn_labels = nullptr;
       int* num_activated_neurons = nullptr;
       int* num_active_synapses = nullptr;
       int* active_synapse_counts = nullptr;
+      int* active_synapse_starts = nullptr;
       int* active_presynaptic_neuron_indices = nullptr;
       int* group_indices = nullptr;
 
+      int* postsynaptic_neuron_indices = nullptr;
+      int* delays = nullptr;
+      float* synaptic_efficacies_or_weights = nullptr;
+      float* weight_scaling_constants = nullptr;
     };
     typedef float (*injection_kernel)(
         spiking_synapses_data_struct* synaptic_data,
@@ -65,6 +71,7 @@ namespace Backend {
       int* num_active_synapses = nullptr;
       int* num_activated_neurons = nullptr;
       int* active_synapse_counts = nullptr;
+      int* active_synapse_starts = nullptr;
       int* active_presynaptic_neuron_indices = nullptr;
       int h_num_active_synapses = 0;
       // Device pointers
