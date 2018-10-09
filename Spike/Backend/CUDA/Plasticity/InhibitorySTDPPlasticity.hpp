@@ -33,6 +33,23 @@ namespace Backend {
       void apply_stdp_to_synapse_weights(float current_time_in_seconds, float timestep) override;
     };
 
+    __global__ void ltp_and_ltd
+          (int* d_postsyns,
+           int* d_presyns,
+           int* d_syndelays,
+           spiking_neurons_data_struct* neuron_data,
+           spiking_neurons_data_struct* input_neuron_data,
+           float* d_synaptic_efficacies_or_weights,
+           float* stdp_pre_memory_trace,
+           float* stdp_post_memory_trace,
+           float post_decay,
+           float pre_decay,
+           struct inhibitory_stdp_plasticity_parameters_struct stdp_vars,
+           float timestep,
+           int timestep_grouping,
+           float current_time_in_seconds,
+           int* d_plastic_synapse_indices,
+           size_t total_number_of_plastic_synapses);
     // Kernel to carry out LTP/LTD
     __global__ void vogels_apply_stdp_to_synapse_weights_kernel
           (int* d_postsyns,

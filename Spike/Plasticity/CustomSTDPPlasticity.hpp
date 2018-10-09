@@ -29,6 +29,7 @@ struct custom_stdp_plasticity_parameters_struct : stdp_plasticity_parameters_str
   custom_stdp_plasticity_parameters_struct() : 
     a_minus(1.0), a_plus(1.0), tau_minus(0.02f), tau_plus(0.02f), w_max(1.0f), nearest_spike_only(false) { } // default Constructor
   // STDPPlasticity Parameters
+  float a_star;
   float a_minus;
   float a_plus;
   float tau_minus;

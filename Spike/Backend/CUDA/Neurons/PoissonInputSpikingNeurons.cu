@@ -121,6 +121,7 @@ namespace Backend {
                   true);
               } else {
                 active[idx] = true;
+                in_neuron_data->neuron_spike_time_bitbuffer[idx*bufsize + (bitloc / 8)] &= ~(1 << (bitloc % 8));
               }
             } 
             else {
