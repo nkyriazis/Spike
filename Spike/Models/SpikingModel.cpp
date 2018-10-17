@@ -191,6 +191,7 @@ void SpikingModel::reset_state() {
 
 void SpikingModel::reset_time() {
   current_time_in_seconds = 0.0f;
+  current_time_in_timesteps = 0;
 }
 
 
@@ -212,26 +213,24 @@ void SpikingModel::perform_per_step_model_instructions(bool plasticity_on){
 }
 
 void SpikingModel::run(float seconds, bool plasticity_on){
-  float starttime = current_time_in_seconds;
+  // Finalise the model if not already done
   finalise_model();
-
-  printf("Running model for %f seconds \n", seconds);
-
   // Calculate the number of computational steps we need to do
   int number_of_timesteps = ceil(seconds / timestep);
   int number_of_steps = ceil(number_of_timesteps / timestep_grouping);
 
+  printf("Running model for %f units of time (%d Timesteps) \n", seconds, (number_of_steps*timestep_grouping));
+
   // Run the simulation for the given number of steps
   for (int s = 0; s < number_of_steps; s++){
-    current_time_in_seconds = starttime + s*timestep_grouping*timestep;
+    current_time_in_seconds = current_time_in_timesteps*timestep;
     perform_per_step_model_instructions(plasticity_on);
+    current_time_in_timesteps += timestep_grouping;
   }
 
   // Carry out any final checks and outputs from recording electrodes
   for (int monitor_id = 0; monitor_id < monitors_vec.size(); monitor_id++)
     monitors_vec[monitor_id]->final_update(current_time_in_seconds, timestep);
 
-  // Finally, ensure that the time at the end of the run is correct
-  current_time_in_seconds = starttime + seconds;
 }
 
