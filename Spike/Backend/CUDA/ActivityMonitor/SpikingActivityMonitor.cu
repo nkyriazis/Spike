@@ -50,14 +50,14 @@ namespace Backend {
     }
 
     void SpikingActivityMonitor::collect_spikes_for_timestep
-    (float current_time_in_seconds, float timestep) {
+    (int current_time_in_timesteps, float timestep) {
       collect_spikes_for_timestep_kernel<<<neurons_backend->number_of_neuron_blocks_per_grid, neurons_backend->threads_per_block>>>
         (neurons_backend->d_neuron_data,
          total_number_of_spikes_stored_on_device,
          neuron_ids_of_stored_spikes_on_device,
          time_in_seconds_of_stored_spikes_on_device,
          frontend()->model->timestep_grouping,
-         current_time_in_seconds,
+         current_time_in_timesteps,
          timestep,
          neurons_frontend->total_number_of_neurons);
 
@@ -72,7 +72,7 @@ namespace Backend {
      int* d_neuron_ids_of_stored_spikes_on_device,
      float* d_time_in_seconds_of_stored_spikes_on_device,
      int timestep_grouping,
-     float current_time_in_seconds,
+     int current_time_in_timesteps,
      float timestep,
      size_t total_number_of_neurons){
 
@@ -80,7 +80,7 @@ namespace Backend {
       int bufsize = neuron_data->neuron_spike_time_bitbuffer_bytesize[0];
       while (idx < total_number_of_neurons) {
         for (int g=0; g < timestep_grouping; g++){
-          int bitloc = ((int)roundf(current_time_in_seconds / timestep) + g) % (8*bufsize);
+          int bitloc = (current_time_in_timesteps + g) % (8*bufsize);
           // If a neuron has fired
           if (neuron_data->neuron_spike_time_bitbuffer[idx*bufsize + (bitloc / 8)] & (1 << (bitloc % 8))){
             // Increase the number of spikes stored
@@ -90,7 +90,7 @@ namespace Backend {
 
             // In the location, add the id and the time
             d_neuron_ids_of_stored_spikes_on_device[i] = idx;
-            d_time_in_seconds_of_stored_spikes_on_device[i] = current_time_in_seconds + g*timestep;
+            d_time_in_seconds_of_stored_spikes_on_device[i] = (current_time_in_timesteps + g)*timestep;
           }
         }
         idx += blockDim.x * gridDim.x;

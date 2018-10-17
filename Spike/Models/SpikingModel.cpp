@@ -208,7 +208,7 @@ void SpikingModel::perform_per_step_model_instructions(bool plasticity_on){
   spiking_synapses->state_update(spiking_neurons, input_spiking_neurons, current_time_in_seconds, timestep);
   
   for (int monitor_id = 0; monitor_id < monitors_vec.size(); monitor_id++)
-    monitors_vec[monitor_id]->state_update(current_time_in_seconds, timestep);
+    monitors_vec[monitor_id]->state_update(current_time_in_timesteps, timestep);
 
 }
 
@@ -230,7 +230,7 @@ void SpikingModel::run(float seconds, bool plasticity_on){
 
   // Carry out any final checks and outputs from recording electrodes
   for (int monitor_id = 0; monitor_id < monitors_vec.size(); monitor_id++)
-    monitors_vec[monitor_id]->final_update(current_time_in_seconds, timestep);
+    monitors_vec[monitor_id]->final_update(current_time_in_timesteps, timestep);
 
 }
 

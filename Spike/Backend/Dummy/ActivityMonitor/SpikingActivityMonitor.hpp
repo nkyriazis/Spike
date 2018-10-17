@@ -17,7 +17,7 @@ namespace Backend {
       void copy_spikes_to_front() override;
       void copy_spikecount_to_front() override;
       void collect_spikes_for_timestep
-      (float current_time_in_seconds, float timestep) override;
+      (int current_time_in_timesteps, float timestep) override;
     };
   }
 }

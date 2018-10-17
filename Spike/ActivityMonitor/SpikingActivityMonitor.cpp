@@ -76,8 +76,7 @@ void SpikingActivityMonitor::reset_state() {
 }
 
 
-void SpikingActivityMonitor::copy_spikes_from_device_to_host_and_reset_device_spikes_if_device_spike_count_above_threshold(float current_time_in_seconds, float timestep, bool force) {
-  int current_time_in_timesteps = round(current_time_in_seconds / timestep) / model->timestep_grouping;
+void SpikingActivityMonitor::copy_spikes_from_device_to_host_and_reset_device_spikes_if_device_spike_count_above_threshold(int current_time_in_timesteps, float timestep, bool force) {
 
   if (((current_time_in_timesteps % (advanced_parameters->number_of_timesteps_per_device_spike_copy_check / model->timestep_grouping)) == 0) || force){
 
@@ -109,13 +108,13 @@ void SpikingActivityMonitor::copy_spikes_from_device_to_host_and_reset_device_sp
 }
 
 
-void SpikingActivityMonitor::state_update(float current_time_in_seconds, float timestep){
-  backend()->collect_spikes_for_timestep(current_time_in_seconds, timestep);
-  copy_spikes_from_device_to_host_and_reset_device_spikes_if_device_spike_count_above_threshold(current_time_in_seconds, timestep);
+void SpikingActivityMonitor::state_update(int current_time_in_timesteps, float timestep){
+  backend()->collect_spikes_for_timestep(current_time_in_timesteps, timestep);
+  copy_spikes_from_device_to_host_and_reset_device_spikes_if_device_spike_count_above_threshold(current_time_in_timesteps, timestep);
 }
 
-void SpikingActivityMonitor::final_update(float current_time_in_seconds, float timestep){
-  copy_spikes_from_device_to_host_and_reset_device_spikes_if_device_spike_count_above_threshold(current_time_in_seconds, timestep, true);
+void SpikingActivityMonitor::final_update(int current_time_in_timesteps, float timestep){
+  copy_spikes_from_device_to_host_and_reset_device_spikes_if_device_spike_count_above_threshold(current_time_in_timesteps, timestep, true);
   printf(" Number of Spikes Recorded: %d\n", total_number_of_spikes_stored_on_host);
 }
 

@@ -19,7 +19,7 @@ namespace Backend {
     }
 
     void SpikingActivityMonitor::collect_spikes_for_timestep
-    (float current_time_in_seconds, float timestep) {
+    (int current_time_in_timesteps, float timestep) {
     }
   }
 }
