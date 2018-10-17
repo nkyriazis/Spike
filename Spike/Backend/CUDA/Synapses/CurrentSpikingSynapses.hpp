@@ -36,10 +36,7 @@ namespace Backend {
       void copy_constants_and_initial_efficacies_to_device(); // Not virtual
 
       void state_update
-      (::SpikingNeurons * neurons,
-       ::SpikingNeurons* input_neurons,
-       float current_time_in_seconds,
-       float timestep) final; // Overrides ::Backend::SpikingSynapses:: ...
+      (int current_time_in_timesteps, float timestep) final;
       
     };
     __device__ float current_spiking_current_injection_kernel(

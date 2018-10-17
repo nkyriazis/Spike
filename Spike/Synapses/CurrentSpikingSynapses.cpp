@@ -48,8 +48,8 @@ int CurrentSpikingSynapses::AddGroup(int presynaptic_group_id,
 }
 
 
-void CurrentSpikingSynapses::state_update(SpikingNeurons * input_neurons, SpikingNeurons * neurons, float current_time_in_seconds, float timestep) {
-  backend()->state_update(input_neurons, neurons, current_time_in_seconds, timestep);
+void CurrentSpikingSynapses::state_update(int current_time_in_timesteps, float timestep) {
+  backend()->state_update(current_time_in_timesteps, timestep);
 }
 
 SPIKE_MAKE_INIT_BACKEND(CurrentSpikingSynapses);

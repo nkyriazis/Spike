@@ -82,8 +82,8 @@ void ConductanceSpikingSynapses::increment_number_of_synapses(int increment) {
 }
 
 
-void ConductanceSpikingSynapses::state_update(SpikingNeurons * neurons, SpikingNeurons * input_neurons, float current_time_in_seconds, float timestep) {
-  backend()->state_update(neurons, input_neurons, current_time_in_seconds, timestep);
+void ConductanceSpikingSynapses::state_update(int current_time_in_timesteps, float timestep) {
+  backend()->state_update(current_time_in_timesteps, timestep);
 }
 
 SPIKE_MAKE_INIT_BACKEND(ConductanceSpikingSynapses);

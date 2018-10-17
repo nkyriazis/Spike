@@ -90,10 +90,8 @@ namespace Backend {
 
     /* STATE UPDATE */
     void ConductanceSpikingSynapses::state_update
-    (::SpikingNeurons* neurons,
-     ::SpikingNeurons* input_neurons,
-     float current_time_in_seconds, float timestep) {
-      SpikingSynapses::state_update(neurons, input_neurons, current_time_in_seconds, timestep);
+    (int current_time_in_timesteps, float timestep) {
+      SpikingSynapses::state_update(current_time_in_timesteps, timestep);
     }
 
 

@@ -36,7 +36,7 @@ public:
 
   void increment_number_of_synapses(int increment);
 
-  void state_update(SpikingNeurons * neurons, SpikingNeurons * input_neurons, float current_time_in_seconds, float timestep) override;
+  void state_update(int current_time_in_timesteps, float timestep) override;
 
 private:
   std::shared_ptr<::Backend::VoltageSpikingSynapses> _backend;

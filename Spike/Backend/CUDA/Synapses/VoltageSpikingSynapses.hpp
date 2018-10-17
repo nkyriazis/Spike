@@ -24,7 +24,7 @@ namespace Backend {
       void allocate_device_pointers(); // Not virtual
       void copy_constants_and_initial_efficacies_to_device(); // Not virtual
 
-      void state_update(::SpikingNeurons * neurons, ::SpikingNeurons * input_neurons, float current_time_in_seconds, float timestep) final;
+      void state_update(int current_time_in_timesteps, float timestep) final;
 
     };
     __device__ float voltage_spiking_current_injection_kernel(

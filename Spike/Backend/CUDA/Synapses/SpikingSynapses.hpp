@@ -96,7 +96,7 @@ namespace Backend {
 
       void copy_weights_to_host() override;
 
-      void state_update(::SpikingNeurons * neurons, ::SpikingNeurons * input_neurons, float current_time_in_seconds, float timestep) override;
+      void state_update(int current_time_in_timesteps, float timestep) override;
 
     };
 
@@ -124,8 +124,7 @@ namespace Backend {
         spiking_neurons_data_struct* in_neurons_data,
         int bufferloc,
         float timestep,
-        float current_time_in_seconds,
-        int timestep_index,
+        int current_time_in_timesteps,
         int timestep_grouping);
   }
 }

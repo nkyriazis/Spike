@@ -117,21 +117,19 @@ namespace Backend {
     }
 
     void SpikingSynapses::state_update
-    (::SpikingNeurons* neurons,
-     ::SpikingNeurons* input_neurons,
-     float current_time_in_seconds, float timestep) {
+    (int current_time_in_timesteps, float timestep) {
 
       if (frontend()->total_number_of_synapses > 0){
       
       // Calculate buffer location
-      int bufferloc = (int)(std::round(current_time_in_seconds / timestep)) % buffersize;
+      int bufferloc = current_time_in_timesteps % buffersize;
 
 
       ::Backend::CUDA::SpikingNeurons* neurons_backend =
-        dynamic_cast<::Backend::CUDA::SpikingNeurons*>(neurons->backend());
+        dynamic_cast<::Backend::CUDA::SpikingNeurons*>(frontend()->model->spiking_neurons->backend());
       assert(neurons_backend);
       ::Backend::CUDA::SpikingNeurons* input_neurons_backend =
-        dynamic_cast<::Backend::CUDA::SpikingNeurons*>(input_neurons->backend());
+        dynamic_cast<::Backend::CUDA::SpikingNeurons*>(frontend()->model->input_spiking_neurons->backend());
       assert(input_neurons_backend);
 
       activate_synapses<<<neurons_backend->number_of_neuron_blocks_per_grid, threads_per_block>>>(
@@ -140,8 +138,7 @@ namespace Backend {
           input_neurons_backend->d_neuron_data,
           bufferloc,
           timestep,
-          current_time_in_seconds,
-          ((int)roundf(current_time_in_seconds / timestep)),
+          current_time_in_timesteps,
           frontend()->model->timestep_grouping);
       CudaCheckError();
       }
@@ -171,15 +168,14 @@ namespace Backend {
         spiking_neurons_data_struct* in_neurons_data,
         int bufferloc,
         float timestep,
-        float current_time_in_seconds,
-        int timestep_index,
+        int current_time_in_timesteps,
         int timestep_grouping)
     {
       int indx = threadIdx.x + blockIdx.x * blockDim.x;
       if (indx == 0){
-        synaptic_data->num_activated_neurons[((timestep_index / timestep_grouping) + 1) % 2] = 0;
+        synaptic_data->num_activated_neurons[((current_time_in_timesteps / timestep_grouping) + 1) % 2] = 0;
       }
-      while (indx < (synaptic_data->num_active_synapses[0]*synaptic_data->num_activated_neurons[((timestep_index / timestep_grouping) % 2)])) {
+      while (indx < (synaptic_data->num_active_synapses[0]*synaptic_data->num_activated_neurons[((current_time_in_timesteps / timestep_grouping) % 2)])) {
  
         int pos = indx / synaptic_data->num_active_synapses[0]; 
         int idx = indx % synaptic_data->num_active_synapses[0]; 

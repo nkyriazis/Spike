@@ -129,8 +129,8 @@ void SpikingSynapses::increment_number_of_synapses(int increment) {
 }
 
 
-void SpikingSynapses::state_update(SpikingNeurons * neurons, SpikingNeurons * input_neurons, float current_time_in_seconds, float timestep) {
-  backend()->state_update(neurons, input_neurons, current_time_in_seconds, timestep);
+void SpikingSynapses::state_update(int current_time_in_timesteps, float timestep) {
+  backend()->state_update(current_time_in_timesteps, timestep);
 }
 
 void SpikingSynapses::save_connectivity_as_txt(std::string path, std::string prefix, int synapsegroupid){

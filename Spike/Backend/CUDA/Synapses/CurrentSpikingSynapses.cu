@@ -64,7 +64,8 @@ namespace Backend {
         sizeof(float)*current_array_length, cudaMemcpyHostToDevice));
     }
 
-    void CurrentSpikingSynapses::state_update(::SpikingNeurons * neurons, ::SpikingNeurons* input_neurons, float current_time_in_seconds, float timestep) {
+    void CurrentSpikingSynapses::state_update(int current_time_in_timesteps, float timestep) {
+      SpikingSynapses::state_update(current_time_in_timesteps, timestep);
     }
     
     /* KERNELS BELOW */
