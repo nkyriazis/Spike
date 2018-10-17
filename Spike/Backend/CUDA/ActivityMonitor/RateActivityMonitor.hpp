@@ -26,15 +26,14 @@ namespace Backend {
       void allocate_pointers_for_spike_count(); // Not virtual
 
       void copy_spike_count_to_host() override;
-      void add_spikes_to_per_neuron_spike_count(float current_time_in_seconds, float timestep) override;
+      void add_spikes_to_per_neuron_spike_count(int current_time_in_timesteps, float timestep) override;
 
     };
 
     __global__ void add_spikes_to_per_neuron_spike_count_kernel
     (spiking_neurons_data_struct* neuron_data,
      int* d_per_neuron_spike_counts,
-     float current_time_in_seconds,
-     float timestep,
+     int current_time_in_timesteps,
      int timestep_grouping,
      size_t total_number_of_neurons);
   }

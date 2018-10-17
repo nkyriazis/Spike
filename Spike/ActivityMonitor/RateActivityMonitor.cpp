@@ -25,11 +25,11 @@ void RateActivityMonitor::prepare_backend_early() {
   per_neuron_spike_counts = (int *)malloc(sizeof(int)*neurons->total_number_of_neurons);
 }
 
-void RateActivityMonitor::state_update(float current_time_in_seconds, float timestep) {
-  backend()->add_spikes_to_per_neuron_spike_count(current_time_in_seconds, timestep);
+void RateActivityMonitor::state_update(int current_time_in_timesteps, float timestep) {
+  backend()->add_spikes_to_per_neuron_spike_count(current_time_in_timesteps, timestep);
 }
 
-void RateActivityMonitor::final_update(float current_time_in_seconds, float timestep){
+void RateActivityMonitor::final_update(int current_time_in_timesteps, float timestep){
   backend()->copy_spike_count_to_host();
 }
 
