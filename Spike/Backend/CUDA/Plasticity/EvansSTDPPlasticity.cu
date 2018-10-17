@@ -68,7 +68,7 @@ namespace Backend {
            evans_stdp_plasticity_parameters_struct stdp_vars,
            float timestep,
            int timestep_grouping,
-           float current_time_in_timesteps,
+           int current_time_in_timesteps,
            int* d_plastic_synapse_indices,
            size_t total_number_of_plastic_synapses){
       // Global Index
