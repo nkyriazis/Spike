@@ -101,14 +101,14 @@ namespace Backend {
         spiking_neurons_data_struct* neuron_data,
         float multiplication_to_volts,
         float current_membrane_voltage,
-        float current_time_in_seconds,
+        int current_time_in_timesteps,
         float timestep,
         int idx,
         int g){
       
       conductance_spiking_synapses_data_struct* synaptic_data = (conductance_spiking_synapses_data_struct*) in_synaptic_data;
         
-      int bufferloc = (((int)roundf(current_time_in_seconds / timestep) + g) % synaptic_data->neuron_inputs.temporal_buffersize)*synaptic_data->neuron_inputs.input_buffersize;
+      int bufferloc = ((current_time_in_timesteps + g) % synaptic_data->neuron_inputs.temporal_buffersize)*synaptic_data->neuron_inputs.input_buffersize;
         
       float total_current = 0.0f;
       for (int syn_label = 0; syn_label < synaptic_data->num_syn_labels; syn_label++){
@@ -126,6 +126,5 @@ namespace Backend {
       }
       return total_current*multiplication_to_volts;
     };
-
   }
 }

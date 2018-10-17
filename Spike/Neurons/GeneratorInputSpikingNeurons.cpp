@@ -20,10 +20,6 @@ int GeneratorInputSpikingNeurons::AddGroup(neuron_parameters_struct * group_para
 }
 */
 
-void GeneratorInputSpikingNeurons::state_update(float current_time_in_seconds,  float timestep){
-  backend()->state_update(current_time_in_seconds, timestep);
-}
-
 
 int GeneratorInputSpikingNeurons::add_stimulus(int spikenumber, int* ids, float* spiketimes){
 

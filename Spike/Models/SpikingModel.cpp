@@ -197,8 +197,8 @@ void SpikingModel::reset_time() {
 
 void SpikingModel::perform_per_step_model_instructions(bool plasticity_on){
   
-  spiking_neurons->state_update(current_time_in_seconds, timestep);
-  input_spiking_neurons->state_update(current_time_in_seconds, timestep);
+  spiking_neurons->state_update(current_time_in_timesteps, timestep);
+  input_spiking_neurons->state_update(current_time_in_timesteps, timestep);
   
   if (plasticity_on){
     for (int plasticity_id = 0; plasticity_id < plasticity_rule_vec.size(); plasticity_id++)

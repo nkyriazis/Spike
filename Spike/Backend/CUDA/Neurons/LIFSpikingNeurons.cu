@@ -69,7 +69,7 @@ namespace Backend {
       SpikingNeurons::reset_state();
     }
 
-    void LIFSpikingNeurons::state_update(float current_time_in_seconds, float timestep) {
+    void LIFSpikingNeurons::state_update(int current_time_in_timesteps, float timestep) {
       ::Backend::CUDA::SpikingSynapses* synapses_backend =
         dynamic_cast<::Backend::CUDA::SpikingSynapses*>(frontend()->model->spiking_synapses->backend());
       lif_update_membrane_potentials<<<number_of_neuron_blocks_per_grid, threads_per_block>>>
@@ -80,8 +80,8 @@ namespace Backend {
          frontend()->background_current,
          timestep,
          frontend()->model->timestep_grouping,
-         current_time_in_seconds,
-         (int)(roundf(current_time_in_seconds / timestep)),
+         current_time_in_timesteps*timestep,
+         current_time_in_timesteps,
          frontend()->refractory_period_in_seconds,
          frontend()->total_number_of_neurons);
 
@@ -97,7 +97,7 @@ namespace Backend {
         float timestep,
         int timestep_grouping,
         float current_time_in_seconds,
-        int timestep_index,
+        int current_time_in_timesteps,
         float refractory_period_in_seconds,
         size_t total_number_of_neurons) {
       // Get thread IDs
@@ -113,7 +113,7 @@ namespace Backend {
         int bufsize = in_neuron_data->neuron_spike_time_bitbuffer_bytesize[0];
           
         for (int g=0; g < timestep_grouping; g++){
-          int bitloc = (timestep_index + g) % (bufsize*8);
+          int bitloc = (current_time_in_timesteps + g) % (bufsize*8);
           in_neuron_data->neuron_spike_time_bitbuffer[idx*bufsize + (bitloc / 8)] &= ~(1 << (bitloc % 8));
           #ifndef INLINEDEVICEFUNCS
             voltage_input_for_timestep = current_injection_kernel(
@@ -121,7 +121,7 @@ namespace Backend {
                   in_neuron_data,
                   temp_membrane_resistance_R,
                   membrane_potential_Vi,
-                  current_time_in_seconds,
+                  current_time_in_timesteps,
                   timestep,
                   idx,
                   g);
@@ -134,7 +134,7 @@ namespace Backend {
                   in_neuron_data,
                   temp_membrane_resistance_R,
                   membrane_potential_Vi,
-                  current_time_in_seconds,
+                  current_time_in_timesteps,
                   timestep,
                   idx,
                   g);
@@ -145,7 +145,7 @@ namespace Backend {
                   in_neuron_data,
                   temp_membrane_resistance_R,
                   membrane_potential_Vi,
-                  current_time_in_seconds,
+                  current_time_in_timesteps,
                   timestep,
                   idx,
                   g);
@@ -156,7 +156,7 @@ namespace Backend {
                   in_neuron_data,
                   temp_membrane_resistance_R,
                   membrane_potential_Vi,
-                  current_time_in_seconds,
+                  current_time_in_timesteps,
                   timestep,
                   idx,
                   g);
@@ -184,7 +184,7 @@ namespace Backend {
                   in_neuron_data,
                   g,
                   idx,
-                  timestep_index / timestep_grouping,
+                  current_time_in_timesteps / timestep_grouping,
                   false);
             }
           }

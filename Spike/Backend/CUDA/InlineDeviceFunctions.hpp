@@ -6,10 +6,10 @@ __device__ void my_activate_synapses(
   spiking_neurons_data_struct* neuron_data,
   int timestep_group_index,
   int preneuron_idx,
-  int timestep_index,
+  int grouping_index,
   bool is_input)
 {
-  int pos = atomicAdd(&synaptic_data->num_activated_neurons[timestep_index % 2], 1);
+  int pos = atomicAdd(&synaptic_data->num_activated_neurons[grouping_index % 2], 1);
   int synapse_count = neuron_data->per_neuron_efferent_synapse_count[preneuron_idx];
   int synapse_start = neuron_data->per_neuron_efferent_synapse_start[preneuron_idx];
   synaptic_data->active_synapse_counts[pos] = synapse_count;
@@ -24,14 +24,14 @@ __device__ float my_conductance_spiking_injection_kernel(
     spiking_neurons_data_struct* neuron_data,
     float multiplication_to_volts,
     float current_membrane_voltage,
-    float current_time_in_seconds,
+    int current_time_in_timesteps,
     float timestep,
     int idx,
     int g){
   
   conductance_spiking_synapses_data_struct* synaptic_data = (conductance_spiking_synapses_data_struct*) in_synaptic_data;
     
-  int bufferloc = (((int)roundf(current_time_in_seconds / timestep) + g) % synaptic_data->neuron_inputs.temporal_buffersize)*synaptic_data->neuron_inputs.input_buffersize;
+  int bufferloc = ((current_time_in_timesteps + g) % synaptic_data->neuron_inputs.temporal_buffersize)*synaptic_data->neuron_inputs.input_buffersize;
     
   float total_current = 0.0f;
   for (int syn_label = 0; syn_label < synaptic_data->num_syn_labels; syn_label++){
@@ -55,7 +55,7 @@ __device__ float my_current_spiking_injection_kernel(
     spiking_neurons_data_struct* neuron_data,
     float multiplication_to_volts,
     float current_membrane_voltage,
-    float current_time_in_seconds,
+    int current_time_in_timesteps,
     float timestep,
     int idx,
     int g){
@@ -63,7 +63,7 @@ __device__ float my_current_spiking_injection_kernel(
   current_spiking_synapses_data_struct* synaptic_data = (current_spiking_synapses_data_struct*) in_synaptic_data;
     
   int total_number_of_neurons =  neuron_data->total_number_of_neurons;
-  int bufferloc = (((int)roundf(current_time_in_seconds / timestep) + g) % synaptic_data->neuron_inputs.temporal_buffersize)*synaptic_data->neuron_inputs.input_buffersize;
+  int bufferloc = ((current_time_in_timesteps + g) % synaptic_data->neuron_inputs.temporal_buffersize)*synaptic_data->neuron_inputs.input_buffersize;
   float total_current = 0.0f;
     for (int syn_label = 0; syn_label < synaptic_data->num_syn_labels; syn_label++){
       float decay_term_value = synaptic_data->decay_terms_tau[syn_label];
@@ -88,14 +88,14 @@ __device__ float my_voltage_spiking_injection_kernel(
     spiking_neurons_data_struct* neuron_data,
     float multiplication_to_volts,
     float current_membrane_voltage,
-    float current_time_in_seconds,
+    int current_time_in_timesteps,
     float timestep,
     int idx,
     int g){
   
   spiking_synapses_data_struct* synaptic_data = (spiking_synapses_data_struct*) in_synaptic_data;
     
-  int bufferloc = (((int)roundf(current_time_in_seconds / timestep) + g) % synaptic_data->neuron_inputs.temporal_buffersize)*synaptic_data->neuron_inputs.input_buffersize;
+  int bufferloc = ((current_time_in_timesteps + g) % synaptic_data->neuron_inputs.temporal_buffersize)*synaptic_data->neuron_inputs.input_buffersize;
 
   float total_current = 0.0f;
   for (int syn_label = 0; syn_label < synaptic_data->num_syn_labels; syn_label++){

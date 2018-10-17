@@ -32,7 +32,6 @@ public:
   SPIKE_ADD_BACKEND_GETSET(PatternedPoissonInputSpikingNeurons, PoissonInputSpikingNeurons);
   void init_backend(Context* ctx = _global_ctx) override;
  
-  void state_update(float current_time_in_seconds, float timestep) override;
   void reset_stimuli();  
   int add_stimulus(float* rates, int num_rates);
   int add_stimulus(std::vector<float> rates);

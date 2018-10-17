@@ -38,13 +38,13 @@ namespace Backend {
       num_spikes_in_current_stimulus = frontend()->number_of_spikes_in_stimuli[frontend()->current_stimulus_index];
     }
 
-    void GeneratorInputSpikingNeurons::state_update(float current_time_in_seconds, float timestep) {
+    void GeneratorInputSpikingNeurons::state_update(int current_time_in_timesteps, float timestep) {
       ::Backend::CUDA::SpikingSynapses* synapses_backend = dynamic_cast<::Backend::CUDA::SpikingSynapses*>(frontend()->model->spiking_synapses->backend());
-      if ((frontend()->temporal_lengths_of_stimuli[frontend()->current_stimulus_index] + (h_neuron_spike_time_bitbuffer_bytesize*8 + 1)*timestep) > (current_time_in_seconds - frontend()->stimulus_onset_adjustment)){
+      if ((frontend()->temporal_lengths_of_stimuli[frontend()->current_stimulus_index] + (h_neuron_spike_time_bitbuffer_bytesize*8 + 1)*timestep) > (current_time_in_timesteps*timestep - frontend()->stimulus_onset_adjustment)){
 
         reset_spike_times<<<number_of_neuron_blocks_per_grid, threads_per_block>>>(
            d_neuron_data,
-           (int)roundf(current_time_in_seconds / timestep),
+           current_time_in_timesteps,
            frontend()->model->timestep_grouping,
            frontend()->total_number_of_neurons);
         CudaCheckError();
@@ -56,10 +56,10 @@ namespace Backend {
            neuron_ids_for_stimulus,
            spike_times_for_stimulus,
            last_spike_time_of_each_neuron,
-           current_time_in_seconds,
+           current_time_in_timesteps*timestep,
            frontend()->stimulus_onset_adjustment,
            timestep,
-           (int)roundf(current_time_in_seconds / timestep),
+           current_time_in_timesteps,
            frontend()->model->timestep_grouping,
            frontend()->total_number_of_neurons,
            num_spikes_in_current_stimulus);
@@ -96,7 +96,7 @@ namespace Backend {
         float current_time_in_seconds,
         float stimulus_onset_adjustment,
         float timestep,
-        int timestep_index,
+        int current_time_in_timesteps,
         int timestep_grouping,
         int total_number_of_neurons,
         size_t number_of_spikes_in_stimulus){
@@ -107,20 +107,20 @@ namespace Backend {
       while (idx < number_of_spikes_in_stimulus) {
         for (int g=0; g < timestep_grouping; g++){
           if (fabs((current_time_in_seconds - stimulus_onset_adjustment + g*timestep) - d_spike_times_for_stimulus[idx]) < 0.5 * timestep) {
-            int bitloc = (timestep_index + g) % (8*bufsize);
+            int bitloc = (current_time_in_timesteps + g) % (8*bufsize);
             neuron_data->neuron_spike_time_bitbuffer[d_neuron_ids_for_stimulus[idx]*bufsize + (bitloc / 8)] |= (1 << (bitloc % 8));
            neuron_data->last_spike_time_of_each_neuron[d_neuron_ids_for_stimulus[idx]] = current_time_in_seconds + g*timestep;
-            #ifndef INLINEDEVICEFUNCS
-              syn_activation_kernel(
-            #else
-              INLINE_GENE::my_activate_synapses(
-            #endif
-                synaptic_data,
-                neuron_data,
-                g,
-                idx,
-                timestep_index,
-                true);
+           #ifndef INLINEDEVICEFUNCS
+             syn_activation_kernel(
+           #else
+             INLINE_GENE::my_activate_synapses(
+           #endif
+               synaptic_data,
+               neuron_data,
+               g,
+               idx,
+               current_time_in_timesteps / timestep_grouping,
+               false);
           }
         }
         idx += blockDim.x * gridDim.x;

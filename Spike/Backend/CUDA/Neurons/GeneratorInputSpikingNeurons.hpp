@@ -30,12 +30,12 @@ namespace Backend {
 
       void allocate_device_pointers(); // Not virtual
 
-      void state_update(float current_time_in_seconds, float timestep) override;
+      void state_update(int current_time_in_timesteps, float timestep) override;
     };
 
     __global__ void reset_spike_times(
         spiking_neurons_data_struct* neuron_data,
-        int timestep_index,
+        int current_time_in_timesteps,
         int timestep_grouping,
         int total_number_of_neurons);
     __global__ void check_for_generator_spikes_kernel(

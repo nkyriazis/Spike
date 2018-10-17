@@ -21,11 +21,6 @@ PatternedPoissonInputSpikingNeurons::~PatternedPoissonInputSpikingNeurons() {
   free(stimuli_rates);
 }
 
-void PatternedPoissonInputSpikingNeurons::state_update
-(float current_time_in_seconds, float timestep) {
-  backend()->state_update(current_time_in_seconds, timestep);
-}
-
 void PatternedPoissonInputSpikingNeurons::reset_stimuli(){
   total_number_of_rates = 0;
   total_number_of_input_stimuli = 0;

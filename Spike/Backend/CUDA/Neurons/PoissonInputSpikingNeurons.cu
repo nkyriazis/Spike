@@ -46,7 +46,7 @@ namespace Backend {
       assert(random_state_manager_backend);
     }
 
-    void PoissonInputSpikingNeurons::state_update(float current_time_in_seconds, float timestep) {
+    void PoissonInputSpikingNeurons::state_update(int current_time_in_timesteps, float timestep) {
       ::Backend::CUDA::SpikingSynapses* synapses_backend =
         dynamic_cast<::Backend::CUDA::SpikingSynapses*>(frontend()->model->spiking_synapses->backend());
       poisson_update_membrane_potentials_kernel<<<random_state_manager_backend->block_dimensions, random_state_manager_backend->threads_per_block>>>(
@@ -62,8 +62,7 @@ namespace Backend {
          thresholds_for_action_potential_spikes,
          resting_potentials_v0,
          last_spike_time_of_each_neuron,
-         current_time_in_seconds,
-         (int)roundf(current_time_in_seconds / timestep),
+         current_time_in_timesteps,
          frontend()->total_number_of_neurons,
          frontend()->current_stimulus_index);
 
@@ -83,8 +82,7 @@ namespace Backend {
        float * d_thresholds_for_action_potential_spikes,
        float* d_resting_potentials,
        float* d_last_spike_time_of_each_neuron,
-       float current_time_in_seconds,
-       int timestep_index,
+       int current_time_in_timesteps,
        size_t total_number_of_input_neurons,
        int current_stimulus_index) {
 
@@ -96,17 +94,17 @@ namespace Backend {
       while (idx < total_number_of_input_neurons){
             
         for (int g=0; g < timestep_grouping; g++){
-            int bitloc = (timestep_index + g) % (8*bufsize);
+            int bitloc = (current_time_in_timesteps + g) % (8*bufsize);
             // Creates random float between 0 and 1 from uniform distribution
             // d_states effectively provides a different seed for each thread
             // curand_uniform produces different float every time you call it
             in_neuron_data->neuron_spike_time_bitbuffer[idx*bufsize + (bitloc / 8)] &= ~(1 << (bitloc % 8));
-            if ((in_neuron_data->last_spike_time_of_each_neuron[idx] <= (current_time_in_seconds + g*timestep)) || (!active[idx])){
+            if ((in_neuron_data->last_spike_time_of_each_neuron[idx] <= ((current_time_in_timesteps + g)*timestep)) || (!active[idx])){
               int rate_index = (total_number_of_input_neurons * current_stimulus_index) + idx;
               float rate = d_rates[rate_index];
               float random_float = curand_uniform(&d_states[t_idx]);
 
-              in_neuron_data->last_spike_time_of_each_neuron[idx] = current_time_in_seconds + g*timestep - (1.0f / rate)*logf(random_float);
+              in_neuron_data->last_spike_time_of_each_neuron[idx] = (current_time_in_timesteps + g)*timestep - (1.0f / rate)*logf(random_float);
               if (active[idx]){
                 in_neuron_data->neuron_spike_time_bitbuffer[idx*bufsize + (bitloc / 8)] |= (1 << (bitloc % 8));
               #ifndef INLINEDEVICEFUNCS
@@ -118,7 +116,7 @@ namespace Backend {
                   in_neuron_data,
                   g,
                   idx,
-                  timestep_index / timestep_grouping,
+                  current_time_in_timesteps / timestep_grouping,
                   true);
               } else {
                 active[idx] = true;

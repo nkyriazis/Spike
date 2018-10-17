@@ -48,7 +48,7 @@ namespace Backend {
         spiking_neurons_data_struct* neuron_data,
         float multiplication_to_volts,
         float membrane_voltage,
-        float current_time_in_seconds,
+        int current_time_in_timesteps,
         float timestep,
         int idx,
         int g);
@@ -105,7 +105,7 @@ namespace Backend {
       spiking_neurons_data_struct* neuron_data,
       float multiplication_to_volts,
       float current_membrane_voltage,
-      float current_time_in_seconds,
+      int current_time_in_timesteps,
       float timestep,
       int idx,
       int g);

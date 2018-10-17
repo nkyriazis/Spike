@@ -150,10 +150,10 @@ namespace Backend {
       spiking_neurons_data_struct* neuron_data,
       int timestep_group_index,
       int preneuron_idx,
-      int timestep_index,
+      int grouping_index,
       bool is_input)
     {
-      int pos = atomicAdd(&synaptic_data->num_activated_neurons[timestep_index % 2], 1);
+      int pos = atomicAdd(&synaptic_data->num_activated_neurons[grouping_index % 2], 1);
       int synapse_count = neuron_data->per_neuron_efferent_synapse_count[preneuron_idx];
       int synapse_start = neuron_data->per_neuron_efferent_synapse_start[preneuron_idx];
       synaptic_data->active_synapse_counts[pos] = synapse_count;
@@ -197,17 +197,17 @@ namespace Backend {
       }
     }
 
-      __device__ float spiking_current_injection_kernel(
-        spiking_synapses_data_struct* synaptic_data,
+    __device__ float spiking_current_injection_kernel(
+        spiking_synapses_data_struct* in_synaptic_data,
         spiking_neurons_data_struct* neuron_data,
-        float current_membrane_voltage,
-        float current_time_in_seconds,
-        float timestep,
         float multiplication_to_volts,
+        float current_membrane_voltage,
+        int current_time_in_timesteps,
+        float timestep,
         int idx,
         int g){
-        return 0.0f;
-      };
+         return 0.0f;
+    }
 
   }
 }

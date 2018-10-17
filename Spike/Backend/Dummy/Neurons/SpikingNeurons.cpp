@@ -16,7 +16,7 @@ namespace Backend {
     }
 
     void SpikingNeurons::state_update
-    (float current_time_in_seconds, float timestep) {
+    (int current_time_in_timesteps, float timestep) {
     }
 
   } // namespace Dummy

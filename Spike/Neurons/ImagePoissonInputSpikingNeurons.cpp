@@ -22,11 +22,6 @@ ImagePoissonInputSpikingNeurons::~ImagePoissonInputSpikingNeurons() {
   free(gabor_input_rates);
 }
 
-void ImagePoissonInputSpikingNeurons::state_update
-(float current_time_in_seconds, float timestep) {
-  backend()->state_update(current_time_in_seconds, timestep);
-}
-
 int ImagePoissonInputSpikingNeurons::AddGroup(neuron_parameters_struct * group_params){
   int new_group_id = PoissonInputSpikingNeurons::AddGroup(group_params);
 

@@ -28,11 +28,11 @@ namespace Backend {
 
     };
     __device__ float voltage_spiking_current_injection_kernel(
-        spiking_synapses_data_struct* synaptic_data,
+        spiking_synapses_data_struct* in_synaptic_data,
         spiking_neurons_data_struct* neuron_data,
         float multiplication_to_volts,
         float current_membrane_voltage,
-        float current_time_in_seconds,
+        int current_time_in_timesteps,
         float timestep,
         int idx,
         int g);

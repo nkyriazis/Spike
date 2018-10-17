@@ -36,7 +36,7 @@ namespace Backend {
       void allocate_device_pointers(); // Not virtual
       void copy_constants_to_device(); // Not virtual
 
-      void state_update(float current_time_in_seconds, float timestep) override;
+      void state_update(int current_time_in_timesteps, float timestep) override;
     };
     __global__ void poisson_update_membrane_potentials_kernel(
         synaptic_activation_kernel syn_activation_kernel,
@@ -51,8 +51,7 @@ namespace Backend {
        float * d_thresholds_for_action_potential_spikes,
        float* d_resting_potentials,
        float* d_last_spike_time_of_each_neuron,
-       float current_time_in_seconds,
-       int timestep_index,
+       int current_time_in_timesteps,
        size_t total_number_of_input_neurons,
        int current_stimulus_index);
   }

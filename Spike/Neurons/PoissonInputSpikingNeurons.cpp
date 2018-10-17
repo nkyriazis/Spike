@@ -50,8 +50,4 @@ void PoissonInputSpikingNeurons::select_stimulus(int stimulus_index){
   if (_backend) reset_state();
 }
 
-void PoissonInputSpikingNeurons::state_update(float current_time_in_seconds, float timestep) {
-  backend()->state_update(current_time_in_seconds, timestep);
-}
-
 SPIKE_MAKE_INIT_BACKEND(PoissonInputSpikingNeurons);
