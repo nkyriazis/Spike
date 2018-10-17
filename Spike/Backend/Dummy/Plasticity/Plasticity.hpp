@@ -9,7 +9,7 @@ namespace Backend {
       void prepare() override;
       void reset_state() override;
 
-      virtual void state_update(float current_time_in_seconds, float timestep);
+      virtual void state_update(int current_time_in_timesteps, float timestep);
     };
   }
 }

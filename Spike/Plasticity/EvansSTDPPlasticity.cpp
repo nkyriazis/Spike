@@ -29,13 +29,9 @@ void EvansSTDPPlasticity::prepare_backend_late() {
 }
 
 // Run the STDP
-void EvansSTDPPlasticity::state_update (float current_time_in_seconds, float timestep){
+void EvansSTDPPlasticity::state_update (int current_time_in_timesteps, float timestep){
   // Update
-  update_synaptic_efficacies_or_weights(current_time_in_seconds, timestep);
-}
-
-void EvansSTDPPlasticity::update_synaptic_efficacies_or_weights(float current_time_in_seconds, float timestep) {
-  backend()->update_synaptic_efficacies_or_weights(current_time_in_seconds, timestep);
+  backend()->update_synaptic_efficacies_or_weights(current_time_in_timesteps, timestep);
 }
 
 SPIKE_MAKE_INIT_BACKEND(EvansSTDPPlasticity);

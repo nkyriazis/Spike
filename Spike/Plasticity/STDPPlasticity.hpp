@@ -52,9 +52,6 @@ public:
   void reset_state() override;
   void prepare_backend_early() override;
 
-  SpikingSynapses* syns = nullptr;
-  SpikingNeurons* in_neurs = nullptr;
-  SpikingNeurons* neurs = nullptr;
   SpikingModel* model = nullptr;
   
   // Dealt with by AddSynapseIndices function
@@ -62,7 +59,7 @@ public:
   int total_number_of_plastic_synapses = 0;
 
   virtual void AddSynapseIndices(int synapse_id_start, int num_synapses_to_add);
-  virtual void state_update(float current_time_in_seconds, float timestep) override = 0;
+  virtual void state_update(int current_time_in_timesteps, float timestep) override = 0;
 
 private:
   std::shared_ptr<::Backend::STDPPlasticity> _backend;

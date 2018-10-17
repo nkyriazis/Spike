@@ -47,7 +47,7 @@ namespace Backend {
       CudaSafeCall(cudaMalloc((void **)&vogels_prevupdate, sizeof(int)*total_number_of_plastic_synapses));
     }
 
-    void InhibitorySTDPPlasticity::apply_stdp_to_synapse_weights(float current_time_in_seconds, float timestep) {
+    void InhibitorySTDPPlasticity::apply_stdp_to_synapse_weights(int current_time_in_timesteps, float timestep) {
 
     // Vogels update rule requires a neuron wise memory trace. This must be updated upon neuron firing.
     vogels_apply_stdp_to_synapse_weights_kernel<<<neurons_backend->number_of_neuron_blocks_per_grid, neurons_backend->threads_per_block>>>
@@ -63,7 +63,7 @@ namespace Backend {
        *(frontend()->stdp_params),
        timestep,
        frontend()->model->timestep_grouping,
-       current_time_in_seconds,
+       current_time_in_timesteps,
        plastic_synapse_indices,
        total_number_of_plastic_synapses);
     CudaCheckError();
@@ -82,7 +82,7 @@ namespace Backend {
            struct inhibitory_stdp_plasticity_parameters_struct stdp_vars,
            float timestep,
            int timestep_grouping,
-           float current_time_in_seconds,
+           int current_time_in_timesteps,
            int* d_plastic_synapse_indices,
            size_t total_number_of_plastic_synapses){
       // Global Index
@@ -112,7 +112,7 @@ namespace Backend {
           vogels_post_memory_trace_val *= trace_decay;
 
           // Bit Indexing to detect spikes
-          int postbitloc = ((int)roundf(current_time_in_seconds / timestep) + g) % (bufsize*8);
+          int postbitloc = (current_time_in_timesteps + g) % (bufsize*8);
           int prebitloc = postbitloc - d_syndelays[idx];
           prebitloc = (prebitloc < 0) ? (bufsize*8 + prebitloc) : prebitloc;
 

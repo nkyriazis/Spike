@@ -30,7 +30,7 @@ namespace Backend {
       void reset_state() override;
 
       void allocate_device_pointers();
-      void apply_stdp_to_synapse_weights(float current_time_in_seconds, float timestep) override;
+      void apply_stdp_to_synapse_weights(int current_time_in_timesteps, float timestep) override;
     };
 
     // Kernel to carry out LTP/LTD
@@ -47,7 +47,7 @@ namespace Backend {
            struct inhibitory_stdp_plasticity_parameters_struct stdp_vars,
            float timestep,
            int timestep_grouping,
-           float current_time_in_seconds,
+           int current_time_in_timesteps,
            int* d_plastic_synapse_indices,
            size_t total_number_of_plastic_synapses);
   }

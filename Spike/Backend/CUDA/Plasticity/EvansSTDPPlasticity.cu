@@ -39,7 +39,7 @@ namespace Backend {
 
     }
 
-    void EvansSTDPPlasticity::update_synaptic_efficacies_or_weights(float current_time_in_seconds, float timestep) {
+    void EvansSTDPPlasticity::update_synaptic_efficacies_or_weights(int current_time_in_timesteps, float timestep) {
         ltp_and_ltd<<<synapses_backend->number_of_synapse_blocks_per_grid, synapses_backend->threads_per_block>>>
           (synapses_backend->postsynaptic_neuron_indices,
            synapses_backend->presynaptic_neuron_indices,
@@ -52,7 +52,7 @@ namespace Backend {
            *(frontend()->stdp_params),
            timestep,
            frontend()->model->timestep_grouping,
-           current_time_in_seconds,
+           current_time_in_timesteps,
            plastic_synapse_indices,
            total_number_of_plastic_synapses);
           CudaCheckError();
@@ -70,7 +70,7 @@ namespace Backend {
            evans_stdp_plasticity_parameters_struct stdp_vars,
            float timestep,
            int timestep_grouping,
-           float current_time_in_seconds,
+           float current_time_in_timesteps,
            int* d_plastic_synapse_indices,
            size_t total_number_of_plastic_synapses){
       // Global Index
@@ -101,7 +101,7 @@ namespace Backend {
           recent_postsynaptic_activity_D = (1 - (timestep/stdp_vars.decay_term_tau_D)) * recent_postsynaptic_activity_D;
 
           // Bit Indexing to detect spikes
-          int postbitloc = ((int)roundf(current_time_in_seconds / timestep) + g) % (bufsize*8);
+          int postbitloc = (current_time_in_timesteps + g) % (bufsize*8);
           int prebitloc = postbitloc - d_syndelays[idx];
           prebitloc = (prebitloc < 0) ? (bufsize*8 + prebitloc) : prebitloc;
 

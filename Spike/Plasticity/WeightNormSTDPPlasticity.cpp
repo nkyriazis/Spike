@@ -15,7 +15,7 @@ WeightNormSTDPPlasticity::~WeightNormSTDPPlasticity(){
   free(initial_weights);
 }
 
-void WeightNormSTDPPlasticity::state_update(float current_time_in_seconds, float timestep){
+void WeightNormSTDPPlasticity::state_update(int current_time_in_timesteps, float timestep){
   //if (((int)round(current_time_in_seconds / timestep) % 1000) == 0)
   backend()->weight_normalization();
 }
@@ -31,6 +31,7 @@ void WeightNormSTDPPlasticity::reset_state() {
 
 void WeightNormSTDPPlasticity::prepare_backend_early(){
   printf("Prepping\n");
+  STDPPlasticity::prepare_backend_early();
   // By making use of the neuron and synapses, I can determine which weights are contributing to the calculation to be done
   if (syns && neurs && plasticity_parameters) {
   if (plasticity_rule_id >= 0){

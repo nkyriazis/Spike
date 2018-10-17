@@ -13,7 +13,7 @@ namespace Backend {
     }
 
     void EvansSTDPPlasticity::update_synaptic_efficacies_or_weights
-    (float current_time_in_seconds, float timestep) {
+    (int current_time_in_timesteps, float timestep) {
     }
   }
 }

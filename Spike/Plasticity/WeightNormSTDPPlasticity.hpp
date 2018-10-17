@@ -63,7 +63,7 @@ public:
 
   void init_backend(Context* ctx = _global_ctx) override;
   void prepare_backend_early() override;
-  virtual void state_update(float current_time_in_seconds, float timestep) override;
+  virtual void state_update(int current_time_in_timesteps, float timestep) override;
 
 private:
   std::shared_ptr<::Backend::WeightNormSTDPPlasticity> _backend;

@@ -30,7 +30,7 @@ namespace Backend {
   public:
     SPIKE_ADD_BACKEND_FACTORY(InhibitorySTDPPlasticity);
 
-    virtual void apply_stdp_to_synapse_weights(float current_time_in_seconds, float timestep) = 0;
+    virtual void apply_stdp_to_synapse_weights(int current_time_in_timesteps, float timestep) = 0;
   };
 }
 
@@ -60,10 +60,7 @@ public:
   void init_backend(Context* ctx = _global_ctx) override;
   void prepare_backend_late() override;
 
-  void state_update(float current_time_in_seconds, float timestep) override;
-
-  // LTP & LTD for this model
-  void apply_stdp_to_synapse_weights(float current_time_in_seconds, float timestep);
+  void state_update(int current_time_in_timesteps, float timestep) override;
 
 private:
   std::shared_ptr<::Backend::InhibitorySTDPPlasticity> _backend;

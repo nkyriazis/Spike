@@ -17,7 +17,7 @@ namespace Backend {
 
     void CustomSTDPPlasticity
   ::apply_stdp_to_synapse_weights
-    (float current_time_in_seconds, float timestep) {
+    (int current_time_in_timesteps, float timestep) {
     }
   }
 }
