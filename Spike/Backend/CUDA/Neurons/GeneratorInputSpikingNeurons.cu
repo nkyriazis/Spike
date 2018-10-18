@@ -118,7 +118,7 @@ namespace Backend {
                synaptic_data,
                neuron_data,
                g,
-               idx,
+               d_neuron_ids_for_stimulus[idx],
                current_time_in_timesteps / timestep_grouping,
                false);
           }
