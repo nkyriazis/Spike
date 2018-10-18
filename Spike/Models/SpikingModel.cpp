@@ -202,7 +202,7 @@ void SpikingModel::perform_per_step_model_instructions(bool plasticity_on){
   
   if (plasticity_on){
     for (int plasticity_id = 0; plasticity_id < plasticity_rule_vec.size(); plasticity_id++)
-      plasticity_rule_vec[plasticity_id]->state_update(current_time_in_seconds, timestep);
+      plasticity_rule_vec[plasticity_id]->state_update(current_time_in_timesteps, timestep);
   }
 
   spiking_synapses->state_update(current_time_in_timesteps, timestep);
