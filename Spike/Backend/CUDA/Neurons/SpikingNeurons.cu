@@ -80,7 +80,7 @@ namespace Backend {
                               frontend()->total_number_of_neurons*sizeof(float),
                               cudaMemcpyHostToDevice));
       CudaSafeCall(cudaMemcpy(membrane_potentials_v,
-                              frontend()->resting_potentials_v0,
+                              frontend()->membrane_potentials_v,
                               sizeof(float)*frontend()->total_number_of_neurons,
                               cudaMemcpyHostToDevice));
 
