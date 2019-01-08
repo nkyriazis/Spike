@@ -31,7 +31,7 @@ namespace Backend {
       void setup_stimulus() override;
 
       ::Backend::CUDA::RandomStateManager* random_state_manager_backend = nullptr;
-      float * next_spike_time_of_each_neuron = nullptr;
+      int * next_spike_timestep_of_each_neuron = nullptr;
       float * rates = nullptr;
       bool * active = nullptr;
       bool * init = nullptr;
@@ -53,7 +53,7 @@ namespace Backend {
        int timestep_grouping,
        float * d_thresholds_for_action_potential_spikes,
        float* d_resting_potentials,
-       float* next_spike_time_of_each_neuron,
+       int* next_spike_timestep_of_each_neuron,
        unsigned int current_time_in_timesteps,
        size_t total_number_of_input_neurons,
        int current_stimulus_index);

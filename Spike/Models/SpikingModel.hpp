@@ -25,8 +25,8 @@ class SpikingModel {
 private:
   void perform_per_step_model_instructions(bool plasticity_on);
   float current_time_in_seconds = 0.0f;
-  unsigned int current_time_in_timesteps = 0;
 public:
+  unsigned int current_time_in_timesteps = 0;
   // Constructor/Destructor
   //SpikingModel(SpikingNeurons* spiking_neurons, SpikingNeurons* input_spiking_neurons, SpikingSynapses* spiking_synapses);
   SpikingModel();

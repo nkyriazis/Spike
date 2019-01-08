@@ -44,7 +44,7 @@ namespace Backend {
          frontend()->model->timestep_grouping,
          thresholds_for_action_potential_spikes,
          resting_potentials_v0,
-         next_spike_time_of_each_neuron,
+         next_spike_timestep_of_each_neuron,
          current_time_in_timesteps,
          frontend()->total_number_of_neurons,
          frontend()->current_stimulus_index);

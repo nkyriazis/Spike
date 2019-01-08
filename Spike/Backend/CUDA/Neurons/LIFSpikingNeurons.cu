@@ -82,7 +82,7 @@ namespace Backend {
          frontend()->model->timestep_grouping,
          current_time_in_timesteps*timestep,
          current_time_in_timesteps,
-         frontend()->refractory_period_in_seconds,
+         ceil(frontend()->refractory_period_in_seconds/timestep),
          frontend()->total_number_of_neurons);
 
       CudaCheckError();
@@ -98,7 +98,7 @@ namespace Backend {
         int timestep_grouping,
         float current_time_in_seconds,
         unsigned int current_time_in_timesteps,
-        float refractory_period_in_seconds,
+        int refractory_period_in_timesteps,
         size_t total_number_of_neurons) {
       // Get thread IDs
       int idx = threadIdx.x + blockIdx.x * blockDim.x;
@@ -114,6 +114,8 @@ namespace Backend {
           
         for (int g=0; g < timestep_grouping; g++){
           int bitloc = (current_time_in_timesteps + g) % (bufsize*8);
+          //if (idx == 0)
+          //  printf("%d, %f, %f -- %d\n", (current_time_in_timesteps + g), (current_time_in_timesteps + g)*timestep, (current_time_in_timesteps + g)*timestep, bitloc);
           in_neuron_data->neuron_spike_time_bitbuffer[idx*bufsize + (bitloc / 8)] &= ~(1 << (bitloc % 8));
           #ifndef INLINEDEVICEFUNCS
             voltage_input_for_timestep = current_injection_kernel(
@@ -165,7 +167,8 @@ namespace Backend {
                 break;
             }
           #endif
-          if (((current_time_in_seconds + g*timestep) - neuron_data->last_spike_time_of_each_neuron[idx] - refractory_period_in_seconds) > 0.5f*timestep ){
+          if (neuron_data->refraction_counter[idx] <= 0){
+          //if ((((current_time_in_timesteps + g)*timestep) - neuron_data->last_spike_time_of_each_neuron[idx] - refractory_period_in_seconds) > 0.5f*timestep ){
             membrane_potential_Vi = equation_constant * resting_potential_V0 + (1 - equation_constant) * membrane_potential_Vi + equation_constant * background_current + voltage_input_for_timestep;
             
     
@@ -173,7 +176,8 @@ namespace Backend {
             if (membrane_potential_Vi >= neuron_data->thresholds_for_action_potential_spikes[idx]){
               in_neuron_data->neuron_spike_time_bitbuffer[idx*bufsize + (bitloc / 8)] |= (1 << (bitloc % 8));
 
-              neuron_data->last_spike_time_of_each_neuron[idx] = current_time_in_seconds + (g*timestep);
+              neuron_data->refraction_counter[idx] = refractory_period_in_timesteps;
+              neuron_data->last_spike_time_of_each_neuron[idx] = (current_time_in_timesteps + g)*timestep;
               membrane_potential_Vi = neuron_data->after_spike_reset_potentials_vreset[idx];
               #ifndef INLINEDEVICEFUNCS
                 syn_activation_kernel(
@@ -187,6 +191,8 @@ namespace Backend {
                   current_time_in_timesteps / timestep_grouping,
                   false);
             }
+          } else {
+            neuron_data->refraction_counter[idx] -= 1;
           }
       }
       neuron_data->membrane_potentials_v[idx] = membrane_potential_Vi;

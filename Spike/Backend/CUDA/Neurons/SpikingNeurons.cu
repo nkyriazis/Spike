@@ -27,6 +27,7 @@ namespace Backend {
       CudaSafeCall(cudaMalloc((void **)&thresholds_for_action_potential_spikes, sizeof(float)*frontend()->total_number_of_neurons));
       CudaSafeCall(cudaMalloc((void **)&resting_potentials_v0, sizeof(float)*frontend()->total_number_of_neurons));
       CudaSafeCall(cudaMalloc((void **)&after_spike_reset_potentials_vreset, sizeof(float)*frontend()->total_number_of_neurons));
+      CudaSafeCall(cudaMalloc((void **)&refraction_counter, sizeof(int)*frontend()->total_number_of_neurons));
 
       CudaSafeCall(cudaMalloc((void **)&d_neuron_data, sizeof(spiking_neurons_data_struct)));
       
@@ -54,6 +55,7 @@ namespace Backend {
       neuron_data->resting_potentials_v0 = resting_potentials_v0;
       neuron_data->total_number_of_neurons = frontend()->total_number_of_neurons;
       neuron_data->after_spike_reset_potentials_vreset = after_spike_reset_potentials_vreset;
+      neuron_data->refraction_counter = refraction_counter;
 
       neuron_data->neuron_spike_time_bitbuffer = neuron_spike_time_bitbuffer;
       neuron_data->neuron_spike_time_bitbuffer_bytesize = neuron_spike_time_bitbuffer_bytesize;
@@ -70,14 +72,21 @@ namespace Backend {
 
       // Set last spike times to -1000 so that the times do not affect current simulation.
       float* tmp_last_spike_times;
+      int* tmp_refraction_counter;
       tmp_last_spike_times = (float*)malloc(sizeof(float)*frontend()->total_number_of_neurons);
+      tmp_refraction_counter = (int*)malloc(sizeof(int)*frontend()->total_number_of_neurons);
       for (int i=0; i < frontend()->total_number_of_neurons; i++){
         tmp_last_spike_times[i] = -1000.0f;
+        tmp_refraction_counter = 0;
       }
 
       CudaSafeCall(cudaMemcpy(last_spike_time_of_each_neuron,
                               tmp_last_spike_times,
                               frontend()->total_number_of_neurons*sizeof(float),
+                              cudaMemcpyHostToDevice));
+      CudaSafeCall(cudaMemcpy(refraction_counter,
+                              tmp_refraction_counter,
+                              frontend()->total_number_of_neurons*sizeof(int),
                               cudaMemcpyHostToDevice));
       CudaSafeCall(cudaMemcpy(membrane_potentials_v,
                               frontend()->membrane_potentials_v,
@@ -91,6 +100,7 @@ namespace Backend {
                               cudaMemcpyHostToDevice));
       // Free tmp_last_spike_times
       free (tmp_last_spike_times);
+      free (tmp_refraction_counter);
     }
     
     void SpikingNeurons::state_update(unsigned int current_time_in_timesteps, float timestep) {
