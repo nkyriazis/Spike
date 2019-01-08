@@ -61,7 +61,7 @@ namespace Backend {
        */
       void copy_constants_to_device(); // Not virtual
 
-      void state_update(int current_time_in_seconds, float timestep) override;
+      void state_update(unsigned int current_time_in_timesteps, float timestep) override;
       
     };
 

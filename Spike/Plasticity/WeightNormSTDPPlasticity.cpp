@@ -13,7 +13,7 @@ WeightNormSTDPPlasticity::~WeightNormSTDPPlasticity(){
   free(initial_weights);
 }
 
-void WeightNormSTDPPlasticity::state_update(int current_time_in_timesteps, float timestep){
+void WeightNormSTDPPlasticity::state_update(unsigned int current_time_in_timesteps, float timestep){
   //if (((int)round(current_time_in_seconds / timestep) % 1000) == 0)
   backend()->weight_normalization();
 }

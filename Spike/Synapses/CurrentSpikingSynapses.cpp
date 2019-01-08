@@ -48,7 +48,7 @@ int CurrentSpikingSynapses::AddGroup(int presynaptic_group_id,
 }
 
 
-void CurrentSpikingSynapses::state_update(int current_time_in_timesteps, float timestep) {
+void CurrentSpikingSynapses::state_update(unsigned int current_time_in_timesteps, float timestep) {
   backend()->state_update(current_time_in_timesteps, timestep);
 }
 

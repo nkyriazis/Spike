@@ -20,7 +20,7 @@ void CustomSTDPPlasticity::prepare_backend_late() {
 
 
 // Run the STDP
-void CustomSTDPPlasticity::state_update(int current_time_in_timesteps, float timestep){
+void CustomSTDPPlasticity::state_update(unsigned int current_time_in_timesteps, float timestep){
   backend()->apply_stdp_to_synapse_weights(current_time_in_timesteps, timestep);
 }
 

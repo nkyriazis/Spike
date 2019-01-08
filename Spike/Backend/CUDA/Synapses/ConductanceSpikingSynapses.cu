@@ -90,7 +90,7 @@ namespace Backend {
 
     /* STATE UPDATE */
     void ConductanceSpikingSynapses::state_update
-    (int current_time_in_timesteps, float timestep) {
+    (unsigned int current_time_in_timesteps, float timestep) {
       SpikingSynapses::state_update(current_time_in_timesteps, timestep);
     }
 
@@ -101,7 +101,7 @@ namespace Backend {
         spiking_neurons_data_struct* neuron_data,
         float multiplication_to_volts,
         float current_membrane_voltage,
-        int current_time_in_timesteps,
+        unsigned int current_time_in_timesteps,
         float timestep,
         int idx,
         int g){

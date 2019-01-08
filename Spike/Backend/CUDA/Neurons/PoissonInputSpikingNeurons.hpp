@@ -28,15 +28,18 @@ namespace Backend {
 
       void prepare() override;
       void reset_state() override;
+      void setup_stimulus() override;
 
       ::Backend::CUDA::RandomStateManager* random_state_manager_backend = nullptr;
+      float * next_spike_time_of_each_neuron = nullptr;
       float * rates = nullptr;
       bool * active = nullptr;
+      bool * init = nullptr;
       
       void allocate_device_pointers(); // Not virtual
       void copy_constants_to_device(); // Not virtual
 
-      void state_update(int current_time_in_timesteps, float timestep) override;
+      void state_update(unsigned int current_time_in_timesteps, float timestep) override;
     };
     __global__ void poisson_update_membrane_potentials_kernel(
         synaptic_activation_kernel syn_activation_kernel,
@@ -50,8 +53,8 @@ namespace Backend {
        int timestep_grouping,
        float * d_thresholds_for_action_potential_spikes,
        float* d_resting_potentials,
-       float* d_last_spike_time_of_each_neuron,
-       int current_time_in_timesteps,
+       float* next_spike_time_of_each_neuron,
+       unsigned int current_time_in_timesteps,
        size_t total_number_of_input_neurons,
        int current_stimulus_index);
   }

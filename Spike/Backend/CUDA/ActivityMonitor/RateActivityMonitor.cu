@@ -36,7 +36,7 @@ namespace Backend {
     }
 
     void RateActivityMonitor::add_spikes_to_per_neuron_spike_count
-    (int current_time_in_timesteps, float timestep) {
+    (unsigned int current_time_in_timesteps, float timestep) {
       add_spikes_to_per_neuron_spike_count_kernel<<<neurons_backend->number_of_neuron_blocks_per_grid, neurons_backend->threads_per_block>>>
         (neurons_backend->d_neuron_data,
          per_neuron_spike_counts,
@@ -49,7 +49,7 @@ namespace Backend {
     __global__ void add_spikes_to_per_neuron_spike_count_kernel
     (spiking_neurons_data_struct* neuron_data,
      int* d_per_neuron_spike_counts,
-     int current_time_in_timesteps,
+     unsigned int current_time_in_timesteps,
      int timestep_grouping,
      size_t total_number_of_neurons) {
       

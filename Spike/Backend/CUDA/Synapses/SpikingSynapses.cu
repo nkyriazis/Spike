@@ -117,7 +117,7 @@ namespace Backend {
     }
 
     void SpikingSynapses::state_update
-    (int current_time_in_timesteps, float timestep) {
+    (unsigned int current_time_in_timesteps, float timestep) {
 
       if (frontend()->total_number_of_synapses > 0){
       
@@ -168,7 +168,7 @@ namespace Backend {
         spiking_neurons_data_struct* in_neurons_data,
         int bufferloc,
         float timestep,
-        int current_time_in_timesteps,
+        unsigned int current_time_in_timesteps,
         int timestep_grouping)
     {
       int indx = threadIdx.x + blockIdx.x * blockDim.x;
@@ -202,7 +202,7 @@ namespace Backend {
         spiking_neurons_data_struct* neuron_data,
         float multiplication_to_volts,
         float current_membrane_voltage,
-        int current_time_in_timesteps,
+        unsigned int current_time_in_timesteps,
         float timestep,
         int idx,
         int g){

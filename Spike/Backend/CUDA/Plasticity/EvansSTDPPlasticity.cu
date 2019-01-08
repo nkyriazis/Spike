@@ -37,7 +37,7 @@ namespace Backend {
 
     }
 
-    void EvansSTDPPlasticity::update_synaptic_efficacies_or_weights(int current_time_in_timesteps, float timestep) {
+    void EvansSTDPPlasticity::update_synaptic_efficacies_or_weights(unsigned int current_time_in_timesteps, float timestep) {
         ltp_and_ltd<<<synapses_backend->number_of_synapse_blocks_per_grid, synapses_backend->threads_per_block>>>
           (synapses_backend->postsynaptic_neuron_indices,
            synapses_backend->presynaptic_neuron_indices,
@@ -68,7 +68,7 @@ namespace Backend {
            evans_stdp_plasticity_parameters_struct stdp_vars,
            float timestep,
            int timestep_grouping,
-           int current_time_in_timesteps,
+           unsigned int current_time_in_timesteps,
            int* d_plastic_synapse_indices,
            size_t total_number_of_plastic_synapses){
       // Global Index

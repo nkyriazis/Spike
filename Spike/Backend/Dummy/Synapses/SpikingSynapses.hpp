@@ -15,7 +15,7 @@ namespace Backend {
 
       void copy_weights_to_host() override;
       virtual void state_update
-      (int current_time_in_timesteps, float timestep) final;
+      (unsigned int current_time_in_timesteps, float timestep) final;
     };
   } // namespace Dummy
 } // namespace Backend

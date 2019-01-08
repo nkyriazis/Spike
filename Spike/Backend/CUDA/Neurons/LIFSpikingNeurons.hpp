@@ -36,7 +36,7 @@ namespace Backend {
       void copy_constants_to_device(); // Not virtual
       void allocate_device_pointers(); // Not virtual
 
-      void state_update(int current_time_in_timesteps, float timestep) override;
+      void state_update(unsigned int current_time_in_timesteps, float timestep) override;
     };
 
     __global__ void lif_update_membrane_potentials(
@@ -48,7 +48,7 @@ namespace Backend {
         float timestep,
         int timestep_grouping,
         float current_time_in_seconds,
-        int current_time_in_timesteps,
+        unsigned int current_time_in_timesteps,
         float refactory_period_in_seconds,
         size_t total_number_of_neurons);
   }

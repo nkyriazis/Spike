@@ -26,7 +26,7 @@ namespace Backend {
   class SpikingNeurons : public virtual Neurons {
   public:
     SPIKE_ADD_BACKEND_FACTORY(SpikingNeurons);
-    virtual void state_update(int current_time_in_timesteps, float timestep) = 0;
+    virtual void state_update(unsigned int current_time_in_timesteps, float timestep) = 0;
   };
 }
 
@@ -51,7 +51,7 @@ public:
   // Functions
   int AddGroup(neuron_parameters_struct * group_params) override;
 
-  virtual void state_update(int current_time_in_timesteps, float timestep);
+  virtual void state_update(unsigned int current_time_in_timesteps, float timestep);
 
 private:
   std::shared_ptr<::Backend::SpikingNeurons> _backend;

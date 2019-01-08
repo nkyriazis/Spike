@@ -47,7 +47,8 @@ void PoissonInputSpikingNeurons::prepare_backend_early() {
   
 void PoissonInputSpikingNeurons::select_stimulus(int stimulus_index){
   InputSpikingNeurons::select_stimulus(stimulus_index);
-  if (_backend) reset_state();
+  //if (_backend) reset_state();
+  if (_backend) backend()->setup_stimulus();
 }
 
 SPIKE_MAKE_INIT_BACKEND(PoissonInputSpikingNeurons);

@@ -13,7 +13,7 @@ namespace Backend {
     }
 
     void RateActivityMonitor::add_spikes_to_per_neuron_spike_count
-    (int current_time_in_timesteps, float timestep) {
+    (unsigned int current_time_in_timesteps, float timestep) {
     }
       
     void RateActivityMonitor::copy_spike_count_to_host() {

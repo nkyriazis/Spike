@@ -36,7 +36,7 @@ namespace Backend {
       void allocate_device_pointers(); // Not virtual
       void copy_constants_and_initial_efficacies_to_device(); // Not virtual
 
-      void state_update(int current_time_in_timesteps, float timestep) final;
+      void state_update(unsigned int current_time_in_timesteps, float timestep) final;
 
     };
     __device__ float conductance_spiking_current_injection_kernel(
@@ -44,7 +44,7 @@ namespace Backend {
         spiking_neurons_data_struct* neuron_data,
         float multiplication_to_volts,
         float current_membrane_voltage,
-        int current_time_in_timesteps,
+        unsigned int current_time_in_timesteps,
         float timestep,
         int idx,
         int g);

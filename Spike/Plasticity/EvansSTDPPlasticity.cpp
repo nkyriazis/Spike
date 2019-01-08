@@ -27,7 +27,7 @@ void EvansSTDPPlasticity::prepare_backend_early() {
 }
 
 // Run the STDP
-void EvansSTDPPlasticity::state_update (int current_time_in_timesteps, float timestep){
+void EvansSTDPPlasticity::state_update (unsigned int current_time_in_timesteps, float timestep){
   // Update
   backend()->update_synaptic_efficacies_or_weights(current_time_in_timesteps, timestep);
 }

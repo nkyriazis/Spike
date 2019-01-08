@@ -15,7 +15,7 @@ namespace Backend {
     }
 
     void SpikingSynapses::state_update
-    (int current_time_in_timesteps, float timestep) {
+    (unsigned int current_time_in_timesteps, float timestep) {
     }
 
     void SpikingSynapses::copy_weights_to_host() {

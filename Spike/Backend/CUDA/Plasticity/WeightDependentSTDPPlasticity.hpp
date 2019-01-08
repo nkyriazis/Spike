@@ -29,7 +29,7 @@ namespace Backend {
       void reset_state() override;
 
       void allocate_device_pointers();
-      void apply_stdp_to_synapse_weights(int current_time_in_timesteps, float timestep) override;
+      void apply_stdp_to_synapse_weights(unsigned int current_time_in_timesteps, float timestep) override;
     };
     __global__ void ltp_and_ltd
           (int* d_postsyns,

@@ -69,7 +69,7 @@ namespace Backend {
       SpikingNeurons::reset_state();
     }
 
-    void LIFSpikingNeurons::state_update(int current_time_in_timesteps, float timestep) {
+    void LIFSpikingNeurons::state_update(unsigned int current_time_in_timesteps, float timestep) {
       ::Backend::CUDA::SpikingSynapses* synapses_backend =
         dynamic_cast<::Backend::CUDA::SpikingSynapses*>(frontend()->model->spiking_synapses->backend());
       lif_update_membrane_potentials<<<number_of_neuron_blocks_per_grid, threads_per_block>>>
@@ -97,7 +97,7 @@ namespace Backend {
         float timestep,
         int timestep_grouping,
         float current_time_in_seconds,
-        int current_time_in_timesteps,
+        unsigned int current_time_in_timesteps,
         float refractory_period_in_seconds,
         size_t total_number_of_neurons) {
       // Get thread IDs

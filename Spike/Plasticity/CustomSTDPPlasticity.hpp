@@ -20,7 +20,7 @@ namespace Backend {
   public:
     SPIKE_ADD_BACKEND_FACTORY(CustomSTDPPlasticity);
 
-    virtual void apply_stdp_to_synapse_weights(int current_time_in_timesteps, float timestep) = 0;
+    virtual void apply_stdp_to_synapse_weights(unsigned int current_time_in_timesteps, float timestep) = 0;
   };
 }
 
@@ -54,7 +54,7 @@ public:
   void init_backend(Context* ctx = _global_ctx) override;
   void prepare_backend_late() override;
 
-  void state_update(int current_time_in_timesteps, float timestep) override;
+  void state_update(unsigned int current_time_in_timesteps, float timestep) override;
 
 private:
   std::shared_ptr<::Backend::CustomSTDPPlasticity> _backend;

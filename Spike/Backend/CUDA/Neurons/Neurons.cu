@@ -51,9 +51,9 @@ namespace Backend {
       neuron_data->per_neuron_efferent_synapse_count = per_neuron_efferent_synapse_count;
       neuron_data->per_neuron_efferent_synapse_start = per_neuron_efferent_synapse_start;
       CudaSafeCall(cudaMemcpy(
-		d_neuron_data,
-		neuron_data,
-		sizeof(neurons_data_struct), cudaMemcpyHostToDevice));
+      d_neuron_data,
+      neuron_data,
+      sizeof(neurons_data_struct), cudaMemcpyHostToDevice));
 
     }
 

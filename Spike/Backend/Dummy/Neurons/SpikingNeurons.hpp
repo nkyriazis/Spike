@@ -13,7 +13,7 @@ namespace Backend {
       void prepare() override;
       void reset_state() override;
 
-      void state_update(int current_time_in_timesteps,
+      void state_update(unsigned int current_time_in_timesteps,
                                    float timestep) override;
     };
   } // namespace Dummy

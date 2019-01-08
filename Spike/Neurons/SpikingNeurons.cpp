@@ -35,7 +35,7 @@ int SpikingNeurons::AddGroup(neuron_parameters_struct * group_params){
   return new_group_id;
 }
 
-void SpikingNeurons::state_update(int current_time_in_timesteps, float timestep) {
+void SpikingNeurons::state_update(unsigned int current_time_in_timesteps, float timestep) {
   backend()->state_update(current_time_in_timesteps, timestep);
 }
 

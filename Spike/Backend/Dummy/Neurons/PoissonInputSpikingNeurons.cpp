@@ -11,5 +11,8 @@ namespace Backend {
     void PoissonInputSpikingNeurons::reset_state() {
       InputSpikingNeurons::reset_state();
     }
+    
+    void PoissonInputSpikingNeurons::setup_stimulus() {
+    }
   }
 }

@@ -129,7 +129,7 @@ void SpikingSynapses::increment_number_of_synapses(int increment) {
 }
 
 
-void SpikingSynapses::state_update(int current_time_in_timesteps, float timestep) {
+void SpikingSynapses::state_update(unsigned int current_time_in_timesteps, float timestep) {
   backend()->state_update(current_time_in_timesteps, timestep);
 }
 

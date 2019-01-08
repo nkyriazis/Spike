@@ -93,7 +93,7 @@ namespace Backend {
       free (tmp_last_spike_times);
     }
     
-    void SpikingNeurons::state_update(int current_time_in_timesteps, float timestep) {
+    void SpikingNeurons::state_update(unsigned int current_time_in_timesteps, float timestep) {
     }
 
 

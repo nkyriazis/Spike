@@ -54,7 +54,7 @@ public:
   int plasticity_rule_id = -1;
 
   virtual void AddSynapseIndices(int synapse_id_start, int num_synapses_to_add) = 0;
-  virtual void state_update(int current_time_in_timesteps, float timestep) = 0;
+  virtual void state_update(unsigned int current_time_in_timesteps, float timestep) = 0;
 
 private:
   std::shared_ptr<::Backend::Plasticity> _backend;

@@ -48,7 +48,7 @@ namespace Backend {
         spiking_neurons_data_struct* neuron_data,
         float multiplication_to_volts,
         float membrane_voltage,
-        int current_time_in_timesteps,
+        unsigned int current_time_in_timesteps,
         float timestep,
         int idx,
         int g);
@@ -96,7 +96,7 @@ namespace Backend {
 
       void copy_weights_to_host() override;
 
-      void state_update(int current_time_in_timesteps, float timestep) override;
+      void state_update(unsigned int current_time_in_timesteps, float timestep) override;
 
     };
 
@@ -105,7 +105,7 @@ namespace Backend {
       spiking_neurons_data_struct* neuron_data,
       float multiplication_to_volts,
       float current_membrane_voltage,
-      int current_time_in_timesteps,
+      unsigned int current_time_in_timesteps,
       float timestep,
       int idx,
       int g);
@@ -124,7 +124,7 @@ namespace Backend {
         spiking_neurons_data_struct* in_neurons_data,
         int bufferloc,
         float timestep,
-        int current_time_in_timesteps,
+        unsigned int current_time_in_timesteps,
         int timestep_grouping);
   }
 }
