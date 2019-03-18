@@ -24,7 +24,7 @@ namespace Backend {
       void reset_state() override;
 
       void allocate_device_pointers();
-      void update_synaptic_efficacies_or_weights(int current_time_in_timesteps, float timestep) override;
+      void update_synaptic_efficacies_or_weights(unsigned int current_time_in_timesteps, float timestep) override;
     };
     
     __global__ void ltp_and_ltd
@@ -39,7 +39,7 @@ namespace Backend {
            evans_stdp_plasticity_parameters_struct stdp_vars,
            float timestep,
            int timestep_grouping,
-           int current_time_in_timesteps,
+           unsigned int current_time_in_timesteps,
            int* d_plastic_synapse_indices,
            size_t total_number_of_plastic_synapses);
 

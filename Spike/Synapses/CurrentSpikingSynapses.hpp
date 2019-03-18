@@ -35,7 +35,7 @@ public:
                 Neurons * input_neurons,
                 float timestep,
                 synapse_parameters_struct * synapse_params) override;
-  void state_update(int current_time_in_timesteps, float timestep) override;
+  void state_update(unsigned int current_time_in_timesteps, float timestep) override;
 private:
   std::shared_ptr<::Backend::CurrentSpikingSynapses> _backend;
 };

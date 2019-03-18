@@ -42,7 +42,7 @@ namespace Backend {
       }
     }
 
-    void CustomSTDPPlasticity::apply_stdp_to_synapse_weights(int current_time_in_timesteps, float timestep) {
+    void CustomSTDPPlasticity::apply_stdp_to_synapse_weights(unsigned int current_time_in_timesteps, float timestep) {
         ltp_and_ltd<<<synapses_backend->number_of_synapse_blocks_per_grid, synapses_backend->threads_per_block>>>
           (synapses_backend->postsynaptic_neuron_indices,
            synapses_backend->presynaptic_neuron_indices,
@@ -52,6 +52,8 @@ namespace Backend {
            synapses_backend->synaptic_efficacies_or_weights,
            stdp_pre_memory_trace,
            stdp_post_memory_trace,
+           //frontend()->stdp_params->tau_minus,
+           //frontend()->stdp_params->tau_plus,
            expf(- timestep / frontend()->stdp_params->tau_minus),
            expf(- timestep / frontend()->stdp_params->tau_plus),
            *(frontend()->stdp_params),
@@ -78,7 +80,7 @@ namespace Backend {
            custom_stdp_plasticity_parameters_struct stdp_vars,
            float timestep,
            int timestep_grouping,
-           int current_time_in_timesteps,
+           unsigned int current_time_in_timesteps,
            int* d_plastic_synapse_indices,
            size_t total_number_of_plastic_synapses){
       // Global Index
@@ -102,17 +104,63 @@ namespace Backend {
         int corr_preid = CORRECTED_PRESYNAPTIC_ID(preid, is_input);
         uint8_t* pre_bitbuffer = is_input ? input_neuron_data->neuron_spike_time_bitbuffer : neuron_data->neuron_spike_time_bitbuffer;
 
+        /*
+        float* pre_last_spike_times = is_input ? input_neuron_data->last_spike_time_of_each_neuron : neuron_data->last_spike_time_of_each_neuron;
+        //int pre_spike_g = -1;
+        int pre_spike_g = ((int)roundf(pre_last_spike_times[corr_preid] / timestep) - current_time_in_timesteps);
+        int post_spike_g = ((int)roundf(neuron_data->last_spike_time_of_each_neuron[postid] / timestep) - current_time_in_timesteps);
+        if (pre_spike_g >= timestep_grouping)
+          pre_spike_g *= -1;
+        stdp_post_memory_trace_val *= expf(-(timestep_grouping*timestep) / post_decay);
+        stdp_pre_memory_trace_val *= expf(-(timestep_grouping*timestep) / pre_decay);
+
+        // Change this if nearest only
+        stdp_post_memory_trace_val += (post_spike_g >= 0) ? stdp_vars.a_minus*expf(-((timestep_grouping - post_spike_g - 1)*timestep) / post_decay) : 0.0f;
+        stdp_pre_memory_trace_val += (pre_spike_g >= 0) ? stdp_vars.a_plus*expf(-((timestep_grouping - pre_spike_g - 1)*timestep) / pre_decay) : 0.0f;
+          
+        float syn_update_val = 0.0f; 
+        //old_synaptic_weight = new_synaptic_weight;
+        // OnPre Weight Update
+        if (pre_spike_g >= 0){
+          float temp_post_trace = stdp_post_memory_trace_val;
+          temp_post_trace += (post_spike_g > pre_spike_g) ? -stdp_vars.a_minus*expf(-((timestep_grouping - post_spike_g - 1)*timestep) / post_decay): 0.0f;
+          temp_post_trace *= (1.0f / (expf(-(timestep_grouping - pre_spike_g - 1)*timestep / post_decay))); 
+          syn_update_val -= stdp_vars.learning_rate * (old_synaptic_weight / stdp_vars.w_max) * temp_post_trace + stdp_vars.learning_rate*stdp_vars.a_star;
+          //syn_update_val -= stdp_vars.lambda * stdp_vars.alpha * old_synaptic_weight * temp_post_trace;
+        }
+        // OnPost Weight Update
+        if (post_spike_g >= 0){
+          float temp_pre_trace = stdp_pre_memory_trace_val;
+          temp_pre_trace += (pre_spike_g > post_spike_g) ? -stdp_vars.a_plus*expf(-((timestep_grouping - pre_spike_g - 1)*timestep) / pre_decay): 0.0f;
+          temp_pre_trace *= (1.0f / (expf(-(timestep_grouping - post_spike_g - 1)*timestep / pre_decay))); 
+          syn_update_val += stdp_vars.learning_rate * temp_pre_trace;
+          //syn_update_val += stdp_vars.learningrate*(temp_pre_trace);
+          //syn_update_val += stdp_vars.lambda * (stdp_vars.w_max - old_synaptic_weight) * temp_pre_trace;
+        }
+
+        new_synaptic_weight = old_synaptic_weight + syn_update_val;
+        if (new_synaptic_weight < 0.0f)
+          new_synaptic_weight = 0.0f;
+        
+        // Weight Update
+        d_synaptic_efficacies_or_weights[idx] = new_synaptic_weight;
+
+        // Correctly set the trace values
+        stdp_pre_memory_trace[indx] = stdp_pre_memory_trace_val;
+        stdp_post_memory_trace[indx] = stdp_post_memory_trace_val;
+
+        indx += blockDim.x * gridDim.x;
+        */
         // Looping over timesteps
         for (int g=0; g < timestep_grouping; g++){	
           // Decaying STDP traces
           stdp_post_memory_trace_val *= post_decay;
           stdp_pre_memory_trace_val *= pre_decay;
-
+        
           // Bit Indexing to detect spikes
           int postbitloc = (current_time_in_timesteps + g) % (bufsize*8);
           int prebitloc = postbitloc - d_syndelays[idx];
           prebitloc = (prebitloc < 0) ? (bufsize*8 + prebitloc) : prebitloc;
-
 
           // OnPre Trace Update
           if (pre_bitbuffer[corr_preid*bufsize + (prebitloc / 8)] & (1 << (prebitloc % 8))){
@@ -126,7 +174,7 @@ namespace Backend {
             if (stdp_vars.nearest_spike_only)
               stdp_post_memory_trace_val = stdp_vars.a_minus;
           }
-          
+
           float syn_update_val = 0.0f; 
           old_synaptic_weight = new_synaptic_weight;
           // OnPre Weight Update

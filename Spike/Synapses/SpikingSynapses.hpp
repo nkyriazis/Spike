@@ -13,7 +13,7 @@ namespace Backend {
   public:
     SPIKE_ADD_BACKEND_FACTORY(SpikingSynapses);
     virtual void copy_weights_to_host() = 0;
-    virtual void state_update(int current_time_in_timesteps, float timestep) = 0;
+    virtual void state_update(unsigned int current_time_in_timesteps, float timestep) = 0;
   };
 }
 
@@ -57,7 +57,7 @@ public:
   void sort_synapses();
   void set_synapse_start(int pre_index, int syn_start);
 
-  virtual void state_update(int current_time_in_timesteps, float timestep);
+  virtual void state_update(unsigned int current_time_in_timesteps, float timestep);
 
   virtual void save_connectivity_as_txt(std::string path, std::string prefix="", int synapsegroupid=-1) override;
   virtual void save_connectivity_as_binary(std::string path, std::string prefix="",int synapsegroupid=-1) override;

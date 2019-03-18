@@ -50,7 +50,7 @@ namespace Backend {
     }
 
     void SpikingActivityMonitor::collect_spikes_for_timestep
-    (int current_time_in_timesteps, float timestep) {
+    (unsigned int current_time_in_timesteps, float timestep) {
       collect_spikes_for_timestep_kernel<<<neurons_backend->number_of_neuron_blocks_per_grid, neurons_backend->threads_per_block>>>
         (neurons_backend->d_neuron_data,
          total_number_of_spikes_stored_on_device,
@@ -72,7 +72,7 @@ namespace Backend {
      int* d_neuron_ids_of_stored_spikes_on_device,
      float* d_time_in_seconds_of_stored_spikes_on_device,
      int timestep_grouping,
-     int current_time_in_timesteps,
+     unsigned int current_time_in_timesteps,
      float timestep,
      size_t total_number_of_neurons){
 

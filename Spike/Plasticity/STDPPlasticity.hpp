@@ -59,7 +59,7 @@ public:
   int total_number_of_plastic_synapses = 0;
 
   virtual void AddSynapseIndices(int synapse_id_start, int num_synapses_to_add);
-  virtual void state_update(int current_time_in_timesteps, float timestep) override = 0;
+  virtual void state_update(unsigned int current_time_in_timesteps, float timestep) override = 0;
 
 private:
   std::shared_ptr<::Backend::STDPPlasticity> _backend;

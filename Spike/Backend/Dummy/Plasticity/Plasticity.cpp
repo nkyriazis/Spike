@@ -10,6 +10,6 @@ namespace Backend {
     void Plasticity::reset_state() {
     }
 
-    void Plasticity::state_update(int current_time_in_timesteps, float timestep){}
+    void Plasticity::state_update(unsigned int current_time_in_timesteps, float timestep){}
   }
 }

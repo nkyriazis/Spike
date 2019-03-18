@@ -34,8 +34,8 @@ public:
 
   SpikingNeurons* neurons = nullptr;
   SpikingModel* model = nullptr;
-  virtual void state_update(int current_time_in_timesteps, float timestep) = 0;
-  virtual void final_update(int current_time_in_timesteps, float timestep) = 0;
+  virtual void state_update(unsigned int current_time_in_timesteps, float timestep) = 0;
+  virtual void final_update(unsigned int current_time_in_timesteps, float timestep) = 0;
   virtual void reset_state() = 0;
 
 private:

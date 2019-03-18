@@ -20,6 +20,7 @@ namespace Backend {
         float* thresholds_for_action_potential_spikes;
         float* resting_potentials_v0;
         float* after_spike_reset_potentials_vreset;
+        int* refraction_counter;
 
         uint8_t* neuron_spike_time_bitbuffer;
         int* neuron_spike_time_bitbuffer_bytesize;
@@ -42,6 +43,7 @@ namespace Backend {
       float* thresholds_for_action_potential_spikes;
       float* resting_potentials_v0;
       float* after_spike_reset_potentials_vreset;
+      int* refraction_counter = nullptr;
 
       // Keeping neuorn spike times
       int h_neuron_spike_time_bitbuffer_bytesize;
@@ -61,7 +63,7 @@ namespace Backend {
        */
       void copy_constants_to_device(); // Not virtual
 
-      void state_update(int current_time_in_seconds, float timestep) override;
+      void state_update(unsigned int current_time_in_timesteps, float timestep) override;
       
     };
 

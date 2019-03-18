@@ -16,7 +16,7 @@ WeightDependentSTDPPlasticity::~WeightDependentSTDPPlasticity() {
 }
 
 // Run the STDP
-void WeightDependentSTDPPlasticity::state_update(int current_time_in_timesteps, float timestep){
+void WeightDependentSTDPPlasticity::state_update(unsigned int current_time_in_timesteps, float timestep){
   backend()->apply_stdp_to_synapse_weights(current_time_in_timesteps, timestep);
 }
 

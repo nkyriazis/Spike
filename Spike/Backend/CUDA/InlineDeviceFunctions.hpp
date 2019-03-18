@@ -24,7 +24,7 @@ __device__ float my_conductance_spiking_injection_kernel(
     spiking_neurons_data_struct* neuron_data,
     float multiplication_to_volts,
     float current_membrane_voltage,
-    int current_time_in_timesteps,
+    unsigned int current_time_in_timesteps,
     float timestep,
     int idx,
     int g){
@@ -55,7 +55,7 @@ __device__ float my_current_spiking_injection_kernel(
     spiking_neurons_data_struct* neuron_data,
     float multiplication_to_volts,
     float current_membrane_voltage,
-    int current_time_in_timesteps,
+    unsigned int current_time_in_timesteps,
     float timestep,
     int idx,
     int g){
@@ -88,7 +88,7 @@ __device__ float my_voltage_spiking_injection_kernel(
     spiking_neurons_data_struct* neuron_data,
     float multiplication_to_volts,
     float current_membrane_voltage,
-    int current_time_in_timesteps,
+    unsigned int current_time_in_timesteps,
     float timestep,
     int idx,
     int g){

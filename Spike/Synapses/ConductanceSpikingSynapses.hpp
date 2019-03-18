@@ -44,7 +44,7 @@ public:
 
   void increment_number_of_synapses(int increment);
 
-  void state_update(int current_time_in_timesteps, float timestep) override;
+  void state_update(unsigned int current_time_in_timesteps, float timestep) override;
 
 private:
   std::shared_ptr<::Backend::ConductanceSpikingSynapses> _backend;

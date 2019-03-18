@@ -42,7 +42,7 @@ namespace Backend {
       }
     }
 
-    void WeightDependentSTDPPlasticity::apply_stdp_to_synapse_weights(int current_time_in_timesteps, float timestep) {
+    void WeightDependentSTDPPlasticity::apply_stdp_to_synapse_weights(unsigned int current_time_in_timesteps, float timestep) {
         ltp_and_ltd<<<synapses_backend->number_of_synapse_blocks_per_grid, synapses_backend->threads_per_block>>>
           (synapses_backend->postsynaptic_neuron_indices,
            synapses_backend->presynaptic_neuron_indices,

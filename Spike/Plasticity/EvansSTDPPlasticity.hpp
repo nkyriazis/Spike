@@ -25,7 +25,7 @@ namespace Backend {
   public:
     SPIKE_ADD_BACKEND_FACTORY(EvansSTDPPlasticity);
 
-    virtual void update_synaptic_efficacies_or_weights(int current_time_in_timesteps, float timestep) = 0;
+    virtual void update_synaptic_efficacies_or_weights(unsigned int current_time_in_timesteps, float timestep) = 0;
   };
 }
 
@@ -55,7 +55,7 @@ public:
   void init_backend(Context* ctx = _global_ctx) override;
   void prepare_backend_early() override;
 
-  void state_update(int current_time_in_timesteps, float timestep) override;
+  void state_update(unsigned int current_time_in_timesteps, float timestep) override;
   
 
 private:

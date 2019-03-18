@@ -17,7 +17,7 @@ namespace Backend {
 
     void InhibitorySTDPPlasticity
   ::apply_stdp_to_synapse_weights
-    (int current_time_in_timesteps, float timestep) {
+    (unsigned int current_time_in_timesteps, float timestep) {
     }
   }
 }
