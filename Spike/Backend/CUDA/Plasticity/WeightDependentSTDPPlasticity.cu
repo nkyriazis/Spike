@@ -108,7 +108,7 @@ namespace Backend {
 
 
         //int pre_spike_g = -1;
-        int pre_spike_g = ((int)roundf((pre_last_spike_times[corr_preid] - current_time_in_seconds) / timestep)); // + d_syndelays[idx];
+        int pre_spike_g = ((int)roundf((pre_last_spike_times[corr_preid] - current_time_in_seconds) / timestep)) + d_syndelays[idx];
         int post_spike_g = ((int)roundf((neuron_data->last_spike_time_of_each_neuron[postid] - current_time_in_seconds) / timestep));
         if (pre_spike_g >= timestep_grouping)
           pre_spike_g *= -1;
