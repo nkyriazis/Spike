@@ -178,7 +178,7 @@ namespace Backend {
           // OnPre Weight Update
           if (pre_bitbuffer[corr_preid*bufsize + (prebitloc / 8)] & (1 << (prebitloc % 8))){
             syn_update_val += stdp_vars.learningrate*(vogels_post_memory_trace_val);
-            syn_update_val += - stdp_vars.learningrate*(2.0*stdp_vars.targetrate*stdp_vars.tau_istdp);
+            syn_update_val += -stdp_vars.learningrate*(2.0*stdp_vars.targetrate*stdp_vars.tau_istdp);
           }
           // OnPost Weight Update
           if (neuron_data->neuron_spike_time_bitbuffer[postid*bufsize + (postbitloc / 8)] & (1 << (postbitloc % 8))){
@@ -189,6 +189,10 @@ namespace Backend {
           if (new_synaptic_weight < 0.0f)
             new_synaptic_weight = 0.0f;
         }
+
+        if (new_synaptic_weight > stdp_vars.w_max)
+          new_synaptic_weight = stdp_vars.w_max;
+
         // Weight Update
         d_synaptic_efficacies_or_weights[idx] = new_synaptic_weight;
         

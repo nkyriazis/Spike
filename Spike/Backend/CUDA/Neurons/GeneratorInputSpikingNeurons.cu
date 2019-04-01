@@ -26,7 +26,10 @@ namespace Backend {
 
     void GeneratorInputSpikingNeurons::reset_state() {
       InputSpikingNeurons::reset_state();
-
+      setup_stimulus();
+    }
+    
+    void GeneratorInputSpikingNeurons::setup_stimulus() {
       CudaSafeCall(cudaMemcpy(neuron_ids_for_stimulus,
                               frontend()->neuron_id_matrix_for_stimuli[frontend()->current_stimulus_index],
                               sizeof(int)*frontend()->number_of_spikes_in_stimuli[frontend()->current_stimulus_index],
@@ -37,6 +40,7 @@ namespace Backend {
                               cudaMemcpyHostToDevice));
       num_spikes_in_current_stimulus = frontend()->number_of_spikes_in_stimuli[frontend()->current_stimulus_index];
     }
+
 
     void GeneratorInputSpikingNeurons::state_update(unsigned int current_time_in_timesteps, float timestep) {
       ::Backend::CUDA::SpikingSynapses* synapses_backend = dynamic_cast<::Backend::CUDA::SpikingSynapses*>(frontend()->model->spiking_synapses->backend());

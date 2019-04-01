@@ -27,7 +27,7 @@ namespace Backend {
 // STDP Parameters
 struct custom_stdp_plasticity_parameters_struct : stdp_plasticity_parameters_struct {
   custom_stdp_plasticity_parameters_struct() : 
-    a_minus(1.0), a_plus(1.0), tau_minus(0.02f), tau_plus(0.02f), w_max(1.0f), nearest_spike_only(false) { } // default Constructor
+    a_minus(1.0), a_plus(1.0), tau_minus(0.02f), tau_plus(0.02f), w_max(1.0f), weight_dependence_power_ltd(1.0f), weight_dependence_power_ltp(0.0f), nearest_spike_only(false) { } // default Constructor
   // STDPPlasticity Parameters
   float a_minus;
   float a_plus;
@@ -35,6 +35,8 @@ struct custom_stdp_plasticity_parameters_struct : stdp_plasticity_parameters_str
   float tau_minus;
   float tau_plus;
   float w_max;
+  float weight_dependence_power_ltd;
+  float weight_dependence_power_ltp;
   float learning_rate;
   bool nearest_spike_only;
 };

@@ -63,6 +63,12 @@ namespace Backend {
                               neuron_data,
                               sizeof(lif_spiking_neurons_data_struct),
                               cudaMemcpyHostToDevice));
+      
+      // Crudely assume that the RandomStateManager backend is also CUDA:
+      random_state_manager_backend
+        = dynamic_cast<::Backend::CUDA::RandomStateManager*>
+        (frontend()->random_state_manager->backend());
+      assert(random_state_manager_backend);
     }
 
     void LIFSpikingNeurons::reset_state() {
@@ -77,6 +83,7 @@ namespace Backend {
          synapses_backend->host_syn_activation_kernel,
          synapses_backend->d_synaptic_data,
          d_neuron_data,
+         random_state_manager_backend->states,
          frontend()->background_current,
          timestep,
          frontend()->model->timestep_grouping,
@@ -93,6 +100,7 @@ namespace Backend {
         synaptic_activation_kernel syn_activation_kernel,
         spiking_synapses_data_struct* synaptic_data,
         spiking_neurons_data_struct* in_neuron_data,
+        curandState_t* d_states,
         float background_current,
         float timestep,
         int timestep_grouping,
@@ -102,6 +110,7 @@ namespace Backend {
         size_t total_number_of_neurons) {
       // Get thread IDs
       int idx = threadIdx.x + blockIdx.x * blockDim.x;
+      int t_idx = threadIdx.x;
       while (idx < total_number_of_neurons) {
 
         lif_spiking_neurons_data_struct* neuron_data = (lif_spiking_neurons_data_struct*) in_neuron_data;
@@ -169,7 +178,8 @@ namespace Backend {
           #endif
           if (neuron_data->refraction_counter[idx] <= 0){
           //if ((((current_time_in_timesteps + g)*timestep) - neuron_data->last_spike_time_of_each_neuron[idx] - refractory_period_in_seconds) > 0.5f*timestep ){
-            membrane_potential_Vi = equation_constant * resting_potential_V0 + (1 - equation_constant) * membrane_potential_Vi + equation_constant * background_current + voltage_input_for_timestep;
+            float random_float_background = equation_constant*background_current;// + sqrtf(timestep)*0.1*curand_normal(&d_states[t_idx]);
+            membrane_potential_Vi = equation_constant * resting_potential_V0 + (1 - equation_constant) * membrane_potential_Vi + voltage_input_for_timestep + random_float_background;
             
     
             // Finally check for a spike

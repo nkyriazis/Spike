@@ -13,6 +13,7 @@ namespace Backend {
   class GeneratorInputSpikingNeurons : public virtual InputSpikingNeurons {
   public:
     SPIKE_ADD_BACKEND_FACTORY(GeneratorInputSpikingNeurons);
+    virtual void setup_stimulus() = 0;
   };
 } 
 

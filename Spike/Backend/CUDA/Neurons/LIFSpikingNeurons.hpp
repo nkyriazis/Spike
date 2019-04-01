@@ -17,6 +17,7 @@ namespace Backend {
       float* membrane_time_constants_tau_m;
       float* membrane_decay_constants;
       float* membrane_resistances_R;
+      float* adaptation;
     };
 
     class LIFSpikingNeurons : public virtual ::Backend::CUDA::SpikingNeurons,
@@ -29,6 +30,7 @@ namespace Backend {
       ~LIFSpikingNeurons() override;
       SPIKE_MAKE_BACKEND_CONSTRUCTOR(LIFSpikingNeurons);
       using ::Backend::LIFSpikingNeurons::frontend;
+      ::Backend::CUDA::RandomStateManager* random_state_manager_backend = nullptr;
 
       void prepare() override;
       void reset_state() override;
@@ -44,6 +46,7 @@ namespace Backend {
         synaptic_activation_kernel syn_activation_kernel,
         spiking_synapses_data_struct* synaptic_data,
         spiking_neurons_data_struct* neuron_data,
+        curandState_t* d_states,
         float background_current,
         float timestep,
         int timestep_grouping,

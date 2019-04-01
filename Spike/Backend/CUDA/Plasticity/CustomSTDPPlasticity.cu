@@ -179,17 +179,21 @@ namespace Backend {
           old_synaptic_weight = new_synaptic_weight;
           // OnPre Weight Update
           if (pre_bitbuffer[corr_preid*bufsize + (prebitloc / 8)] & (1 << (prebitloc % 8))){
-            syn_update_val -= stdp_vars.learning_rate * (old_synaptic_weight / stdp_vars.w_max) * stdp_post_memory_trace_val + stdp_vars.learning_rate*stdp_vars.a_star;
+            syn_update_val -= stdp_vars.learning_rate * (powf((old_synaptic_weight / stdp_vars.w_max),stdp_vars.weight_dependence_power_ltd)) * stdp_post_memory_trace_val + stdp_vars.learning_rate*stdp_vars.a_star;
+            //syn_update_val -= stdp_vars.learning_rate * (old_synaptic_weight / stdp_vars.w_max) * stdp_post_memory_trace_val + stdp_vars.learning_rate*stdp_vars.a_star;
           }
           // OnPost Weight Update
           if (neuron_data->neuron_spike_time_bitbuffer[postid*bufsize + (postbitloc / 8)] & (1 << (postbitloc % 8))){
-            syn_update_val += stdp_vars.learning_rate * stdp_pre_memory_trace_val;
+            syn_update_val += stdp_vars.learning_rate *  (powf((1.0 - (old_synaptic_weight / stdp_vars.w_max)),stdp_vars.weight_dependence_power_ltp)) * stdp_pre_memory_trace_val;
           }
 
           new_synaptic_weight = old_synaptic_weight + syn_update_val;
           if (new_synaptic_weight < 0.0f)
             new_synaptic_weight = 0.0f;
         }
+
+        if (new_synaptic_weight > stdp_vars.w_max)
+            new_synaptic_weight = stdp_vars.w_max;
         
         // Weight Update
         d_synaptic_efficacies_or_weights[idx] = new_synaptic_weight;

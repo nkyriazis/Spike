@@ -33,11 +33,13 @@ public:
   
   float * membrane_time_constants_tau_m;
   float * membrane_resistances_R;
+  RandomStateManager * random_state_manager = nullptr;
   float background_current;
 
   float refractory_period_in_seconds;
 
   int AddGroup(neuron_parameters_struct * group_params) override;
+  void prepare_backend_early() override;
 
 private:
   std::shared_ptr<::Backend::LIFSpikingNeurons> _backend;

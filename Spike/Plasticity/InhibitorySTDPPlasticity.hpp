@@ -36,12 +36,13 @@ namespace Backend {
 
 // STDP Parameters
 struct inhibitory_stdp_plasticity_parameters_struct : stdp_plasticity_parameters_struct {
-  inhibitory_stdp_plasticity_parameters_struct() : tau_istdp(0.02f), learningrate(0.0004f), targetrate(10.0f), momentumrate{0.0f} { } // default Constructor
+  inhibitory_stdp_plasticity_parameters_struct() : tau_istdp(0.02f), learningrate(0.0004f), targetrate(10.0f), momentumrate{0.0f}, w_max{1000.0f} { } // default Constructor
   // STDP Parameters
   float tau_istdp;
   float learningrate;
   float targetrate;
   float momentumrate;
+  float w_max;
   // Alpha must be calculated as 2 * targetrate * tau_istdp
 };
 

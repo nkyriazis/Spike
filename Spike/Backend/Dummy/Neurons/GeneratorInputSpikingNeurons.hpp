@@ -12,6 +12,7 @@ namespace Backend {
 
       void prepare() override;
       void reset_state() override;
+      void setup_stimulus() override;
 
       // May want to override these when writing a new backend, or may not:
       using ::Backend::Dummy::SpikingNeurons::state_update;

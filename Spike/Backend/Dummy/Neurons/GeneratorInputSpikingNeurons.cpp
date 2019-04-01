@@ -11,5 +11,7 @@ namespace Backend {
     void GeneratorInputSpikingNeurons::reset_state() {
       InputSpikingNeurons::reset_state();
     }
+    void GeneratorInputSpikingNeurons::setup_stimulus() {
+    }
   }
 }
