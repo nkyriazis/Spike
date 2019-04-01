@@ -29,7 +29,9 @@ int SpikingNeurons::AddGroup(neuron_parameters_struct * group_params){
     after_spike_reset_potentials_vreset[i] = spiking_group_params->after_spike_reset_potential_vreset;
     resting_potentials_v0[i] = spiking_group_params->resting_potential_v0;
     thresholds_for_action_potential_spikes[i] = spiking_group_params->threshold_for_action_potential_spike;
-    membrane_potentials_v[i] = spiking_group_params->membrane_potential_range[0] + ((float)(rand()) / RAND_MAX)*(spiking_group_params->membrane_potential_range[1] - spiking_group_params->membrane_potential_range[0]);
+    membrane_potentials_v[i] = resting_potentials_v0[i];
+    if (spiking_group_params->set_init_membrane)
+      membrane_potentials_v[i] = spiking_group_params->membrane_potential_range[0] + ((float)(rand()) / RAND_MAX)*(spiking_group_params->membrane_potential_range[1] - spiking_group_params->membrane_potential_range[0]);
   }
 
   return new_group_id;

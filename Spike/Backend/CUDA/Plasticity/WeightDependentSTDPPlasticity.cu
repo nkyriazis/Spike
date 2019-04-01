@@ -83,7 +83,7 @@ namespace Backend {
            size_t total_number_of_plastic_synapses){
       // Global Index
       int indx = threadIdx.x + blockIdx.x * blockDim.x;
-      int bufsize = input_neuron_data->neuron_spike_time_bitbuffer_bytesize[0];
+      //int bufsize = input_neuron_data->neuron_spike_time_bitbuffer_bytesize[0];
 
       // Running though all neurons
       while (indx < total_number_of_plastic_synapses) {
@@ -100,13 +100,15 @@ namespace Backend {
         // Correcting for input vs output neuron types
         bool is_input = PRESYNAPTIC_IS_INPUT(preid);
         int corr_preid = CORRECTED_PRESYNAPTIC_ID(preid, is_input);
+        /*
         uint8_t* pre_bitbuffer = is_input ? input_neuron_data->neuron_spike_time_bitbuffer : neuron_data->neuron_spike_time_bitbuffer;
+        */
         float* pre_last_spike_times = is_input ? input_neuron_data->last_spike_time_of_each_neuron : neuron_data->last_spike_time_of_each_neuron;
 
 
 
         //int pre_spike_g = -1;
-        int pre_spike_g = ((int)roundf((pre_last_spike_times[corr_preid] - current_time_in_seconds) / timestep));
+        int pre_spike_g = ((int)roundf((pre_last_spike_times[corr_preid] - current_time_in_seconds) / timestep)) + d_syndelays[idx];
         int post_spike_g = ((int)roundf((neuron_data->last_spike_time_of_each_neuron[postid] - current_time_in_seconds) / timestep));
         if (pre_spike_g >= timestep_grouping)
           pre_spike_g *= -1;

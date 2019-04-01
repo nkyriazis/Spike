@@ -77,7 +77,7 @@ namespace Backend {
       tmp_refraction_counter = (int*)malloc(sizeof(int)*frontend()->total_number_of_neurons);
       for (int i=0; i < frontend()->total_number_of_neurons; i++){
         tmp_last_spike_times[i] = -1000.0f;
-        tmp_refraction_counter = 0;
+        tmp_refraction_counter[i] = 0;
       }
 
       CudaSafeCall(cudaMemcpy(last_spike_time_of_each_neuron,
