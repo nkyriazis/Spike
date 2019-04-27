@@ -16,11 +16,6 @@ namespace Backend {
   namespace CUDA {
     struct spiking_neurons_data_struct : neurons_data_struct {
         float* last_spike_time_of_each_neuron;
-        float* membrane_potentials_v; 
-        float* thresholds_for_action_potential_spikes;
-        float* resting_potentials_v0;
-        float* after_spike_reset_potentials_vreset;
-        int* refraction_counter;
 
         uint8_t* neuron_spike_time_bitbuffer;
         int* neuron_spike_time_bitbuffer_bytesize;
@@ -39,11 +34,6 @@ namespace Backend {
 
       // Device Pointers
       float* last_spike_time_of_each_neuron = nullptr;
-      float* membrane_potentials_v;
-      float* thresholds_for_action_potential_spikes;
-      float* resting_potentials_v0;
-      float* after_spike_reset_potentials_vreset;
-      int* refraction_counter = nullptr;
 
       // Keeping neuorn spike times
       int h_neuron_spike_time_bitbuffer_bytesize;

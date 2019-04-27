@@ -5,7 +5,14 @@
 
 
 struct lif_spiking_neuron_parameters_struct : spiking_neuron_parameters_struct {
-	lif_spiking_neuron_parameters_struct() : somatic_capacitance_Cm(0.0f), somatic_leakage_conductance_g0(0.0f), background_current(0.0f)  { spiking_neuron_parameters_struct(); }
+  lif_spiking_neuron_parameters_struct() : somatic_capacitance_Cm(0.0f), somatic_leakage_conductance_g0(0.0f), background_current(0.0f), resting_potential_v0(-0.074f), after_spike_reset_potential_vreset(-0.074f), threshold_for_action_potential_spike(0.03f), absolute_refractory_period(0.002f) { spiking_neuron_parameters_struct(); }
+
+  bool set_init_membrane = false;
+  float membrane_potential_range[2];
+  float resting_potential_v0;
+  float after_spike_reset_potential_vreset;
+  float threshold_for_action_potential_spike;
+  float absolute_refractory_period;
 
   float somatic_capacitance_Cm;
   float somatic_leakage_conductance_g0;
@@ -31,12 +38,18 @@ public:
   void init_backend(Context* ctx) override;
   SPIKE_ADD_BACKEND_GETSET(LIFSpikingNeurons, SpikingNeurons);
   
-  float * membrane_time_constants_tau_m;
-  float * membrane_resistances_R;
-  float background_current;
-
-  float refractory_period_in_seconds;
-
+  // Details of sub-populations
+  vector<int> neuron_labels;
+  vector<float> membrane_potentials_v;
+  
+  vector<float> after_spike_reset_potentials_vreset;
+  vector<float> resting_potentials_v0;
+  vector<float> spiking_thresholds_vthresh;
+  vector<float> membrane_time_constants_tau_m;
+  vector<float> membrane_resistances_R;
+  vector<float> background_currents;
+  vector<float> refractory_periods;
+  
   int AddGroup(neuron_parameters_struct * group_params) override;
 
 private:
