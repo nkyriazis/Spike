@@ -45,10 +45,6 @@ namespace Backend {
                               frontend()->spiking_thresholds_vthresh.data(),
                               sizeof(float)*frontend()->spiking_thresholds_vthresh.size(),
                               cudaMemcpyHostToDevice));
-      CudaSafeCall(cudaMemcpy(resting_potentials_v0,
-                              frontend()->resting_potentials_v0.data(),
-                              sizeof(float)*frontend()->resting_potentials_v0.size(),
-                              cudaMemcpyHostToDevice));
       CudaSafeCall(cudaMemcpy(after_spike_reset_potentials_vreset,
                               frontend()->after_spike_reset_potentials_vreset.data(),
                               sizeof(float)*frontend()->after_spike_reset_potentials_vreset.size(),
@@ -57,10 +53,7 @@ namespace Backend {
                               frontend()->membrane_time_constants_tau_m.data(),
                               sizeof(float)*frontend()->membrane_time_constants_tau_m.size(),
                               cudaMemcpyHostToDevice));
-      CudaSafeCall(cudaMemcpy(background_currents,
-                              frontend()->background_currents.data(),
-                              sizeof(float)*frontend()->background_currents.size(),
-                              cudaMemcpyHostToDevice));
+     
       
       vector<float> m_decay_constants;
       for (int n=0; n < frontend()->membrane_time_constants_tau_m.size(); n++)
@@ -76,6 +69,22 @@ namespace Backend {
       CudaSafeCall(cudaMemcpy(membrane_resistances_R,
                               m_resistance_constants.data(),
                               sizeof(float)*m_resistance_constants.size(),
+                              cudaMemcpyHostToDevice));
+      
+      vector<float> modified_background_currents;
+      for (int n=0; n < frontend()->background_currents.size(); n++)
+        modified_background_currents.push_back(m_decay_constants[n]*frontend()->background_currents[n]);
+      CudaSafeCall(cudaMemcpy(background_currents,
+                              modified_background_currents.data(),
+                              sizeof(float)*modified_background_currents.size(),
+                              cudaMemcpyHostToDevice));
+      
+      vector<float> modified_resting_potentials_v0;
+      for (int n=0; n < frontend()->resting_potentials_v0.size(); n++)
+        modified_resting_potentials_v0.push_back(m_decay_constants[n]*frontend()->resting_potentials_v0[n]);
+      CudaSafeCall(cudaMemcpy(resting_potentials_v0,
+                              modified_resting_potentials_v0.data(),
+                              sizeof(float)*modified_resting_potentials_v0.size(),
                               cudaMemcpyHostToDevice));
       
       vector<int> tmp_refractory_timesteps;
@@ -176,11 +185,12 @@ namespace Backend {
         float equation_constant = neuron_data->membrane_decay_constants[neuron_label];
         float resting_potential_V0 = neuron_data->resting_potentials_v0[neuron_label];
         float temp_membrane_resistance_R = neuron_data->membrane_resistances_R[neuron_label];
-        float membrane_potential_Vi = neuron_data->membrane_potentials_v[neuron_label];
         float background_current = neuron_data->background_currents[neuron_label];
         int refractory_period_in_timesteps = neuron_data->refractory_timesteps[neuron_label];
         float voltage_input_for_timestep = 0.0f;
         int bufsize = in_neuron_data->neuron_spike_time_bitbuffer_bytesize[0];
+        
+        float membrane_potential_Vi = neuron_data->membrane_potentials_v[idx];
       
         //printf("%d: %f, %f, %f, %f, %d, %f, %f\n", idx, equation_constant, resting_potential_V0, temp_membrane_resistance_R, background_current, refractory_period_in_timesteps, neuron_data->thresholds_for_action_potential_spikes[neuron_label], neuron_data->after_spike_reset_potentials_vreset[neuron_label]);
           
@@ -240,7 +250,7 @@ namespace Backend {
             }
           #endif
           if (neuron_data->refraction_counter[idx] <= 0){
-            membrane_potential_Vi = equation_constant * resting_potential_V0 + (1 - equation_constant) * membrane_potential_Vi + equation_constant * background_current + voltage_input_for_timestep;
+            membrane_potential_Vi += resting_potential_V0 - equation_constant * membrane_potential_Vi + background_current + voltage_input_for_timestep;
             
     
             // Finally check for a spike
