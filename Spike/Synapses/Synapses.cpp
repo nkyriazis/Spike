@@ -23,8 +23,6 @@ Synapses::Synapses(int seedval) {
 
 void Synapses::prepare_backend_early() {
   random_state_manager->init_backend(backend()->context);
-  // Sort synapses by pre-synaptic neuron
-  //sort_synapses();
 }
 
 void Synapses::sort_synapses(Neurons* input_neurons, Neurons* neurons){
@@ -153,6 +151,7 @@ int Synapses::AddGroup(int presynaptic_group_id,
           postsynaptic_group_shape = neurons->group_shapes[postsynaptic_group_id];
           poststart = start_neuron_indices_for_neuron_groups[postsynaptic_group_id];
   }
+  
   int postend = last_neuron_indices_for_neuron_groups[postsynaptic_group_id] + 1;
 
   if (print_synapse_group_details == true) {
@@ -290,22 +289,30 @@ int Synapses::AddGroup(int presynaptic_group_id,
         std::cerr << "Synapse pre and post vectors are not the same length!" << std::endl;
         exit(1);
       }
-            // If we desire a single connection
-            Synapses::increment_number_of_synapses(synapse_params->pairwise_connect_presynaptic.size());
+      // If we desire a single connection
+      Synapses::increment_number_of_synapses(synapse_params->pairwise_connect_presynaptic.size());
 
-            // Setup Synapses
+      // Setup Synapses
+      int numpostneurons = postsynaptic_group_shape[0]*postsynaptic_group_shape[1];
+      int numpreneurons = presynaptic_group_shape[0]*presynaptic_group_shape[1];
       for (int i=0; i < synapse_params->pairwise_connect_presynaptic.size(); i++){
-              presynaptic_neuron_indices[original_number_of_synapses + i] = CORRECTED_PRESYNAPTIC_ID(prestart + int(synapse_params->pairwise_connect_presynaptic[i]), presynaptic_group_is_input);
-              postsynaptic_neuron_indices[original_number_of_synapses + i] = poststart + int(synapse_params->pairwise_connect_postsynaptic[i]);
+        if ((synapse_params->pairwise_connect_presynaptic[i] < 0) || (synapse_params->pairwise_connect_postsynaptic[i] < 0)){
+          print_message_and_exit("PAIRWISE CONNECTION ERROR: Negative pre/post indices encountered. All indices should be positive (relative to the number of neurons in the pre/post synaptic neuron groups).");
+        }
+        if ((synapse_params->pairwise_connect_presynaptic[i] >= numpreneurons) || (synapse_params->pairwise_connect_postsynaptic[i] >= numpostneurons)){
+          print_message_and_exit("PAIRWISE CONNECTION ERROR: Pre/post indices encountered too large. All indices should be up to the size of the neuron group. Indexing is from zero.");
+        }
+        presynaptic_neuron_indices[original_number_of_synapses + i] = CORRECTED_PRESYNAPTIC_ID(prestart + int(synapse_params->pairwise_connect_presynaptic[i]), presynaptic_group_is_input);
+        postsynaptic_neuron_indices[original_number_of_synapses + i] = poststart + int(synapse_params->pairwise_connect_postsynaptic[i]);
       }
 
-            break;
-          }
-        default:
-          {
-            print_message_and_exit("Unknown Connection Type.");
-            break;
-          }
+      break;
+    }
+    default:
+    {
+      print_message_and_exit("Unknown Connection Type.");
+      break;
+    }
   }
 
   temp_number_of_synapses_in_last_group = total_number_of_synapses - original_number_of_synapses;

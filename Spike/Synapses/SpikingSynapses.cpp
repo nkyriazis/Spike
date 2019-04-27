@@ -107,8 +107,11 @@ int SpikingSynapses::AddGroup(int presynaptic_group_id,
     if (spiking_synapse_group_params->connectivity_type == CONNECTIVITY_TYPE_PAIRWISE){
       if (spiking_synapse_group_params->pairwise_connect_delay.size() == temp_number_of_synapses_in_last_group){
         delays[i] = (int)round(spiking_synapse_group_params->pairwise_connect_delay[i + temp_number_of_synapses_in_last_group - total_number_of_synapses] / timestep);
+        if (delays[i] < 1){
+          print_message_and_exit("PAIRWISE CONNECTION ERROR: All delays must be greater than one timestep.");
+        }
       } else if (spiking_synapse_group_params->pairwise_connect_delay.size() != 0) {
-        print_message_and_exit("PAIRWISE CONNECTION ISSUE: Delay vector length not as expected. Should be the same length as pre/post vecs.");
+        print_message_and_exit("PAIRWISE CONNECTION ERROR: Delay vector length not as expected. Should be the same length as pre/post vecs.");
       }
     }
     
