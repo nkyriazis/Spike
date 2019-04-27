@@ -84,7 +84,7 @@ namespace Backend {
       
       vector<int> tmp_refractory_timesteps;
       for (int n=0; n < frontend()->refractory_periods.size(); n++)
-        tmp_refractory_timesteps.push_back((int)(frontend()->refractory_periods[n] / frontend()->model->timestep));
+        tmp_refractory_timesteps.push_back(ceil(frontend()->refractory_periods[n] / frontend()->model->timestep));
       CudaSafeCall(cudaMemcpy(refractory_timesteps,
                               tmp_refractory_timesteps.data(),
                               sizeof(int)*tmp_refractory_timesteps.size(),
@@ -130,16 +130,14 @@ namespace Backend {
 
     void LIFSpikingNeurons::reset_state() {
       SpikingNeurons::reset_state();
-      int* tmp_refraction_counter;
-      tmp_refraction_counter = (int*)malloc(sizeof(int)*frontend()->total_number_of_neurons);
+      vector<int> tmp_refraction_counter;
       for (int i=0; i < frontend()->total_number_of_neurons; i++){
-        tmp_refraction_counter[i] = 0;
+        tmp_refraction_counter.push_back(0);
       }
       CudaSafeCall(cudaMemcpy(refraction_counter,
-                              tmp_refraction_counter,
+                              tmp_refraction_counter.data(),
                               frontend()->total_number_of_neurons*sizeof(int),
                               cudaMemcpyHostToDevice));
-      free (tmp_refraction_counter);
     }
 
     void LIFSpikingNeurons::state_update(unsigned int current_time_in_timesteps, float timestep) {
@@ -240,7 +238,6 @@ namespace Backend {
             }
           #endif
           if (neuron_data->refraction_counter[idx] <= 0){
-          //if ((((current_time_in_timesteps + g)*timestep) - neuron_data->last_spike_time_of_each_neuron[idx] - refractory_period_in_seconds) > 0.5f*timestep ){
             membrane_potential_Vi = equation_constant * resting_potential_V0 + (1 - equation_constant) * membrane_potential_Vi + equation_constant * background_current + voltage_input_for_timestep;
             
     
