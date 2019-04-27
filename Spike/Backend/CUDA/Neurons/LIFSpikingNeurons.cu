@@ -41,10 +41,6 @@ namespace Backend {
     }
 
     void LIFSpikingNeurons::copy_constants_to_device() {
-      CudaSafeCall(cudaMemcpy(membrane_potentials_v,
-                              frontend()->membrane_potentials_v.data(),
-                              sizeof(float)*frontend()->membrane_potentials_v.size(),
-                              cudaMemcpyHostToDevice));
       CudaSafeCall(cudaMemcpy(thresholds_for_action_potential_spikes,
                               frontend()->spiking_thresholds_vthresh.data(),
                               sizeof(float)*frontend()->spiking_thresholds_vthresh.size(),
@@ -138,6 +134,10 @@ namespace Backend {
                               tmp_refraction_counter.data(),
                               frontend()->total_number_of_neurons*sizeof(int),
                               cudaMemcpyHostToDevice));
+      CudaSafeCall(cudaMemcpy(membrane_potentials_v,
+                              frontend()->membrane_potentials_v.data(),
+                              sizeof(float)*frontend()->membrane_potentials_v.size(),
+                              cudaMemcpyHostToDevice));
     }
 
     void LIFSpikingNeurons::state_update(unsigned int current_time_in_timesteps, float timestep) {
@@ -181,6 +181,8 @@ namespace Backend {
         int refractory_period_in_timesteps = neuron_data->refractory_timesteps[neuron_label];
         float voltage_input_for_timestep = 0.0f;
         int bufsize = in_neuron_data->neuron_spike_time_bitbuffer_bytesize[0];
+      
+        //printf("%d: %f, %f, %f, %f, %d, %f, %f\n", idx, equation_constant, resting_potential_V0, temp_membrane_resistance_R, background_current, refractory_period_in_timesteps, neuron_data->thresholds_for_action_potential_spikes[neuron_label], neuron_data->after_spike_reset_potentials_vreset[neuron_label]);
           
         for (int g=0; g < timestep_grouping; g++){
           int bitloc = (current_time_in_timesteps + g) % (bufsize*8);
