@@ -12,10 +12,7 @@
 #include <random>
 
 // Synapses Constructor
-Synapses::Synapses() {
-  // On construction, seed
-  srand(42);  // Seeding the random numbers
-  random_state_manager = new RandomStateManager();
+Synapses::Synapses() : Synapses(42) {
 }
 
 // Synapses Constructor
@@ -231,53 +228,57 @@ int Synapses::AddGroup(int presynaptic_group_id,
           {
 
             float standard_deviation_sigma = synapse_params->gaussian_synapses_standard_deviation;
-            int max_number_of_connections_per_pair = synapse_params->max_number_of_connections_per_pair;
             int number_of_new_synapses_per_postsynaptic_neuron = synapse_params->gaussian_synapses_per_postsynaptic_neuron;
+            int number_of_presynaptic_neurons = presynaptic_group_shape[0] * presynaptic_group_shape[1];
+            if (number_of_new_synapses_per_postsynaptic_neuron > number_of_presynaptic_neurons){
+              print_message_and_exit("Synapse creation error. Pre-synaptic population smaller than requested synapses per post-synaptic neuron (Gaussian Sampling).");
+            }
       
             int number_of_postsynaptic_neurons_in_group = postend - poststart;
-            int total_number_of_unique_synapses = number_of_new_synapses_per_postsynaptic_neuron * number_of_postsynaptic_neurons_in_group;
-            Synapses::increment_number_of_synapses(total_number_of_unique_synapses*max_number_of_connections_per_pair);
-            for (int i=0; i < total_number_of_unique_synapses;i++){
-              int postid = i / number_of_new_synapses_per_postsynaptic_neuron;
+            int total_number_of_new_synapses = number_of_new_synapses_per_postsynaptic_neuron * number_of_postsynaptic_neurons_in_group;
+            Synapses::increment_number_of_synapses(total_number_of_new_synapses);
+
+            for (int postid = 0; postid < number_of_postsynaptic_neurons_in_group; postid++){
               float post_fractional_centre_x = ((float)(postid % postsynaptic_group_shape[0]) / (float)postsynaptic_group_shape[0]);
               float post_fractional_centre_y = ((float)((float)postid / (float)postsynaptic_group_shape[1]) / (float)postsynaptic_group_shape[1]);
               int pre_centre_x = presynaptic_group_shape[0] * post_fractional_centre_x;
               int pre_centre_y = presynaptic_group_shape[1] * post_fractional_centre_y;
 
-              std::default_random_engine generator;
-              std::normal_distribution<float> pre_distribution_x((float)pre_centre_x, standard_deviation_sigma); 
-              std::normal_distribution<float> pre_distribution_y((float)pre_centre_y, standard_deviation_sigma); 
-
-              int pre_x = (int)round(pre_distribution_x(generator));
-              while ((pre_x < 0) || (pre_x >= presynaptic_group_shape[0]))
-                  pre_x = (int)(pre_distribution_x(generator));
-              int pre_y = (int)(pre_distribution_y(generator));
-              while ((pre_y < 0) || (pre_y >= presynaptic_group_shape[1]))
-                  pre_y = (int)round(pre_distribution_y(generator));
-             
-              for (int n=0; n < max_number_of_connections_per_pair; n++){ 
-                postsynaptic_neuron_indices[original_number_of_synapses + i + n*total_number_of_unique_synapses] = poststart + postid;
-                presynaptic_neuron_indices[original_number_of_synapses + i + n*total_number_of_unique_synapses] = CORRECTED_PRESYNAPTIC_ID(prestart + pre_x + presynaptic_group_shape[1] * pre_y, presynaptic_group_is_input);
+              // Constructing the probability with which we should connect to each pre-synaptic neuron
+              std::vector<float> pre_neuron_probabilities;
+              std::vector<float> pre_neuron_indices;
+              float total_probability = 0.0;
+              for (int preid = 0; preid < number_of_presynaptic_neurons; preid++){
+                int pre_xcoord = preid % presynaptic_group_shape[0]; 
+                int pre_ycoord = preid / presynaptic_group_shape[0];
+                float probability_of_connection = expf(- (powf((pre_xcoord - pre_centre_x), 2.0)) / (2.0 * powf(standard_deviation_sigma, 2)));
+                probability_of_connection += expf(- (powf((pre_ycoord - pre_centre_y), 2.0)) / (2.0 * powf(standard_deviation_sigma, 2)));
+                pre_neuron_probabilities.push_back(probability_of_connection);
+                pre_neuron_indices.push_back(preid);
+                total_probability += probability_of_connection;
+              }
+              
+              for (int i=0; i < number_of_new_synapses_per_postsynaptic_neuron; i++){
+                postsynaptic_neuron_indices[original_number_of_synapses + postid*number_of_new_synapses_per_postsynaptic_neuron + i] = poststart + postid;
+                float randval = total_probability*((float)rand() / (RAND_MAX));
+                float probability_trace = 0.0;
+                for (int preloc = 0; preloc < pre_neuron_probabilities.size(); preloc++){
+                  if ((randval > probability_trace) && (randval < (probability_trace + pre_neuron_probabilities[preloc]))){
+                    int chosenpreid = CORRECTED_PRESYNAPTIC_ID(pre_neuron_indices[preloc] + prestart, presynaptic_group_is_input);
+                    presynaptic_neuron_indices[original_number_of_synapses + postid*number_of_new_synapses_per_postsynaptic_neuron + i] = chosenpreid;
+                    total_probability -= pre_neuron_probabilities[preloc];
+                    pre_neuron_indices.erase(pre_neuron_indices.begin() + preloc);
+                    pre_neuron_probabilities.erase(pre_neuron_probabilities.begin() + preloc);
+                    break;
+                  } else {
+                    probability_trace += pre_neuron_probabilities[preloc];
+                  }
+                }
               }
             }
 
-            /*
-            backend()->set_neuron_indices_by_sampling_from_normal_distribution
-              (original_number_of_synapses,
-               total_number_of_new_synapses,
-               postsynaptic_group_id,
-               poststart, prestart,
-               postsynaptic_group_shape,
-               presynaptic_group_shape,
-               number_of_new_synapses_per_postsynaptic_neuron,
-               number_of_postsynaptic_neurons_in_group,
-               max_number_of_connections_per_pair,
-               standard_deviation_sigma,
-               presynaptic_group_is_input);
-               */
-
-            if (total_number_of_unique_synapses*max_number_of_connections_per_pair > largest_synapse_group_size) {
-              largest_synapse_group_size = total_number_of_unique_synapses*max_number_of_connections_per_pair;
+            if (total_number_of_new_synapses > largest_synapse_group_size) {
+              largest_synapse_group_size = total_number_of_new_synapses;
             }
 
             break;
