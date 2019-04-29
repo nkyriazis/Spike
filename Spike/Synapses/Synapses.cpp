@@ -251,7 +251,7 @@ int Synapses::AddGroup(int presynaptic_group_id,
                 int pre_xcoord = preid % presynaptic_group_shape[0]; 
                 int pre_ycoord = preid / presynaptic_group_shape[0];
                 float probability_of_connection = expf(- (powf((pre_xcoord - pre_centre_x), 2.0)) / (2.0 * powf(standard_deviation_sigma, 2)));
-                probability_of_connection += expf(- (powf((pre_ycoord - pre_centre_y), 2.0)) / (2.0 * powf(standard_deviation_sigma, 2)));
+                probability_of_connection *= expf(- (powf((pre_ycoord - pre_centre_y), 2.0)) / (2.0 * powf(standard_deviation_sigma, 2)));
                 pre_neuron_probabilities.push_back(probability_of_connection);
                 pre_neuron_indices.push_back(preid);
                 total_probability += probability_of_connection;
@@ -460,7 +460,7 @@ void Synapses::save_connectivity_as_txt(std::string path, std::string prefix, in
     if (synapsegroupid >= 0)
       preidfile << CORRECTED_PRESYNAPTIC_ID(presynaptic_neuron_indices[synapse_reversesort_indices[i]], presynaptic_group_is_input) - precorrection << std::endl;
     else 
-      preidfile << presynaptic_neuron_indices[synapse_reversesort_indices[i]];
+      preidfile << presynaptic_neuron_indices[synapse_reversesort_indices[i]] << std::endl;
     postidfile << postsynaptic_neuron_indices[synapse_reversesort_indices[i]] - postcorrection << std::endl;
     weightfile << synaptic_efficacies_or_weights[synapse_reversesort_indices[i]] << std::endl;
   }
