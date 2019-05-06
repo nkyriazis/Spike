@@ -11,14 +11,6 @@ struct spiking_neuron_parameters_struct;
 
 
 struct spiking_neuron_parameters_struct : neuron_parameters_struct {
-  spiking_neuron_parameters_struct(): resting_potential_v0(-0.074f), after_spike_reset_potential_vreset(-0.074f), threshold_for_action_potential_spike(0.03f), absolute_refractory_period(0.002f) { neuron_parameters_struct(); }
-
-  bool set_init_membrane = false;
-  float membrane_potential_range[2];
-  float resting_potential_v0;
-  float after_spike_reset_potential_vreset;
-  float threshold_for_action_potential_spike;
-  float absolute_refractory_period;
 };
 
 class SpikingNeurons; // forward definition
@@ -40,12 +32,8 @@ public:
   void init_backend(Context* ctx) override;
   SPIKE_ADD_BACKEND_GETSET(SpikingNeurons, Neurons);
   void prepare_backend_early() override;
-  
+
   // Host Pointers
-  float* after_spike_reset_potentials_vreset = nullptr;
-  float* resting_potentials_v0 = nullptr;
-  float* thresholds_for_action_potential_spikes = nullptr;
-  float* membrane_potentials_v = nullptr;
   unsigned char* bitarray_of_neuron_spikes = nullptr;
   SpikingModel* model = nullptr;
 

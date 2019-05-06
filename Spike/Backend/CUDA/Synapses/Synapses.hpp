@@ -57,7 +57,7 @@ namespace Backend {
        int number_of_postsynaptic_neurons_in_group,
        int max_number_of_connections_per_pair,
        float standard_deviation_sigma,
-       bool presynaptic_group_is_input) final;
+       bool presynaptic_group_is_input);
     };
 
     __global__ void compute_yes_no_connection_matrix_for_groups(bool * d_yes_no_connection_vector,

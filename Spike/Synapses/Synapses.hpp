@@ -39,18 +39,6 @@ namespace Backend {
   public:
     SPIKE_ADD_BACKEND_FACTORY(Synapses);
     ~Synapses() override = default;
-    virtual void set_neuron_indices_by_sampling_from_normal_distribution
-    (int original_number_of_synapses,
-     int total_number_of_new_synapses,
-     int postsynaptic_group_id,
-     int poststart, int prestart,
-     int* postsynaptic_group_shape,
-     int* presynaptic_group_shape,
-     int number_of_new_synapses_per_postsynaptic_neuron,
-     int number_of_postsynaptic_neurons_in_group,
-     int max_number_of_connections_per_pair,
-     float standard_deviation_sigma,
-     bool presynaptic_group_is_input) = 0;
     virtual void copy_to_frontend() = 0;
     virtual void copy_to_backend() = 0;
   };
@@ -81,7 +69,6 @@ struct synapse_parameters_struct {
   std::vector<int> pairwise_connect_presynaptic;
   std::vector<int> pairwise_connect_postsynaptic;
   std::vector<float> pairwise_connect_weight;
-  int max_number_of_connections_per_pair = 1;
   int gaussian_synapses_per_postsynaptic_neuron = 10;
   float gaussian_synapses_standard_deviation = 10.0;
   float weight_range[2] = {0.0f, 0.0f};
@@ -108,6 +95,7 @@ public:
   void prepare_backend_early() override;
   
   // Variables
+  RandomStateManager * random_state_manager;
   int total_number_of_synapses = 0;                 /**< Tracks the total number of synapses in the connectivity */
   int temp_number_of_synapses_in_last_group = 0;    /**< Tracks the number of synapses in the last added group. */
   int largest_synapse_group_size = 0;               /**< Tracks the size of the largest synaptic group. */
@@ -172,8 +160,6 @@ public:
   void load_weights_from_binary(std::string filepath, int synapsegroupid=-1);
 
   void reset_state() override;
-
-  RandomStateManager * random_state_manager;
 
 private:
   std::shared_ptr<::Backend::Synapses> _backend;
