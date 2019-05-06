@@ -23,23 +23,7 @@ void SpikingModel::SetTimestep(float timestep_parameter){
   }
 }
 
-
-int SpikingModel::AddNeuronGroup(neuron_parameters_struct * group_params) {
-  if (spiking_neurons == nullptr) print_message_and_exit("Please set neurons pointer before adding neuron groups.");
-
-  int neuron_group_id = spiking_neurons->AddGroup(group_params);
-  return neuron_group_id;
-}
-
-
-int SpikingModel::AddInputNeuronGroup(neuron_parameters_struct * group_params) {
-  if (input_spiking_neurons == nullptr) print_message_and_exit("Please set input_neurons pointer before adding inputs groups.");
-
-  int input_group_id = input_spiking_neurons->AddGroup(group_params);
-  return input_group_id;
-}
-
-
+  /*
 int SpikingModel::AddSynapseGroup(int presynaptic_group_id, 
               int postsynaptic_group_id, 
               synapse_parameters_struct * synapse_params) {
@@ -68,8 +52,9 @@ void SpikingModel::AddSynapseGroupsForNeuronGroupAndEachInputGroup(int postsynap
   }
 
 }
+              */
 
-int SpikingModel::AddNeuronType(SpikingNeurons * neuron_model) {
+void SpikingModel::AddNeuronType(SpikingNeurons * neuron_model) {
   // Adds a neuron type to the list of neurons being simulated
   spiking_neuron_vec.push_back(neuron_model);
 }
@@ -202,7 +187,7 @@ void SpikingModel::reset_time() {
 void SpikingModel::perform_per_step_model_instructions(bool plasticity_on){
   
   for (int n = 0; n < spiking_neuron_vec.size(); n++){
-    spiking_neurons_vec[n]->state_update(current_time_in_timesteps, timestep);
+    spiking_neuron_vec[n]->state_update(current_time_in_timesteps, timestep);
   }
   
   if (plasticity_on){

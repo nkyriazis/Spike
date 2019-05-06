@@ -28,6 +28,7 @@ void WeightNormSTDPPlasticity::reset_state() {
 
 
 void WeightNormSTDPPlasticity::prepare_backend_early(){
+  /*
   printf("Prepping\n");
   STDPPlasticity::prepare_backend_early();
   // By making use of the neuron and synapses, I can determine which weights are contributing to the calculation to be done
@@ -68,6 +69,7 @@ void WeightNormSTDPPlasticity::prepare_backend_early(){
     }
   }
   }
+  */
 }
 
 SPIKE_MAKE_INIT_BACKEND(WeightNormSTDPPlasticity);

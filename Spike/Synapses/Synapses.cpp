@@ -95,11 +95,11 @@ void Synapses::reset_state() {
 
 
 int Synapses::AddGroup(int presynaptic_group_id, 
-                        int postsynaptic_group_id, 
-                        Neurons * neurons,
-                        Neurons * input_neurons,
-                        float timestep,
-                        synapse_parameters_struct * synapse_params) {
+                       int postsynaptic_group_id, 
+                       Neurons * pre_neurons,
+                       Neurons * post_neurons,
+                       float timestep,
+                       synapse_parameters_struct * synapse_params) {
 
   if (print_synapse_group_details == true) {
           printf("Adding synapse group...\n");
@@ -107,57 +107,37 @@ int Synapses::AddGroup(int presynaptic_group_id,
           printf("postsynaptic_group_id: %d\n", postsynaptic_group_id);
   }
 
-  int* start_neuron_indices_for_neuron_groups = neurons->start_neuron_indices_for_each_group;
-  int* last_neuron_indices_for_neuron_groups = neurons->last_neuron_indices_for_each_group;
-
-  int * presynaptic_group_shape;
-  int * postsynaptic_group_shape;
-
-  int prestart = 0;
-  int preend = 0;
-  int poststart = 0;
-
-  // Calculate presynaptic group start and end indices
-  // Also assign presynaptic group shape
-  bool presynaptic_group_is_input = PRESYNAPTIC_IS_INPUT(presynaptic_group_id);
-
-  if (presynaptic_group_is_input) {
-    int* start_neuron_indices_for_input_neuron_groups = input_neurons->start_neuron_indices_for_each_group;
-    int* last_neuron_indices_for_input_neuron_groups = input_neurons->last_neuron_indices_for_each_group;
-
-    int corrected_presynaptic_group_id = CORRECTED_PRESYNAPTIC_ID(presynaptic_group_id, presynaptic_group_is_input);
-
-    presynaptic_group_shape = input_neurons->group_shapes[corrected_presynaptic_group_id];
-
-    if (presynaptic_group_id < -1){
-      prestart = start_neuron_indices_for_input_neuron_groups[corrected_presynaptic_group_id];
+  // Determine which neuron set for this synapse population
+  unsigned int synapse_set_id = 0;
+  bool setfound = false;
+  for (int setid = 0; setid < post_neuron_set.size(); setid++){
+    if ((pre_neurons == pre_neuron_set[setid]) && (post_neurons == post_neuron_set[setid])){
+      synapse_set_id = setid;
+      setfound = true;
+      break;
     }
-    preend = last_neuron_indices_for_input_neuron_groups[corrected_presynaptic_group_id] + 1;
-  } else {
-    presynaptic_group_shape = neurons->group_shapes[presynaptic_group_id];
-
-    if (presynaptic_group_id > 0){
-      prestart = start_neuron_indices_for_neuron_groups[presynaptic_group_id];
-    }
-    preend = last_neuron_indices_for_neuron_groups[presynaptic_group_id] + 1;
-
   }
 
-  // Calculate postsynaptic group start and end indices
-  // Also assign postsynaptic group shape
-  if (postsynaptic_group_id < 0) { // If presynaptic group is Input group EXIT
-          print_message_and_exit("Input groups cannot be a postsynaptic neuron group.");
-  } else if (postsynaptic_group_id >= 0){
-          postsynaptic_group_shape = neurons->group_shapes[postsynaptic_group_id];
-          poststart = start_neuron_indices_for_neuron_groups[postsynaptic_group_id];
+  if (!setfound){
+      pre_neuron_set.push_back(pre_neurons);
+      post_neuron_set.push_back(post_neurons);
+      synapse_set_id = post_neuron_set.size() - 1;
   }
-  
-  int postend = last_neuron_indices_for_neuron_groups[postsynaptic_group_id] + 1;
+
+
+  // Getting group shapes, and pre and post-synaptic neuron indices
+  int * presynaptic_group_shape = pre_neurons->group_shapes[presynaptic_group_id];
+  int * postsynaptic_group_shape = post_neurons->group_shapes[postsynaptic_group_id];
+
+  int prestart = pre_neurons->start_neuron_indices_for_each_group[presynaptic_group_id];
+  int preend = pre_neurons->last_neuron_indices_for_each_group[presynaptic_group_id];
+  int poststart = post_neurons->start_neuron_indices_for_each_group[postsynaptic_group_id];
+  int postend = post_neurons->last_neuron_indices_for_each_group[postsynaptic_group_id];
+
 
   if (print_synapse_group_details == true) {
-          const char * presynaptic_group_type_string = (presynaptic_group_id < 0) ? "input_neurons" : "neurons";
-          printf("Presynaptic neurons start index: %d (%s)\n", prestart, presynaptic_group_type_string);
-          printf("Presynaptic neurons end index: %d (%s)\n", preend, presynaptic_group_type_string);
+          printf("Presynaptic neurons start index: %d (neurons)\n");
+          printf("Presynaptic neurons end index: %d (neurons)\n");
           printf("Postsynaptic neurons start index: %d (neurons)\n", poststart);
           printf("Postsynaptic neurons end index: %d (neurons)\n", postend);
   }
@@ -172,7 +152,7 @@ int Synapses::AddGroup(int presynaptic_group_id,
           {
             
             int increment = (preend-prestart)*(postend-poststart);
-            Synapses::increment_number_of_synapses(increment);
+            Synapses::increment_number_of_synapses(increment, synapse_set_id);
 
             // If the connectivity is all_to_all
             for (int i = prestart; i < preend; i++){
@@ -180,7 +160,7 @@ int Synapses::AddGroup(int presynaptic_group_id,
                 // Index
                 int idx = original_number_of_synapses + (i-prestart)*(postend-poststart) + (j-poststart);
                 // Setup Synapses
-                presynaptic_neuron_indices[idx] = CORRECTED_PRESYNAPTIC_ID(i, presynaptic_group_is_input);
+                presynaptic_neuron_indices[idx] = i;
                 postsynaptic_neuron_indices[idx] = j;
               }
             }
@@ -188,14 +168,15 @@ int Synapses::AddGroup(int presynaptic_group_id,
           }
         case CONNECTIVITY_TYPE_ONE_TO_ONE:
           {
+            if ((preend-prestart) != (postend-poststart)) print_message_and_exit("Unequal populations for one_to_one.");
+            
             int increment = (preend-prestart);
-            Synapses::increment_number_of_synapses(increment);
+            Synapses::increment_number_of_synapses(increment, synapse_set_id);
             
             // If the connectivity is one_to_one
-            if ((preend-prestart) != (postend-poststart)) print_message_and_exit("Unequal populations for one_to_one.");
             // Create the connectivity
             for (int i = 0; i < (preend-prestart); i++){
-              presynaptic_neuron_indices[original_number_of_synapses + i] = CORRECTED_PRESYNAPTIC_ID(prestart + i, presynaptic_group_is_input);
+              presynaptic_neuron_indices[original_number_of_synapses + i] = prestart + i;
               postsynaptic_neuron_indices[original_number_of_synapses + i] = poststart + i;
             }
 
@@ -212,10 +193,8 @@ int Synapses::AddGroup(int presynaptic_group_id,
                 // If it is within the probability range, connect!
                 if (prob < synapse_params->random_connectivity_probability){
             
-                  Synapses::increment_number_of_synapses(1);
-
-                  // Setup Synapses
-                  presynaptic_neuron_indices[total_number_of_synapses - 1] = CORRECTED_PRESYNAPTIC_ID(i, presynaptic_group_is_input);
+                  Synapses::increment_number_of_synapses(1, synapse_set_id);
+                  presynaptic_neuron_indices[total_number_of_synapses - 1] = i;
                   postsynaptic_neuron_indices[total_number_of_synapses - 1] = j;
                 }
               }
@@ -235,7 +214,7 @@ int Synapses::AddGroup(int presynaptic_group_id,
       
             int number_of_postsynaptic_neurons_in_group = postend - poststart;
             int total_number_of_new_synapses = number_of_new_synapses_per_postsynaptic_neuron * number_of_postsynaptic_neurons_in_group;
-            Synapses::increment_number_of_synapses(total_number_of_new_synapses);
+            Synapses::increment_number_of_synapses(total_number_of_new_synapses, synapse_set_id);
 
             for (int postid = 0; postid < number_of_postsynaptic_neurons_in_group; postid++){
               float post_fractional_centre_x = ((float)(postid % postsynaptic_group_shape[0]) / (float)postsynaptic_group_shape[0]);
@@ -263,7 +242,7 @@ int Synapses::AddGroup(int presynaptic_group_id,
                 float probability_trace = 0.0;
                 for (int preloc = 0; preloc < pre_neuron_probabilities.size(); preloc++){
                   if ((randval > probability_trace) && (randval < (probability_trace + pre_neuron_probabilities[preloc]))){
-                    int chosenpreid = CORRECTED_PRESYNAPTIC_ID(pre_neuron_indices[preloc] + prestart, presynaptic_group_is_input);
+                    int chosenpreid = prestart + pre_neuron_indices[preloc];
                     presynaptic_neuron_indices[original_number_of_synapses + postid*number_of_new_synapses_per_postsynaptic_neuron + i] = chosenpreid;
                     total_probability -= pre_neuron_probabilities[preloc];
                     pre_neuron_indices.erase(pre_neuron_indices.begin() + preloc);
@@ -289,10 +268,9 @@ int Synapses::AddGroup(int presynaptic_group_id,
         std::cerr << "Synapse pre and post vectors are not the same length!" << std::endl;
         exit(1);
       }
-      // If we desire a single connection
-      Synapses::increment_number_of_synapses(synapse_params->pairwise_connect_presynaptic.size());
 
-      // Setup Synapses
+      Synapses::increment_number_of_synapses(synapse_params->pairwise_connect_presynaptic.size(), synapse_set_id);
+
       int numpostneurons = postsynaptic_group_shape[0]*postsynaptic_group_shape[1];
       int numpreneurons = presynaptic_group_shape[0]*presynaptic_group_shape[1];
       for (int i=0; i < synapse_params->pairwise_connect_presynaptic.size(); i++){
@@ -302,7 +280,7 @@ int Synapses::AddGroup(int presynaptic_group_id,
         if ((synapse_params->pairwise_connect_presynaptic[i] >= numpreneurons) || (synapse_params->pairwise_connect_postsynaptic[i] >= numpostneurons)){
           print_message_and_exit("PAIRWISE CONNECTION ERROR: Pre/post indices encountered too large. All indices should be up to the size of the neuron group. Indexing is from zero.");
         }
-        presynaptic_neuron_indices[original_number_of_synapses + i] = CORRECTED_PRESYNAPTIC_ID(prestart + int(synapse_params->pairwise_connect_presynaptic[i]), presynaptic_group_is_input);
+        presynaptic_neuron_indices[original_number_of_synapses + i] = prestart + int(synapse_params->pairwise_connect_presynaptic[i]);
         postsynaptic_neuron_indices[original_number_of_synapses + i] = poststart + int(synapse_params->pairwise_connect_postsynaptic[i]);
       }
 
@@ -315,22 +293,15 @@ int Synapses::AddGroup(int presynaptic_group_id,
     }
   }
 
+
+
   temp_number_of_synapses_in_last_group = total_number_of_synapses - original_number_of_synapses;
 
-  if (print_synapse_group_details == true) printf("%d new synapses added.\n\n", temp_number_of_synapses_in_last_group);
-
+  // Setting up weights and defining neuron efferent/afferent numbers
   for (int i = original_number_of_synapses; i < total_number_of_synapses; i++){
-          
-          weight_scaling_constants[i] = synapse_params->weight_scaling_constant;
+    weight_scaling_constants[i] = synapse_params->weight_scaling_constant;
+    synaptic_efficacies_or_weights[i] = weight_range_bottom + (weight_range_top - weight_range_bottom)*((float)rand() / (RAND_MAX));
     
-          float weight_range_bottom = synapse_params->weight_range[0];
-          float weight_range_top = synapse_params->weight_range[1];
-
-          float weight = weight_range_bottom;
-          if (weight_range_top != weight_range_bottom)
-      weight = weight_range_bottom + (weight_range_top - weight_range_bottom)*((float)rand() / (RAND_MAX));
-          synaptic_efficacies_or_weights[i] = weight;
-
     if (synapse_params->connectivity_type == CONNECTIVITY_TYPE_PAIRWISE){
       if (synapse_params->pairwise_connect_weight.size() == temp_number_of_synapses_in_last_group){
         synaptic_efficacies_or_weights[i] = synapse_params->pairwise_connect_weight[i - original_number_of_synapses];
@@ -339,25 +310,21 @@ int Synapses::AddGroup(int presynaptic_group_id,
       }
     }
 
-          // Used for event count
-          // printf("postsynaptic_neuron_indices[i]: %d\n", postsynaptic_neuron_indices[i]);
-          synapse_postsynaptic_neuron_count_index[postsynaptic_neuron_indices[i]] = neurons->per_neuron_afferent_synapse_count[postsynaptic_neuron_indices[i]];
-          neurons->per_neuron_afferent_synapse_count[postsynaptic_neuron_indices[i]] ++;
+    // Used for event count
+    //synapse_postsynaptic_neuron_count_index[postsynaptic_neuron_indices[i]] = neurons->per_neuron_afferent_synapse_count[postsynaptic_neuron_indices[i]];
+    post_neurons->per_neuron_afferent_synapse_count[postsynaptic_neuron_indices[i]]++;
 
-    if (neurons->per_neuron_afferent_synapse_count[postsynaptic_neuron_indices[i]] > maximum_number_of_afferent_synapses)
+    if (post_neurons->per_neuron_afferent_synapse_count[postsynaptic_neuron_indices[i]] > maximum_number_of_afferent_synapses)
       maximum_number_of_afferent_synapses = neurons->per_neuron_afferent_synapse_count[postsynaptic_neuron_indices[i]];
 
-    int presynaptic_id = CORRECTED_PRESYNAPTIC_ID(presynaptic_neuron_indices[i], presynaptic_group_is_input);
-    if (presynaptic_group_is_input)
-    input_neurons->AddEfferentSynapse(presynaptic_id, i);
-    else
-    neurons->AddEfferentSynapse(presynaptic_id, i);
+    int presynaptic_id = presynaptic_neuron_indices[i];
+    pre_neurons->AddEfferentSynapse(presynaptic_id, i);
 
     synapse_sort_indices[i] = i;
     synapse_reversesort_indices[i] = i;
   }
 
-  // SETTING UP PLASTICITY
+  // Set up plasticity
   int plasticity_id = -1;
   int original_num_plasticity_indices = 0;
   if (synapse_params->plasticity_vec.size() > 0){
@@ -367,36 +334,27 @@ int Synapses::AddGroup(int presynaptic_group_id,
       if (plasticity_ptr == nullptr)
         continue;
       plasticity_id = plasticity_ptr->plasticity_rule_id;
-      //Store or recall STDP Pointer
-      // Check if this pointer has already been stored
-      if (plasticity_id < 0){
-        plasticity_id = plasticity_rule_vec.size();
-        plasticity_rule_vec.push_back(plasticity_ptr);
-        // Apply ID to STDP class
-        plasticity_ptr->plasticity_rule_id = plasticity_id;
-      }
-
+      // Provide plasticity relevant synapse indices
       plasticity_ptr->AddSynapseIndices((total_number_of_synapses - temp_number_of_synapses_in_last_group), temp_number_of_synapses_in_last_group);
-        //for (int i = (total_number_of_synapses - temp_number_of_synapses_in_last_group); i < total_number_of_synapses; i++){
-          //Set STDP on or off for synapse (now using stdp id)
-          //plasticity_ptr->AddSynapse(presynaptic_neuron_indices[i], postsynaptic_neuron_indices[i], i);
-        //}
     }
   }
 
 
-
-  postpop_start_per_group.push_back(poststart);
-  prepop_is_input.push_back(presynaptic_group_is_input);
-  prepop_start_per_group.push_back(prestart);
+  post_start_per_group.push_back(poststart);
+  pre_start_per_group.push_back(prestart);
   last_index_of_synapse_per_group.push_back(total_number_of_synapses);
 
+  // Returning the index of synapses
   return(last_index_of_synapse_per_group.size() - 1);
 
 }
 
 
-void Synapses::increment_number_of_synapses(int increment) {
+void Synapses::increment_number_of_synapses(int increment, int synapse_set_id) {
+
+  for (int i = 0; i < increment; i++){
+    synapse_neuron_set.push_back(synapse_set_id);
+  }
 
   total_number_of_synapses += increment;
 
@@ -438,11 +396,9 @@ void Synapses::save_connectivity_as_txt(std::string path, std::string prefix, in
   }
   int precorrection = 0;
   int postcorrection = 0;
-  bool presynaptic_group_is_input = false;
   if (synapsegroupid >= 0){
-    postcorrection = postpop_start_per_group[synapsegroupid];
-    precorrection = prepop_start_per_group[synapsegroupid];
-    presynaptic_group_is_input = prepop_is_input[synapsegroupid];
+    postcorrection = post_start_per_group[synapsegroupid];
+    precorrection = pre_start_per_group[synapsegroupid];
   }
   std::ofstream preidfile, postidfile, weightfile;
 
@@ -457,10 +413,7 @@ void Synapses::save_connectivity_as_txt(std::string path, std::string prefix, in
 
   // Send data to file
   for (int i = startid; i < endid; i++){
-    if (synapsegroupid >= 0)
-      preidfile << CORRECTED_PRESYNAPTIC_ID(presynaptic_neuron_indices[synapse_reversesort_indices[i]], presynaptic_group_is_input) - precorrection << std::endl;
-    else 
-      preidfile << presynaptic_neuron_indices[synapse_reversesort_indices[i]] << std::endl;
+    preidfile << presynaptic_neuron_indices[synapse_reversesort_indices[i]] - precorrection << std::endl;
     postidfile << postsynaptic_neuron_indices[synapse_reversesort_indices[i]] - postcorrection << std::endl;
     weightfile << synaptic_efficacies_or_weights[synapse_reversesort_indices[i]] << std::endl;
   }
@@ -482,11 +435,9 @@ void Synapses::save_connectivity_as_binary(std::string path, std::string prefix,
   }
   int precorrection = 0;
   int postcorrection = 0;
-  bool presynaptic_group_is_input = false;
   if (synapsegroupid >= 0){
-    postcorrection = postpop_start_per_group[synapsegroupid];
-    precorrection = prepop_start_per_group[synapsegroupid];
-    presynaptic_group_is_input = prepop_is_input[synapsegroupid];
+    postcorrection = post_start_per_group[synapsegroupid];
+    precorrection = pre_start_per_group[synapsegroupid];
   }
   std::ofstream preidfile, postidfile, weightfile;
 
@@ -503,10 +454,7 @@ void Synapses::save_connectivity_as_binary(std::string path, std::string prefix,
   int preid, postid;
   float weight;
   for (int i = startid; i < endid; i++){
-    if (synapsegroupid >= 0)
-      preid = CORRECTED_PRESYNAPTIC_ID(presynaptic_neuron_indices[synapse_reversesort_indices[i]], presynaptic_group_is_input) - precorrection;
-    else
-      preid = presynaptic_neuron_indices[synapse_reversesort_indices[i]];
+    preid = presynaptic_neuron_indices[synapse_reversesort_indices[i]] - precorrection;
     postid = postsynaptic_neuron_indices[synapse_reversesort_indices[i]] - postcorrection;
     weight = synaptic_efficacies_or_weights[synapse_reversesort_indices[i]];
     preidfile.write((char *)&preid, sizeof(int));

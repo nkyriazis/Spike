@@ -102,18 +102,19 @@ public:
   bool print_synapse_group_details = false;         /**< A flag used to indicate whether group details should be printed */
   std::vector<Plasticity*> plasticity_rule_vec;     /**< A vector of pointers to the plasticity rules to be used in the simulation */
   std::vector<int> last_index_of_synapse_per_group; 
-  std::vector<bool> prepop_is_input;
-  std::vector<int> prepop_start_per_group;
-  std::vector<int> postpop_start_per_group;
+  std::vector<int> pre_start_per_group;
+  std::vector<int> post_start_per_group;
   
 
-	
   // Host Pointers
   int* presynaptic_neuron_indices = nullptr;                /**< Indices of presynaptic neuron IDs */
   int* postsynaptic_neuron_indices = nullptr;               /**< Indices of postsynaptic neuron IDs */
   int* synapse_postsynaptic_neuron_count_index = nullptr;   /**< An array of the number of incoming synapses to each postsynaptic neuron */
   float* synaptic_efficacies_or_weights = nullptr;          /**< An array of synaptic efficacies/weights accompanying the pre/postsynaptic_neuron_indices */
   float * weight_scaling_constants = nullptr;
+  std::vector<Neurons*> pre_neuron_set;
+  std::vector<Neurons*> post_neuron_set;
+  std::vector<int> synapse_neuron_set;
   int maximum_number_of_afferent_synapses = 0;
 
   bool synapses_sorted = false;
@@ -135,8 +136,8 @@ public:
    */
   virtual int AddGroup(int presynaptic_group_id, 
                         int postsynaptic_group_id, 
-                        Neurons * neurons,
-                        Neurons * input_neurons,
+                        Neurons * pre_neurons,
+                        Neurons * post_neurons,
                         float timestep,
                         synapse_parameters_struct * synapse_params);
 
@@ -144,8 +145,8 @@ public:
      *  A function called in to reallocate memory for a given number more synapses.
      /param increment The number of synapses for which allocated memory must be expanded.
   */
-  void increment_number_of_synapses(int increment);
-  void sort_synapses(Neurons* input_neurons, Neurons* neurons);
+  void increment_number_of_synapses(int increment, int synapse_set_id);
+  void sort_synapses();
   
   virtual void save_connectivity_as_txt(std::string path, std::string prefix="", int synapsegroupid=-1);
   virtual void save_connectivity_as_binary(std::string path, std::string prefix="", int synapsegroupid=-1);
