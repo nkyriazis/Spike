@@ -33,10 +33,9 @@ public:
   ~SpikingModel();
 
   Context* context = nullptr; // Call init_backend to set this up!
-  SpikingNeurons * spiking_neurons = nullptr;
   SpikingSynapses * spiking_synapses = nullptr;
-  SpikingNeurons * input_spiking_neurons = nullptr;
   
+  vector<SpikingNeurons*> spiking_neuron_vec;
   vector<STDPPlasticity*> plasticity_rule_vec; 
   vector<ActivityMonitor*> monitors_vec; 
 

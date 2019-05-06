@@ -69,6 +69,11 @@ void SpikingModel::AddSynapseGroupsForNeuronGroupAndEachInputGroup(int postsynap
 
 }
 
+int SpikingModel::AddNeuronType(SpikingNeurons * neuron_model) {
+  // Adds a neuron type to the list of neurons being simulated
+  spiking_neuron_vec.push_back(neuron_model);
+}
+
 void SpikingModel::AddPlasticityRule(STDPPlasticity * plasticity_rule){
   // Adds the new STDP rule to the vector of STDP Rule
   plasticity_rule_vec.push_back(plasticity_rule);
@@ -87,10 +92,6 @@ void SpikingModel::finalise_model() {
     model_complete = true;
     
     // If any component does not exist, create at least a stand-in
-    if (!input_spiking_neurons)
-      input_spiking_neurons = new InputSpikingNeurons();
-    if (!spiking_neurons)
-      spiking_neurons = new SpikingNeurons();
     if (!spiking_synapses)
       spiking_synapses = new SpikingSynapses();
     
@@ -104,10 +105,11 @@ void SpikingModel::finalise_model() {
     
     // Outputting Network Overview
     printf("Building Model with:\n");
-    if (input_spiking_neurons->total_number_of_neurons > 0)
-      printf("  %d Input Neuron(s)\n", input_spiking_neurons->total_number_of_neurons);
-    if (spiking_neurons->total_number_of_neurons > 0)
-      printf("  %d Neuron(s)\n", spiking_neurons->total_number_of_neurons);
+    if (spiking_neuron_vec.size() > 0)
+      printf("  %d Neuron Types(s)\n", (int)plasticity_rule_vec.size());
+    for (int n = 0; n < spiking_neuron_vec.size(); n++)
+      printf("    %d: %d Neuron(s)\n", (int)spiking_neuron_vec.size(), spiking_neuron_vec[n]->total_number_of_neurons);
+
     if (spiking_synapses->total_number_of_synapses > 0)
       printf("  %d Synapse(s)\n", spiking_synapses->total_number_of_synapses);
     if (plasticity_rule_vec.size() > 0)
@@ -118,8 +120,9 @@ void SpikingModel::finalise_model() {
 
 
     spiking_synapses->model = this;
-    spiking_neurons->model = this;
-    input_spiking_neurons->model = this;
+    for (int n = 0; n < spiking_neuron_vec.size(); n++){
+      spiking_neuron_vec[n]->model = this;
+    }
     for (int plasticity_id = 0; plasticity_id < plasticity_rule_vec.size(); plasticity_id++){
       plasticity_rule_vec[plasticity_id]->model = this;
     }
@@ -127,7 +130,6 @@ void SpikingModel::finalise_model() {
       monitors_vec[monitor_id]->model = this;
     }
     init_backend();
-    //prepare_backend();
     reset_state();
   }
 }
@@ -147,8 +149,9 @@ void SpikingModel::init_backend() {
 
   // NB All these also call prepare_backend for the initial state:
   spiking_synapses->init_backend(context);
-  spiking_neurons->init_backend(context);
-  input_spiking_neurons->init_backend(context);
+  for (int n = 0; n < spiking_neuron_vec.size(); n++){
+    spiking_neuron_vec[n]->init_backend(context);
+  }
   for (int plasticity_id = 0; plasticity_id < plasticity_rule_vec.size(); plasticity_id++){
     plasticity_rule_vec[plasticity_id]->init_backend(context);
   }
@@ -166,9 +169,9 @@ void SpikingModel::prepare_backend() {
   spiking_synapses->prepare_backend();
   context->params.maximum_axonal_delay_in_timesteps = spiking_synapses->maximum_axonal_delay_in_timesteps;
   
-  spiking_neurons->prepare_backend();
-  input_spiking_neurons->prepare_backend();
-
+  for (int n = 0; n < spiking_neuron_vec.size(); n++){
+    spiking_neuron_vec[n]->init_backend(context);
+  }
   for (int plasticity_id = 0; plasticity_id < plasticity_rule_vec.size(); plasticity_id++){
     plasticity_rule_vec[plasticity_id]->prepare_backend();
   }
@@ -182,8 +185,9 @@ void SpikingModel::reset_state() {
   finalise_model();
 
   spiking_synapses->reset_state();
-  spiking_neurons->reset_state();
-  input_spiking_neurons->reset_state();
+  for (int n = 0; n < spiking_neuron_vec.size(); n++){
+    spiking_neuron_vec[n]->reset_state();
+  }
   for (int plasticity_id = 0; plasticity_id < plasticity_rule_vec.size(); plasticity_id++){
     plasticity_rule_vec[plasticity_id]->reset_state();
   }
@@ -197,8 +201,9 @@ void SpikingModel::reset_time() {
 
 void SpikingModel::perform_per_step_model_instructions(bool plasticity_on){
   
-  spiking_neurons->state_update(current_time_in_timesteps, timestep);
-  input_spiking_neurons->state_update(current_time_in_timesteps, timestep);
+  for (int n = 0; n < spiking_neuron_vec.size(); n++){
+    spiking_neurons_vec[n]->state_update(current_time_in_timesteps, timestep);
+  }
   
   if (plasticity_on){
     for (int plasticity_id = 0; plasticity_id < plasticity_rule_vec.size(); plasticity_id++)
