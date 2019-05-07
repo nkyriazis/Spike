@@ -29,9 +29,10 @@ namespace Backend {
       Synapses::reset_state();
 
       // Spike Buffer Resetting
-      //CudaSafeCall(cudaMemset(num_active_synapses, 0, sizeof(int)));
       CudaSafeCall(cudaMemset(num_activated_neurons, 0, 2*sizeof(int)));
-      CudaSafeCall(cudaMemset(neuron_inputs.circular_input_buffer, 0.0f, sizeof(float)*neuron_inputs.temporal_buffersize*neuron_inputs.input_buffersize));
+      for (int u = 0; u < frontend()->post_neuron_set.size(); u++){
+        CudaSafeCall(cudaMemset(h_circular_input_buffer[u], 0.0f, sizeof(float)*neuron_inputs.temporal_buffersize*frontend()->post_neuron_set[u]->total_number_of_neurons));
+      }
     }
 
     void SpikingSynapses::copy_weights_to_host() {
@@ -46,12 +47,24 @@ namespace Backend {
      
       // Extra buffer size for current time and extra to reset before last
       buffersize = frontend()->maximum_axonal_delay_in_timesteps + 2*frontend()->model->timestep_grouping + 1;
-      neuron_inputs.input_buffersize = frontend()->neuron_pop_size*frontend()->num_syn_labels;
-      neuron_inputs.temporal_buffersize = buffersize;
+      if (h_input_buffersize)
+        free(h_input_buffersize);
+      h_input_buffersize = (int*)malloc((int)frontend()->post_neuron_set.size()*sizeof(int));
+      h_circular_input_buffer = (float**)malloc((float*)frontend()->post_neuron_set.size()*sizeof(float*));
+      for (int u=0; u < post_neuron_set.size(); u++)
+        h_input_buffersize[u] = post_neuron_set[u]->total_number_of_neurons;
+
       
       allocate_device_pointers();
       copy_constants_and_initial_efficacies_to_device();
 
+     
+
+      neuron_inputs.input_buffersize = // WHAT?
+      neuron_inputs.temporal_buffersize = buffersize;
+
+
+      
       synaptic_data = new spiking_synapses_data_struct();
       synaptic_data->synapse_type = EMPTY;
       synaptic_data->syn_labels = d_syn_labels;
@@ -98,7 +111,11 @@ namespace Backend {
         spiking_syn_activation_kernel,
         sizeof(synaptic_activation_kernel)));
 
-      CudaSafeCall(cudaMalloc((void **)&neuron_inputs.circular_input_buffer, sizeof(float)*neuron_inputs.temporal_buffersize*neuron_inputs.input_buffersize));
+      CudaSafeCall(cudaMalloc((void **)&neuron_inputs.input_buffersize, sizeof(int)*frontend()->post_neuron_set.size()));
+      CudaSafeCall(cudaMalloc((void **)&neuron_inputs.circular_input_buffer, sizeof(float*)*frontend()->post_neuron_set.size()));
+      for (int u=0; u < frontend()->post_neuron_set.size(); u++)
+        CudaSafeCall(cudaMalloc((void **)&h_circular_input_buffer[u], sizeof(float)*neuron_inputs.temporal_buffersize*h_input_buffersize[u]));
+
     }
 
     void SpikingSynapses::copy_constants_and_initial_efficacies_to_device() {
@@ -109,6 +126,14 @@ namespace Backend {
         d_syn_labels,
         frontend()->syn_labels,
         sizeof(int)*frontend()->total_number_of_synapses, cudaMemcpyHostToDevice));
+      
+      
+      CudaSafeCall(cudaMemcpy(neuron_inputs.input_buffersize, h_input_buffersize,
+        sizeof(int)*frontend()->post_neuron_set.size(),
+        cudaMemcpyHostToDevice));
+      CudaSafeCall(cudaMemcpy(neuron_inputs.circular_input_buffer, h_circular_input_buffer,
+        sizeof(float*)*frontend()->post_neuron_set.size(),
+        cudaMemcpyHostToDevice));
       
       int max_efferents = 0;
       for (int u = 0; u < frontend()->unique_pre_neuron_set.size(); u++){

@@ -22,8 +22,8 @@ namespace Backend {
       VOLTAGE
     };
     struct neuron_inputs_struct {
-      float* circular_input_buffer = nullptr;
-      int input_buffersize = 0;
+      float** circular_input_buffer = nullptr;
+      int* input_buffersize = nullptr;
       int temporal_buffersize = 0;
     };
     struct spiking_synapses_data_struct: synapses_data_struct {
@@ -75,8 +75,11 @@ namespace Backend {
       int h_num_active_synapses = 0;
       // Device pointers
       int* delays = nullptr;
+      
+      float** h_circular_input_buffer = nullptr;
+      int* h_input_buffersize = nullptr;
+      float** d_circular_input_buffer = nullptr;
 
-      int* d_syn_labels = nullptr;
       neuron_inputs_struct neuron_inputs;
 
       SpikingSynapses();
