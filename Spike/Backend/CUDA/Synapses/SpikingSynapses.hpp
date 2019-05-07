@@ -29,15 +29,15 @@ namespace Backend {
     struct spiking_synapses_data_struct: synapses_data_struct {
       neuron_inputs_struct neuron_inputs;
       int synapse_type = EMPTY;
-      int num_syn_labels = 0;
-      int* syn_labels = nullptr;
       int* num_activated_neurons = nullptr;
-      int* num_active_synapses = nullptr;
+      int* max_efferents_per_group = nullptr;
       int* active_synapse_counts = nullptr;
       int* active_synapse_starts = nullptr;
       int* active_presynaptic_neuron_indices = nullptr;
       int* group_indices = nullptr;
 
+      int num_synapse_groups = 0;
+      int* synapse_neuron_group_indices = nullptr;
       int* postsynaptic_neuron_indices = nullptr;
       int* delays = nullptr;
       float* synaptic_efficacies_or_weights = nullptr;
@@ -72,10 +72,16 @@ namespace Backend {
       int* active_synapse_counts = nullptr;
       int* active_synapse_starts = nullptr;
       int* active_presynaptic_neuron_indices = nullptr;
+      int* max_efferents_per_group = nullptr;
       int h_num_active_synapses = 0;
       // Device pointers
       int* delays = nullptr;
       
+      std::vector<spiking_neurons_data_struct*> h_pre_neurons_data;
+      std::vector<spiking_neurons_data_struct*> h_post_neurons_data;
+      spiking_neurons_data_struct* d_pre_neurons_data;
+      spiking_neurons_data_struct* d_post_neurons_data;
+
       float** h_circular_input_buffer = nullptr;
       int* h_input_buffersize = nullptr;
       float** d_circular_input_buffer = nullptr;

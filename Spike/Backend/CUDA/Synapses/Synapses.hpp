@@ -28,6 +28,7 @@ namespace Backend {
       float* synaptic_efficacies_or_weights = nullptr;
       float* temp_synaptic_efficacies_or_weights = nullptr;
       float * weight_scaling_constants = nullptr;
+      int * synapse_neuron_group_indices = nullptr;
       int max_num_blocks_per_grid = 0;
       
       // CUDA Specific

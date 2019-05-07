@@ -46,12 +46,12 @@ void Synapses::sort_synapses(){
      
       vector<int> efferent_num_per_pre; 
       vector<int> efferent_start_per_pre; 
-      maximum_number_of_afferent_synapses_per_group.push_back(0);
+      maximum_number_of_efferent_synapses_per_group.push_back(0);
       for (int n=0; n < total_pre_neurons; n++){
         efferent_num_per_pre.push_back((int)per_pre_neuron_synapses[n].size());
         efferent_start_per_pre.push_back(num_sorted_synapses);
-        if (efferent_num_per_pre[n] > maximum_number_of_afferent_synapses[p])
-          maximum_number_of_afferent_synapses[p] = efferent_num_per_pre[n];
+        if (efferent_num_per_pre[n] > maximum_number_of_efferent_synapses[p])
+          maximum_number_of_efferent_synapses[p] = efferent_num_per_pre[n];
         for (int s=0; s < per_pre_neuron_synapses[n].size(); s++){
           synapse_sort_indices[num_sorted_synapses] = per_pre_neuron_synapses[n][s];
           num_sorted_synapses++;

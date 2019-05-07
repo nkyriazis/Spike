@@ -116,7 +116,7 @@ public:
   std::vector<Neurons*> post_neuron_set;
   std::vector<std::vector<int>> efferent_starts_per_group;
   std::vector<std::vector<int>> efferent_num_per_group;
-  std::vector<int> maximum_number_of_afferent_synapses_per_group;
+  std::vector<int> maximum_number_of_efferent_synapses_per_group;
 
   bool synapses_sorted = false;
   int* synapse_sort_indices = nullptr;   // Re-sorting synapses by pre-synaptic neuron
