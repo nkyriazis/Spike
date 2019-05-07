@@ -109,7 +109,13 @@ namespace Backend {
         d_syn_labels,
         frontend()->syn_labels,
         sizeof(int)*frontend()->total_number_of_synapses, cudaMemcpyHostToDevice));
-      int max_efferents = max(frontend()->model->spiking_neurons->max_num_efferent_synapses, frontend()->model->input_spiking_neurons->max_num_efferent_synapses);
+      
+      int max_efferents = 0;
+      for (int u = 0; u < frontend()->unique_pre_neuron_set.size(); u++){
+        int num_efferents = frontend()->unique_pre_neuron_set[u]->max_num_efferent_synapses;
+        if (num_efferents > max_efferents)
+          max_efferents = num_efferents;
+      }
       CudaSafeCall(cudaMemcpy(
         num_active_synapses,
         &max_efferents,

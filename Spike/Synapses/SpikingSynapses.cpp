@@ -11,24 +11,25 @@ SpikingSynapses::~SpikingSynapses() {
 
 void SpikingSynapses::prepare_backend_early() {
   Synapses::prepare_backend_early();
-  Synapses::sort_synapses(model->input_spiking_neurons, model->spiking_neurons);
+  Synapses::sort_synapses();
   SpikingSynapses::sort_synapses();
   
-  // Setting Neuron and InputNeuron start indices
-  set_synapse_start(presynaptic_neuron_indices[0], 0);
-  for (int s=1; s < total_number_of_synapses; s++){
-    if (presynaptic_neuron_indices[s-1] != presynaptic_neuron_indices[s])
-      set_synapse_start(presynaptic_neuron_indices[s], s); 
+  // Get post-synaptic neuron population sizes 
+  for (int u=0; u < unique_post_neuron_set.size(); u++){
+    post_neuron_pop_sizes.push_back(unique_post_neuron_set[u]->total_number_of_neurons);
   }
-}
 
-void SpikingSynapses::set_synapse_start(int pre_index, int syn_start){
-  bool is_presynaptic = PRESYNAPTIC_IS_INPUT(pre_index);
-  int corr_pre_index = CORRECTED_PRESYNAPTIC_ID(pre_index, is_presynaptic);
-
-  int* neuron_start_indices = is_presynaptic ? model->input_spiking_neurons->per_neuron_efferent_synapse_start : model->spiking_neurons->per_neuron_efferent_synapse_start;
-
-  neuron_start_indices[corr_pre_index] = syn_start;
+  // Set for each neuron, set the beginning of its efferent synapses in this synaptic population
+  for (int u=0; u < unique_pre_neuron_set.size(); u++){
+    bool started = false;
+    for (int s=0; s < total_number_of_synapses; s++){
+      if (pre_neuron_set[per_synapse_neuron_set[s]] == unique_pre_neuron_set[s]){
+        if (!started || (presynaptic_neuron_indices[s-1] != presynaptic_neuron_indices[s])){
+          unique_pre_neuron_set[u]->per_neuron_efferent_synapse_start[presynaptic_neuron_indices[s]] = s;
+        }
+      }
+    }
+  }
 }
 
 
@@ -49,28 +50,18 @@ void SpikingSynapses::sort_synapses(){
   syn_labels = temp_synlabel_array;
 }
 
-// Connection Detail implementation
-//  INPUT:
-//    Pre-neuron population ID
-//    Post-neuron population ID
-//    An array of the exclusive sum of neuron populations
-//    CONNECTIVITY_TYPE (Constants.h)
-//    2 number float array for weight range
-//    2 number float array for delay range
-//    Boolean value to indicate if population is STDP based
-//    Parameter = either probability for random synapses or S.D. for Gaussian
 int SpikingSynapses::AddGroup(int presynaptic_group_id, 
             int postsynaptic_group_id, 
-            Neurons * neurons,
-            Neurons * input_neurons,
+            Neurons * pre_neurons,
+            Neurons * post_neurons,
             float timestep,
             synapse_parameters_struct * synapse_params) {
   
   
   int groupID = Synapses::AddGroup(presynaptic_group_id, 
               postsynaptic_group_id, 
-              neurons,
-              input_neurons,
+              pre_neurons,
+              post_neurons,
               timestep,
               synapse_params);
 
@@ -119,8 +110,6 @@ int SpikingSynapses::AddGroup(int presynaptic_group_id,
     if (delays[i] > maximum_axonal_delay_in_timesteps) maximum_axonal_delay_in_timesteps = delays[i];
     if (delays[i] < minimum_axonal_delay_in_timesteps) minimum_axonal_delay_in_timesteps = delays[i];
   }
-  if (neurons->total_number_of_neurons > neuron_pop_size)
-    neuron_pop_size = neurons->total_number_of_neurons; 
 
   return groupID;
 

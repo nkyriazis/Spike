@@ -39,7 +39,7 @@ public:
   // For spike array stuff
   int minimum_axonal_delay_in_timesteps = pow(10, 6);
   int maximum_axonal_delay_in_timesteps = 0;
-  int neuron_pop_size = 0; // parameter for efficient conductance trace
+  std::vector<int> post_neuron_pop_sizes;
 
   // In order to group synapses, give them a distinction
   int num_syn_labels = 1;
@@ -55,7 +55,6 @@ public:
 
   void increment_number_of_synapses(int increment);
   void sort_synapses();
-  void set_synapse_start(int pre_index, int syn_start);
 
   virtual void state_update(unsigned int current_time_in_timesteps, float timestep);
 
