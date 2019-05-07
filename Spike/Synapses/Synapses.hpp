@@ -109,14 +109,14 @@ public:
   // Host Pointers
   int* presynaptic_neuron_indices = nullptr;                /**< Indices of presynaptic neuron IDs */
   int* postsynaptic_neuron_indices = nullptr;               /**< Indices of postsynaptic neuron IDs */
-  int* per_synapse_neuron_set = nullptr;
+  int* synapse_neuron_group_indices = nullptr;
   float* synaptic_efficacies_or_weights = nullptr;          /**< An array of synaptic efficacies/weights accompanying the pre/postsynaptic_neuron_indices */
   float * weight_scaling_constants = nullptr;
   std::vector<Neurons*> pre_neuron_set;
   std::vector<Neurons*> post_neuron_set;
-  std::vector<Neurons*> unique_pre_neuron_set;
-  std::vector<Neurons*> unique_post_neuron_set;
-  int maximum_number_of_afferent_synapses = 0;
+  std::vector<std::vector<int>> efferent_starts_per_group;
+  std::vector<std::vector<int>> efferent_num_per_group;
+  std::vector<int> maximum_number_of_afferent_synapses_per_group;
 
   bool synapses_sorted = false;
   int* synapse_sort_indices = nullptr;   // Re-sorting synapses by pre-synaptic neuron

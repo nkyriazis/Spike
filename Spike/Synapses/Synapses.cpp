@@ -28,32 +28,10 @@ void Synapses::prepare_backend_early() {
 void Synapses::sort_synapses(){
   if (!synapses_sorted){
     // We first organise all synapses by pre-synaptic neuron, regardless of set
-    for (int n = 0; n < pre_neuron_set.size(); n++){
-      bool found = false;
-      for (int u = 0; u < unique_pre_neuron_set.size(); u++){
-        if (unique_pre_neuron_set[u] == pre_neuron_set[n]){
-          found = true;
-          break;
-        }
-      }
-      if (!found)
-        unique_pre_neuron_set.push_back(pre_neuron_set[n]);
-      
-      bool postfound = false;
-      for (int u = 0; u < unique_post_neuron_set.size(); u++){
-        if (unique_post_neuron_set[u] == post_neuron_set[n])
-          postfound = true;
-      }
-      if (!postfound)
-        unique_post_neuron_set.push_back(post_neuron_set[n]);
-      
-    }
-
-    // For each of the unique pre neuron sets, individually get sorted (by pre) synapses
     int num_sorted_synapses = 0;
-    for (int u = 0; u < unique_pre_neuron_set.size(); u++){
-      int total_pre_neurons = unique_pre_neuron_set[u]->total_number_of_neurons;
-      
+    for (int p = 0; p < pre_neuron_set.size(); p++){
+      // For each pre-synaptic neuron, collect its efferent synapses
+      int total_pre_neurons = pre_neuron_set[p]->total_number_of_neurons;
       std::vector<std::vector<int>> per_pre_neuron_synapses;
       for (int n=0; n < total_pre_neurons; n++){
         std::vector<int> empty;
@@ -61,30 +39,45 @@ void Synapses::sort_synapses(){
       }
 
       for (int s=0; s < total_number_of_synapses; s++){
-        if (pre_neuron_set[per_synapse_neuron_set[s]] == unique_pre_neuron_set[u]){
+        if (synapse_neuron_group_indices[s] == p){
           per_pre_neuron_synapses[presynaptic_neuron_indices[s]].push_back(s);
         }
       }
+     
+      vector<int> efferent_num_per_pre; 
+      vector<int> efferent_start_per_pre; 
+      maximum_number_of_afferent_synapses_per_group.push_back(0);
       for (int n=0; n < total_pre_neurons; n++){
+        efferent_num_per_pre.push_back((int)per_pre_neuron_synapses[n].size());
+        efferent_start_per_pre.push_back(num_sorted_synapses);
+        if (efferent_num_per_pre[n] > maximum_number_of_afferent_synapses[p])
+          maximum_number_of_afferent_synapses[p] = efferent_num_per_pre[n];
         for (int s=0; s < per_pre_neuron_synapses[n].size(); s++){
           synapse_sort_indices[num_sorted_synapses] = per_pre_neuron_synapses[n][s];
           num_sorted_synapses++;
         }
       }
+
+      efferent_num_per_group.push_back(efferent_num_per_pre);
+      efferent_starts_per_group.push_back(efferent_start_per_pre);
     }
+
+    if (num_sorted_synapses != total_number_of_synapses)
+      print_message_and_exit("Issue encountered when sorting synapses: incomplete sort.");
+    
     
     int* temp_presyn_array = (int*)malloc(total_number_of_synapses * sizeof(int));
     int* temp_postsyn_array = (int*)malloc(total_number_of_synapses * sizeof(int));
     float* temp_weight_array = (float*)malloc(total_number_of_synapses * sizeof(float));
     float* temp_scaling_array = (float*)malloc(total_number_of_synapses * sizeof(float));
-    int* temp_per_synapse_neuron_set = (int*)malloc(total_number_of_synapses * sizeof(int));
+    int* temp_synapse_neuron_group_indices = (int*)malloc(total_number_of_synapses * sizeof(int));
     // Re-ordering arrays
     for (int s=0; s < total_number_of_synapses; s++){
       temp_presyn_array[s] = presynaptic_neuron_indices[synapse_sort_indices[s]];
       temp_postsyn_array[s] = postsynaptic_neuron_indices[synapse_sort_indices[s]];
       temp_weight_array[s] = synaptic_efficacies_or_weights[synapse_sort_indices[s]];
       temp_scaling_array[s] = weight_scaling_constants[synapse_sort_indices[s]];
-      temp_per_synapse_neuron_set[s] = per_synapse_neuron_set[synapse_sort_indices[s]];
+      temp_synapse_neuron_group_indices[s] = synapse_neuron_group_indices[synapse_sort_indices[s]];
 
       synapse_reversesort_indices[synapse_sort_indices[s]] = s;
     }
@@ -93,13 +86,13 @@ void Synapses::sort_synapses(){
     free(postsynaptic_neuron_indices);
     free(synaptic_efficacies_or_weights);
     free(weight_scaling_constants);
-    free(per_synapse_neuron_set);
+    free(synapse_neuron_group_indices);
 
     if (temp_presyn_array) presynaptic_neuron_indices = temp_presyn_array;
     if (temp_postsyn_array) postsynaptic_neuron_indices = temp_postsyn_array;
     if (temp_weight_array) synaptic_efficacies_or_weights = temp_weight_array;
     if (temp_scaling_array) weight_scaling_constants = temp_scaling_array;
-    if (temp_per_synapse_neuron_set) per_synapse_neuron_set = temp_per_synapse_neuron_set;
+    if (temp_synapse_neuron_group_indices) synapse_neuron_group_indices = temp_synapse_neuron_group_indices;
 
     synapses_sorted = true;
   }
@@ -113,7 +106,7 @@ Synapses::~Synapses() {
   free(synapse_sort_indices);
   free(synapse_reversesort_indices);
   free(weight_scaling_constants);
-  free(per_synapse_neuron_set);
+  free(synapse_neuron_group_indices);
 
   delete random_state_manager;
 }
@@ -138,21 +131,9 @@ int Synapses::AddGroup(int presynaptic_group_id,
   }
 
   // Determine which neuron set for this synapse population
-  unsigned int synapse_set_id = 0;
-  bool setfound = false;
-  for (int setid = 0; setid < post_neuron_set.size(); setid++){
-    if ((pre_neurons == pre_neuron_set[setid]) && (post_neurons == post_neuron_set[setid])){
-      synapse_set_id = setid;
-      setfound = true;
-      break;
-    }
-  }
-
-  if (!setfound){
-      pre_neuron_set.push_back(pre_neurons);
-      post_neuron_set.push_back(post_neurons);
-      synapse_set_id = post_neuron_set.size() - 1;
-  }
+  pre_neuron_set.push_back(pre_neurons);
+  post_neuron_set.push_back(post_neurons);
+  synapse_set_id = post_neuron_set.size() - 1;
 
 
   // Getting group shapes, and pre and post-synaptic neuron indices
@@ -331,7 +312,7 @@ int Synapses::AddGroup(int presynaptic_group_id,
   for (int i = original_number_of_synapses; i < total_number_of_synapses; i++){
     weight_scaling_constants[i] = synapse_params->weight_scaling_constant;
     synaptic_efficacies_or_weights[i] = synapse_params->weight_range[0] + (synapse_params->weight_range[1] - synapse_params->weight_range[0])*((float)rand() / (RAND_MAX));
-    per_synapse_neuron_set[i] = synapse_set_id;
+    synapse_neuron_group_indices[i] = synapse_set_id;
     
     if (synapse_params->connectivity_type == CONNECTIVITY_TYPE_PAIRWISE){
       if (synapse_params->pairwise_connect_weight.size() == temp_number_of_synapses_in_last_group){
@@ -389,7 +370,7 @@ void Synapses::increment_number_of_synapses(int increment, int synapse_set_id) {
           postsynaptic_neuron_indices = (int*)malloc(total_number_of_synapses * sizeof(int));
           synaptic_efficacies_or_weights = (float*)malloc(total_number_of_synapses * sizeof(float));
           weight_scaling_constants = (float*)malloc(total_number_of_synapses * sizeof(float));
-          per_synapse_neuron_set = (int*)malloc(total_number_of_synapses * sizeof(int));
+          synapse_neuron_group_indices = (int*)malloc(total_number_of_synapses * sizeof(int));
           synapse_sort_indices = (int*)malloc(total_number_of_synapses * sizeof(int));
           synapse_reversesort_indices = (int*)malloc(total_number_of_synapses * sizeof(int));
   } else {
@@ -397,7 +378,7 @@ void Synapses::increment_number_of_synapses(int increment, int synapse_set_id) {
     int* temp_postsynaptic_neuron_indices = (int*)realloc(postsynaptic_neuron_indices, total_number_of_synapses * sizeof(int));
     float* temp_synaptic_efficacies_or_weights = (float*)realloc(synaptic_efficacies_or_weights, total_number_of_synapses * sizeof(float));
     float* temp_weight_scaling_constants = (float*)realloc(weight_scaling_constants, total_number_of_synapses * sizeof(float));
-    int* temp_per_synapse_neuron_set = (int*)realloc(per_synapse_neuron_set, total_number_of_synapses * sizeof(int));
+    int* temp_synapse_neuron_group_indices = (int*)realloc(synapse_neuron_group_indices, total_number_of_synapses * sizeof(int));
     int* temp_sort_indices = (int*)realloc(synapse_sort_indices, total_number_of_synapses * sizeof(int));
     int* temp_revsort_indices = (int*)realloc(synapse_reversesort_indices, total_number_of_synapses * sizeof(int));
 
@@ -405,7 +386,7 @@ void Synapses::increment_number_of_synapses(int increment, int synapse_set_id) {
     if (temp_postsynaptic_neuron_indices != nullptr) postsynaptic_neuron_indices = temp_postsynaptic_neuron_indices;
     if (temp_synaptic_efficacies_or_weights != nullptr) synaptic_efficacies_or_weights = temp_synaptic_efficacies_or_weights;
     if (temp_weight_scaling_constants != nullptr) weight_scaling_constants = temp_weight_scaling_constants;
-    if (temp_per_synapse_neuron_set != nullptr) per_synapse_neuron_set = temp_per_synapse_neuron_set;
+    if (temp_synapse_neuron_group_indices != nullptr) synapse_neuron_group_indices = temp_synapse_neuron_group_indices;
     if (temp_sort_indices != nullptr) synapse_sort_indices = temp_sort_indices;
     if (temp_revsort_indices != nullptr) synapse_reversesort_indices = temp_revsort_indices;
   }
@@ -413,6 +394,8 @@ void Synapses::increment_number_of_synapses(int increment, int synapse_set_id) {
 }
 
 void Synapses::save_connectivity_as_txt(std::string path, std::string prefix, int synapsegroupid){
+  if (startid < 0)
+    print_message_and_exit("Synapse saving error: Provide a non-zero synapse group id!\n");
   int startid = 0;
   int endid = total_number_of_synapses;
   if (synapsegroupid >= 0)
@@ -452,6 +435,8 @@ void Synapses::save_connectivity_as_txt(std::string path, std::string prefix, in
 };
 // Ensure copied from device, then send
 void Synapses::save_connectivity_as_binary(std::string path, std::string prefix, int synapsegroupid){
+  if (startid < 0)
+    print_message_and_exit("Synapse saving error: Provide a non-zero synapse group id!\n");
   int startid = 0;
   int endid = total_number_of_synapses;
   if (synapsegroupid >= 0)
@@ -505,6 +490,8 @@ void Synapses::save_connectivity_as_binary(std::string path, std::string prefix,
 //void Synapses::load_connectivity_from_binary(std::string path, std::string prefix);
 
 void Synapses::save_weights_as_txt(std::string path, std::string prefix, int synapsegroupid){
+  if (startid < 0)
+    print_message_and_exit("Synapse saving error: Provide a non-zero synapse group id!\n");
   int startid = 0;
   int endid = total_number_of_synapses;
   if (synapsegroupid >= 0)
@@ -524,6 +511,8 @@ void Synapses::save_weights_as_txt(std::string path, std::string prefix, int syn
 }
 
 void Synapses::save_weights_as_binary(std::string path, std::string prefix, int synapsegroupid){
+  if (startid < 0)
+    print_message_and_exit("Synapse saving error: Provide a non-zero synapse group id!\n");
   int startid = 0;
   int endid = total_number_of_synapses;
   if (synapsegroupid >= 0)
@@ -545,6 +534,8 @@ void Synapses::save_weights_as_binary(std::string path, std::string prefix, int 
 
 
 void Synapses::load_weights(std::vector<float> weights, int synapsegroupid){
+  if (startid < 0)
+    print_message_and_exit("Synapse saving error: Provide a non-zero synapse group id!\n");
   int startid = 0;
   int endid = total_number_of_synapses;
   if (synapsegroupid >= 0)

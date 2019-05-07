@@ -12,8 +12,8 @@ int VoltageSpikingSynapses::AddGroup(int presynaptic_group_id,
                                           Neurons * input_neurons,
                                           float timestep,
                                           synapse_parameters_struct * synapse_params) {
-	
-	
+  
+  
   int groupID = SpikingSynapses::AddGroup(presynaptic_group_id, 
                             postsynaptic_group_id, 
                             neurons,

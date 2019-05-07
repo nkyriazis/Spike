@@ -39,11 +39,6 @@ public:
   // For spike array stuff
   int minimum_axonal_delay_in_timesteps = pow(10, 6);
   int maximum_axonal_delay_in_timesteps = 0;
-  std::vector<int> post_neuron_pop_sizes;
-
-  // In order to group synapses, give them a distinction
-  int num_syn_labels = 1;
-  int* syn_labels = nullptr;
 
   // Synapse Functions
   int AddGroup(int presynaptic_group_id, 

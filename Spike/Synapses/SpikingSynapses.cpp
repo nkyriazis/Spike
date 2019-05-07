@@ -13,41 +13,19 @@ void SpikingSynapses::prepare_backend_early() {
   Synapses::prepare_backend_early();
   Synapses::sort_synapses();
   SpikingSynapses::sort_synapses();
-  
-  // Get post-synaptic neuron population sizes 
-  for (int u=0; u < unique_post_neuron_set.size(); u++){
-    post_neuron_pop_sizes.push_back(unique_post_neuron_set[u]->total_number_of_neurons);
-  }
-
-  // Set for each neuron, set the beginning of its efferent synapses in this synaptic population
-  for (int u=0; u < unique_pre_neuron_set.size(); u++){
-    bool started = false;
-    for (int s=0; s < total_number_of_synapses; s++){
-      if (pre_neuron_set[per_synapse_neuron_set[s]] == unique_pre_neuron_set[s]){
-        if (!started || (presynaptic_neuron_indices[s-1] != presynaptic_neuron_indices[s])){
-          unique_pre_neuron_set[u]->per_neuron_efferent_synapse_start[presynaptic_neuron_indices[s]] = s;
-        }
-      }
-    }
-  }
 }
 
 
 void SpikingSynapses::sort_synapses(){
   
   int* temp_delay_array = (int*)malloc(total_number_of_synapses * sizeof(int));
-  int* temp_synlabel_array = (int*)malloc(total_number_of_synapses * sizeof(int));
   // Re-ordering arrays
   for (int s=0; s < total_number_of_synapses; s++){
     temp_delay_array[s] = delays[synapse_sort_indices[s]];
-    temp_synlabel_array[s] = syn_labels[synapse_sort_indices[s]];
   }
 
   free(delays);
-  free(syn_labels);
-
   delays = temp_delay_array;
-  syn_labels = temp_synlabel_array;
 }
 
 int SpikingSynapses::AddGroup(int presynaptic_group_id, 
@@ -94,7 +72,6 @@ int SpikingSynapses::AddGroup(int presynaptic_group_id,
     if (delay_range_in_timesteps[0] != delay_range_in_timesteps[1])
       delayval = delay_range_in_timesteps[0] + (delay_range_in_timesteps[1] - delay_range_in_timesteps[0]) * ((float)rand() / (RAND_MAX));
     delays[i] = round(delayval);
-    syn_labels[i] = 0; // Conductance or other systems can now use this if they wish
     if (spiking_synapse_group_params->connectivity_type == CONNECTIVITY_TYPE_PAIRWISE){
       if (spiking_synapse_group_params->pairwise_connect_delay.size() == temp_number_of_synapses_in_last_group){
         delays[i] = (int)round(spiking_synapse_group_params->pairwise_connect_delay[i + temp_number_of_synapses_in_last_group - total_number_of_synapses] / timestep);
@@ -117,7 +94,6 @@ int SpikingSynapses::AddGroup(int presynaptic_group_id,
 
 void SpikingSynapses::increment_number_of_synapses(int increment) {
   delays = (int*)realloc(delays, total_number_of_synapses * sizeof(int));
-  syn_labels = (int*)realloc(syn_labels, total_number_of_synapses * sizeof(int));
 }
 
 
@@ -126,6 +102,8 @@ void SpikingSynapses::state_update(unsigned int current_time_in_timesteps, float
 }
 
 void SpikingSynapses::save_connectivity_as_txt(std::string path, std::string prefix, int synapsegroupid){
+  if (startid < 0)
+    print_message_and_exit("Synapse saving error: Provide a non-zero synapse group id!\n");
   int startid = 0;
   int endid = total_number_of_synapses;
   if (synapsegroupid >= 0)
@@ -154,6 +132,8 @@ void SpikingSynapses::save_connectivity_as_txt(std::string path, std::string pre
 };
 // Ensure copied from device, then send
 void SpikingSynapses::save_connectivity_as_binary(std::string path, std::string prefix, int synapsegroupid){
+  if (startid < 0)
+    print_message_and_exit("Synapse saving error: Provide a non-zero synapse group id!\n");
   int startid = 0;
   int endid = total_number_of_synapses;
   if (synapsegroupid >= 0)
