@@ -100,13 +100,14 @@ namespace Backend {
         sizeof(synaptic_activation_kernel)));
 
       CudaSafeCall(cudaMalloc((void **)&neuron_inputs.input_buffersize, sizeof(int)*frontend()->post_neuron_set.size()));
-      CudaSafeCall(cudaMalloc((void **)&neuron_inputs.circular_input_buffer, sizeof(float*)*frontend()->post_neuron_set.size()));
       CudaSafeCall(cudaMalloc((void **)&max_efferents_per_group, sizeof(int)*frontend()->post_neuron_set.size()));
+      
+      CudaSafeCall(cudaMalloc((void **)&neuron_inputs.circular_input_buffer, sizeof(float*)*frontend()->post_neuron_set.size()));
       for (int u=0; u < frontend()->post_neuron_set.size(); u++)
         CudaSafeCall(cudaMalloc((void **)&h_circular_input_buffer[u], sizeof(float)*neuron_inputs.temporal_buffersize*h_input_buffersize[u]));
       
-      CudaSafeCall(cudaMalloc((void **)&d_pre_neurons_data, sizeof(spiking_neurons_data_struct)*frontend()->pre_neuron_set.size()));
-      CudaSafeCall(cudaMalloc((void **)&d_post_neurons_data, sizeof(spiking_neurons_data_struct)*frontend()->post_neuron_set.size()));
+      CudaSafeCall(cudaMalloc((void **)&d_pre_neurons_data, sizeof(spiking_neurons_data_struct*)*frontend()->pre_neuron_set.size()));
+      CudaSafeCall(cudaMalloc((void **)&d_post_neurons_data, sizeof(spiking_neurons_data_struct*)*frontend()->post_neuron_set.size()));
 
       h_efferent_synapse_counts = (int**)malloc(frontend()->efferent_num_per_group.size()*sizeof(int*));
       for (int u=0; u < frontend()->efferent_num_per_group.size(); u++)
@@ -207,8 +208,8 @@ namespace Backend {
 
     __global__ void activate_synapses(
         spiking_synapses_data_struct* synaptic_data,
-        spiking_neurons_data_struct* pre_neurons_data,
-        spiking_neurons_data_struct* post_neurons_data,
+        spiking_neurons_data_struct** pre_neurons_data,
+        spiking_neurons_data_struct** post_neurons_data,
         int bufferloc,
         float timestep,
         unsigned int current_time_in_timesteps,
@@ -216,12 +217,11 @@ namespace Backend {
     {
       for (int synapse_group = 0; synapse_group < synaptic_data->num_synapse_groups; synapse_group++){
         int indx = threadIdx.x + blockIdx.x * blockDim.x;
-        while (indx < (synaptic_data->max_efferents_per_group[synapse_group]*pre_neurons_data[synapse_group].num_activated_neurons[((current_time_in_timesteps / timestep_grouping) % 2)])) {
+        while (indx < (synaptic_data->max_efferents_per_group[synapse_group]*pre_neurons_data[synapse_group]->num_activated_neurons[((current_time_in_timesteps / timestep_grouping) % 2)])) {
           int pos = indx / synaptic_data->max_efferents_per_group[synapse_group]; 
-          int pre_idx = pre_neurons_data[synapse_group].activated_neuron_ids[pos];
+          int pre_idx = pre_neurons_data[synapse_group]->activated_neuron_ids[pos];
           int idx = indx % synaptic_data->max_efferents_per_group[synapse_group]; 
 
-          // NEEDS TO CHANGE TO A SYNAPSE VARIABLE BASED UPON THE ACTIVE NEURONS WHICH THE NEURON CLASS GIVES US
           int synapse_count = synaptic_data->efferent_synapse_counts[synapse_group][pre_idx];
 
           if (idx >= synapse_count){
@@ -229,7 +229,7 @@ namespace Backend {
             continue;
           }
 
-          int timestep_grouping_index = pre_neurons_data[synapse_group].activation_timestep_groupings[pos];
+          int timestep_grouping_index = pre_neurons_data[synapse_group]->activation_timestep_groupings[pos];
           int synapse_id = synaptic_data->efferent_synapse_starts[synapse_group][pre_idx] + idx;
           int postneuron = synaptic_data->postsynaptic_neuron_indices[synapse_id];
           
@@ -252,6 +252,14 @@ namespace Backend {
         int g){
          return 0.0f;
     }
+    
+    __device__ void get_active_synapses(
+      spiking_synapses_data_struct* synaptic_data,
+      spiking_neurons_data_struct* neuron_data,
+      int timestep_group_index,
+      int preneuron_idx,
+      int timestep_index,
+      bool is_input) {};
 
   }
 }

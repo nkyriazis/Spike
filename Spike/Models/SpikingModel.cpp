@@ -133,10 +133,10 @@ void SpikingModel::init_backend() {
   context->params.threads_per_block_synapses = 32;
 
   // NB All these also call prepare_backend for the initial state:
-  spiking_synapses->init_backend(context);
   for (int n = 0; n < spiking_neuron_vec.size(); n++){
     spiking_neuron_vec[n]->init_backend(context);
   }
+  spiking_synapses->init_backend(context);
   for (int plasticity_id = 0; plasticity_id < plasticity_rule_vec.size(); plasticity_id++){
     plasticity_rule_vec[plasticity_id]->init_backend(context);
   }

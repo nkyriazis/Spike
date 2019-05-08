@@ -31,7 +31,7 @@ __device__ float my_conductance_spiking_injection_kernel(
     int bufferloc = ((current_time_in_timesteps + g) % synaptic_data->neuron_inputs.temporal_buffersize)*synaptic_data->neuron_inputs.input_buffersize[synapse_group];
     float decay_factor = synaptic_data->decay_factors_g[synapse_group];
     float reversal_value = synaptic_data->reversal_potentials_Vhat[synapse_group];
-    float synaptic_conductance_g = synaptic_data->neuron_wise_conductance_trace[synapse_group*idx + idx];
+    float synaptic_conductance_g = synaptic_data->neuron_wise_conductance_trace[synapse_group][idx];
     // Update the synaptic conductance
     synaptic_conductance_g *= decay_factor;
     float conductance_increment = synaptic_data->neuron_inputs.circular_input_buffer[synapse_group][bufferloc + idx];
@@ -42,7 +42,7 @@ __device__ float my_conductance_spiking_injection_kernel(
     }
     total_current += synaptic_conductance_g*(reversal_value - current_membrane_voltage);
 
-    synaptic_data->neuron_wise_conductance_trace[synapse_group*idx + idx] = synaptic_conductance_g;
+    synaptic_data->neuron_wise_conductance_trace[synapse_group][idx] = synaptic_conductance_g;
 
   }
   return total_current*multiplication_to_volts;

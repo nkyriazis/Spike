@@ -34,6 +34,8 @@ public:
 
   Context* context = nullptr; // Call init_backend to set this up!
   SpikingSynapses * spiking_synapses = nullptr;
+  SpikingNeurons * input_spiking_neurons = nullptr;
+  SpikingNeurons * spiking_neurons = nullptr;
   
   vector<SpikingNeurons*> spiking_neuron_vec;
   vector<STDPPlasticity*> plasticity_rule_vec; 

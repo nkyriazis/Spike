@@ -24,7 +24,6 @@ namespace Backend {
       int* postsynaptic_neuron_indices = nullptr;
       int* temp_presynaptic_neuron_indices = nullptr;
       int* temp_postsynaptic_neuron_indices = nullptr;
-      int * synapse_postsynaptic_neuron_count_index = nullptr;
       float* synaptic_efficacies_or_weights = nullptr;
       float* temp_synaptic_efficacies_or_weights = nullptr;
       float * weight_scaling_constants = nullptr;

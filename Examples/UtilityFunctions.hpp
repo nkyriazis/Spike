@@ -9,6 +9,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+/*
 void connect_from_mat(
     int layer1,
     int layer2,
@@ -80,5 +81,5 @@ void connect_with_sparsity(
   Model->AddSynapseGroup(input_layer, output_layer, SYN_PARAMS);
 
 }
-
+*/
 #endif // UTILITY_FUNCS

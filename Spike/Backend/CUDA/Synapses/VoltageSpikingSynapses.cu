@@ -59,6 +59,7 @@ namespace Backend {
         int idx,
         int g){
       
+      /*
       spiking_synapses_data_struct* synaptic_data = (spiking_synapses_data_struct*) in_synaptic_data;
         
       int bufferloc = ((current_time_in_timesteps + g) % synaptic_data->neuron_inputs.temporal_buffersize)*synaptic_data->neuron_inputs.input_buffersize;
@@ -74,6 +75,7 @@ namespace Backend {
     
       // This is already in volts, no conversion necessary
       return total_current;
+      */
     };
   }
 }

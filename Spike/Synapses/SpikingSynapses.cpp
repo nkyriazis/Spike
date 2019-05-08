@@ -102,7 +102,7 @@ void SpikingSynapses::state_update(unsigned int current_time_in_timesteps, float
 }
 
 void SpikingSynapses::save_connectivity_as_txt(std::string path, std::string prefix, int synapsegroupid){
-  if (startid < 0)
+  if (synapsegroupid < 0)
     print_message_and_exit("Synapse saving error: Provide a non-zero synapse group id!\n");
   int startid = 0;
   int endid = total_number_of_synapses;
@@ -132,7 +132,7 @@ void SpikingSynapses::save_connectivity_as_txt(std::string path, std::string pre
 };
 // Ensure copied from device, then send
 void SpikingSynapses::save_connectivity_as_binary(std::string path, std::string prefix, int synapsegroupid){
-  if (startid < 0)
+  if (synapsegroupid < 0)
     print_message_and_exit("Synapse saving error: Provide a non-zero synapse group id!\n");
   int startid = 0;
   int endid = total_number_of_synapses;

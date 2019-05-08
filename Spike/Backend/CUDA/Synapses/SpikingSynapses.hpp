@@ -74,8 +74,8 @@ namespace Backend {
       
       std::vector<spiking_neurons_data_struct*> h_pre_neurons_data;
       std::vector<spiking_neurons_data_struct*> h_post_neurons_data;
-      spiking_neurons_data_struct* d_pre_neurons_data;
-      spiking_neurons_data_struct* d_post_neurons_data;
+      spiking_neurons_data_struct** d_pre_neurons_data;
+      spiking_neurons_data_struct** d_post_neurons_data;
 
       float** h_circular_input_buffer = nullptr;
       int* h_input_buffersize = nullptr;
@@ -120,12 +120,12 @@ namespace Backend {
       int timestep_group_index,
       int preneuron_idx,
       int timestep_index,
-      bool is_input) {};
+      bool is_input);
     
     __global__ void activate_synapses(
         spiking_synapses_data_struct* synaptic_data,
-        spiking_neurons_data_struct* neurons_data,
-        spiking_neurons_data_struct* in_neurons_data,
+        spiking_neurons_data_struct** pre_neurons_data,
+        spiking_neurons_data_struct** post_neurons_data,
         int bufferloc,
         float timestep,
         unsigned int current_time_in_timesteps,

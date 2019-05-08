@@ -109,7 +109,8 @@ int main (int argc, char *argv[]){
   LIFSpikingNeurons * lif_spiking_neurons = new LIFSpikingNeurons();
   ConductanceSpikingSynapses * conductance_spiking_synapses = new ConductanceSpikingSynapses();
   // Add component choices to the model
-  BenchModel->spiking_neurons = lif_spiking_neurons;
+
+  BenchModel->AddNeuronType(lif_spiking_neurons);
   BenchModel->spiking_synapses = conductance_spiking_synapses;
 
   // Add a monitor for Neuron Spiking
@@ -154,8 +155,8 @@ int main (int argc, char *argv[]){
   EXC_NEURON_PARAMS->group_shape[1] = 3200;
   INH_NEURON_PARAMS->group_shape[0] = 1;
   INH_NEURON_PARAMS->group_shape[1] = 800;
-  EXCITATORY_NEURONS.push_back(BenchModel->AddNeuronGroup(EXC_NEURON_PARAMS));
-  INHIBITORY_NEURONS.push_back(BenchModel->AddNeuronGroup(INH_NEURON_PARAMS));
+  EXCITATORY_NEURONS.push_back(lif_spiking_neurons->AddGroup(EXC_NEURON_PARAMS));
+  INHIBITORY_NEURONS.push_back(lif_spiking_neurons->AddGroup(INH_NEURON_PARAMS));
 
   /*
    *    SYNAPSE PARAMETER SETUP
@@ -194,10 +195,10 @@ int main (int argc, char *argv[]){
   /*
    *    CREATE SYNAPSES
    */
-  BenchModel->AddSynapseGroup(EXCITATORY_NEURONS[0], EXCITATORY_NEURONS[0], EXC_OUT_SYN_PARAMS);
-  BenchModel->AddSynapseGroup(EXCITATORY_NEURONS[0], INHIBITORY_NEURONS[0], EXC_OUT_SYN_PARAMS);
-  BenchModel->AddSynapseGroup(INHIBITORY_NEURONS[0], EXCITATORY_NEURONS[0], INH_OUT_SYN_PARAMS);
-  BenchModel->AddSynapseGroup(INHIBITORY_NEURONS[0], INHIBITORY_NEURONS[0], INH_OUT_SYN_PARAMS);
+  conductance_spiking_synapses->AddGroup(EXCITATORY_NEURONS[0], EXCITATORY_NEURONS[0], lif_spiking_neurons, lif_spiking_neurons, timestep, EXC_OUT_SYN_PARAMS);
+  conductance_spiking_synapses->AddGroup(EXCITATORY_NEURONS[0], INHIBITORY_NEURONS[0], lif_spiking_neurons, lif_spiking_neurons, timestep, EXC_OUT_SYN_PARAMS);
+  conductance_spiking_synapses->AddGroup(INHIBITORY_NEURONS[0], EXCITATORY_NEURONS[0], lif_spiking_neurons, lif_spiking_neurons, timestep, INH_OUT_SYN_PARAMS);
+  conductance_spiking_synapses->AddGroup(INHIBITORY_NEURONS[0], INHIBITORY_NEURONS[0], lif_spiking_neurons, lif_spiking_neurons, timestep, INH_OUT_SYN_PARAMS);
   
   /*
   // Adding connections based upon matrices given

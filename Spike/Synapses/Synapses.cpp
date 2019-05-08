@@ -44,14 +44,14 @@ void Synapses::sort_synapses(){
         }
       }
      
-      vector<int> efferent_num_per_pre; 
-      vector<int> efferent_start_per_pre; 
+      std::vector<int> efferent_num_per_pre; 
+      std::vector<int> efferent_start_per_pre; 
       maximum_number_of_efferent_synapses_per_group.push_back(0);
       for (int n=0; n < total_pre_neurons; n++){
         efferent_num_per_pre.push_back((int)per_pre_neuron_synapses[n].size());
         efferent_start_per_pre.push_back(num_sorted_synapses);
-        if (efferent_num_per_pre[n] > maximum_number_of_efferent_synapses[p])
-          maximum_number_of_efferent_synapses[p] = efferent_num_per_pre[n];
+        if (efferent_num_per_pre[n] > maximum_number_of_efferent_synapses_per_group[p])
+          maximum_number_of_efferent_synapses_per_group[p] = efferent_num_per_pre[n];
         for (int s=0; s < per_pre_neuron_synapses[n].size(); s++){
           synapse_sort_indices[num_sorted_synapses] = per_pre_neuron_synapses[n][s];
           num_sorted_synapses++;
@@ -133,7 +133,7 @@ int Synapses::AddGroup(int presynaptic_group_id,
   // Determine which neuron set for this synapse population
   pre_neuron_set.push_back(pre_neurons);
   post_neuron_set.push_back(post_neurons);
-  synapse_set_id = post_neuron_set.size() - 1;
+  int synapse_set_id = post_neuron_set.size() - 1;
 
 
   // Getting group shapes, and pre and post-synaptic neuron indices
@@ -325,8 +325,8 @@ int Synapses::AddGroup(int presynaptic_group_id,
     // Used for event count
     post_neurons->per_neuron_afferent_synapse_count[postsynaptic_neuron_indices[i]]++;
 
-    if (post_neurons->per_neuron_afferent_synapse_count[postsynaptic_neuron_indices[i]] > maximum_number_of_afferent_synapses)
-      maximum_number_of_afferent_synapses = post_neurons->per_neuron_afferent_synapse_count[postsynaptic_neuron_indices[i]];
+    //if (post_neurons->per_neuron_afferent_synapse_count[postsynaptic_neuron_indices[i]] > maximum_number_of_afferent_synapses)
+    //  maximum_number_of_afferent_synapses = post_neurons->per_neuron_afferent_synapse_count[postsynaptic_neuron_indices[i]];
 
     int presynaptic_id = presynaptic_neuron_indices[i];
     pre_neurons->AddEfferentSynapse(presynaptic_id, i);
@@ -394,7 +394,7 @@ void Synapses::increment_number_of_synapses(int increment, int synapse_set_id) {
 }
 
 void Synapses::save_connectivity_as_txt(std::string path, std::string prefix, int synapsegroupid){
-  if (startid < 0)
+  if (synapsegroupid < 0)
     print_message_and_exit("Synapse saving error: Provide a non-zero synapse group id!\n");
   int startid = 0;
   int endid = total_number_of_synapses;
@@ -435,7 +435,7 @@ void Synapses::save_connectivity_as_txt(std::string path, std::string prefix, in
 };
 // Ensure copied from device, then send
 void Synapses::save_connectivity_as_binary(std::string path, std::string prefix, int synapsegroupid){
-  if (startid < 0)
+  if (synapsegroupid < 0)
     print_message_and_exit("Synapse saving error: Provide a non-zero synapse group id!\n");
   int startid = 0;
   int endid = total_number_of_synapses;
@@ -490,7 +490,7 @@ void Synapses::save_connectivity_as_binary(std::string path, std::string prefix,
 //void Synapses::load_connectivity_from_binary(std::string path, std::string prefix);
 
 void Synapses::save_weights_as_txt(std::string path, std::string prefix, int synapsegroupid){
-  if (startid < 0)
+  if (synapsegroupid < 0)
     print_message_and_exit("Synapse saving error: Provide a non-zero synapse group id!\n");
   int startid = 0;
   int endid = total_number_of_synapses;
@@ -511,7 +511,7 @@ void Synapses::save_weights_as_txt(std::string path, std::string prefix, int syn
 }
 
 void Synapses::save_weights_as_binary(std::string path, std::string prefix, int synapsegroupid){
-  if (startid < 0)
+  if (synapsegroupid < 0)
     print_message_and_exit("Synapse saving error: Provide a non-zero synapse group id!\n");
   int startid = 0;
   int endid = total_number_of_synapses;
@@ -534,7 +534,7 @@ void Synapses::save_weights_as_binary(std::string path, std::string prefix, int 
 
 
 void Synapses::load_weights(std::vector<float> weights, int synapsegroupid){
-  if (startid < 0)
+  if (synapsegroupid < 0)
     print_message_and_exit("Synapse saving error: Provide a non-zero synapse group id!\n");
   int startid = 0;
   int endid = total_number_of_synapses;

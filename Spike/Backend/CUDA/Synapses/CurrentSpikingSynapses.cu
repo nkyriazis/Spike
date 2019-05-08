@@ -35,12 +35,14 @@ namespace Backend {
     
     void CurrentSpikingSynapses::allocate_device_pointers() {
       // Set up per neuron current
+      /*
       current_array_length = frontend()->neuron_pop_size*frontend()->num_syn_labels;
       h_neuron_wise_current_trace = (float*)realloc(h_neuron_wise_current_trace, current_array_length*sizeof(float));
       for (int id = 0; id < current_array_length; id++)
         h_neuron_wise_current_trace[id] = 0.0f;
+        */
 
-      CudaSafeCall(cudaMalloc((void **)&d_decay_terms_tau, sizeof(float)*frontend()->num_syn_labels));
+      CudaSafeCall(cudaMalloc((void **)&d_decay_terms_tau, sizeof(float)*synaptic_data->num_synapse_groups));
       CudaSafeCall(cudaFree(d_synaptic_data));
       CudaSafeCall(cudaMalloc((void **)&d_synaptic_data, sizeof(current_spiking_synapses_data_struct)));
       CudaSafeCall(cudaMemcpyFromSymbol(
@@ -53,7 +55,7 @@ namespace Backend {
       CudaSafeCall(cudaMemcpy(
         d_decay_terms_tau,
         &(frontend()->decay_terms_tau[0]),
-        sizeof(float)*frontend()->num_syn_labels, cudaMemcpyHostToDevice));
+        sizeof(float)*synaptic_data->num_synapse_groups, cudaMemcpyHostToDevice));
     }
 
     void CurrentSpikingSynapses::reset_state() {
@@ -78,9 +80,9 @@ namespace Backend {
         float timestep,
         int idx,
         int g){
-      
+      /*
       current_spiking_synapses_data_struct* synaptic_data = (current_spiking_synapses_data_struct*) in_synaptic_data;
-        
+       
       int total_number_of_neurons =  neuron_data->total_number_of_neurons;
       int bufferloc = ((current_time_in_timesteps + g) % synaptic_data->neuron_inputs.temporal_buffersize)*synaptic_data->neuron_inputs.input_buffersize;
       float total_current = 0.0f;
@@ -99,6 +101,7 @@ namespace Backend {
         }
         
         return total_current*multiplication_to_volts;
+        */
     };
   }
 }
