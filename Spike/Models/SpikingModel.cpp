@@ -91,7 +91,7 @@ void SpikingModel::finalise_model() {
     // Outputting Network Overview
     printf("Building Model with:\n");
     if (spiking_neuron_vec.size() > 0)
-      printf("  %d Neuron Types(s)\n", (int)plasticity_rule_vec.size());
+      printf("  %d Neuron Types(s)\n", (int)spiking_neuron_vec.size());
     for (int n = 0; n < spiking_neuron_vec.size(); n++)
       printf("    %d: %d Neuron(s)\n", (int)spiking_neuron_vec.size(), spiking_neuron_vec[n]->total_number_of_neurons);
 

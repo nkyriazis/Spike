@@ -40,6 +40,7 @@ __device__ float my_conductance_spiking_injection_kernel(
       // Reset the conductance update
       synaptic_data->neuron_inputs.circular_input_buffer[synapse_group][bufferloc + idx] = 0.0f;
     }
+    
     total_current += synaptic_conductance_g*(reversal_value - current_membrane_voltage);
 
     synaptic_data->neuron_wise_conductance_trace[synapse_group][idx] = synaptic_conductance_g;

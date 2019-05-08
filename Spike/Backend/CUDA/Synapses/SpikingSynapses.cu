@@ -219,8 +219,9 @@ namespace Backend {
         int indx = threadIdx.x + blockIdx.x * blockDim.x;
         while (indx < (synaptic_data->max_efferents_per_group[synapse_group]*pre_neurons_data[synapse_group]->num_activated_neurons[((current_time_in_timesteps / timestep_grouping) % 2)])) {
           int pos = indx / synaptic_data->max_efferents_per_group[synapse_group]; 
-          int pre_idx = pre_neurons_data[synapse_group]->activated_neuron_ids[pos];
           int idx = indx % synaptic_data->max_efferents_per_group[synapse_group]; 
+          
+          int pre_idx = pre_neurons_data[synapse_group]->activated_neuron_ids[pos];
 
           int synapse_count = synaptic_data->efferent_synapse_counts[synapse_group][pre_idx];
 
@@ -235,7 +236,7 @@ namespace Backend {
           
           int targetloc = (bufferloc + synaptic_data->delays[synapse_id] + timestep_grouping_index) % synaptic_data->neuron_inputs.temporal_buffersize;
           float weightinput = synaptic_data->synaptic_efficacies_or_weights[synapse_id]*synaptic_data->weight_scaling_constants[synapse_id];
-          atomicAdd((int*)&(synaptic_data->neuron_inputs.circular_input_buffer[synapse_group][targetloc*synaptic_data->neuron_inputs.input_buffersize[synapse_group] + postneuron]), weightinput);
+          atomicAdd(&(synaptic_data->neuron_inputs.circular_input_buffer[synapse_group][targetloc*synaptic_data->neuron_inputs.input_buffersize[synapse_group] + postneuron]), weightinput);
           indx += blockDim.x * gridDim.x;
         }
       }
