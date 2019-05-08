@@ -63,10 +63,6 @@ namespace Backend {
     }
 
     void ConductanceSpikingSynapses::copy_constants_and_initial_efficacies_to_device() {
-      CudaSafeCall(cudaMemcpy(
-        neuron_wise_conductance_trace,
-        h_neuron_wise_conductance_trace,
-        sizeof(float)*conductance_trace_length, cudaMemcpyHostToDevice));
       vector<float> decay_vals_g;
       for (int syn_label_indx = 0; syn_label_indx < synaptic_data->num_synapse_groups; syn_label_indx++)
         decay_vals_g.push_back((expf(-frontend()->model->timestep / frontend()->decay_terms_tau_g[syn_label_indx])));

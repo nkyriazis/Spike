@@ -41,6 +41,7 @@ namespace Backend {
       int* delays = nullptr;
       float* synaptic_efficacies_or_weights = nullptr;
       float* weight_scaling_constants = nullptr;
+      float* circular_input_buffer = nullptr;
     };
     typedef float (*injection_kernel)(
         spiking_synapses_data_struct* synaptic_data,
