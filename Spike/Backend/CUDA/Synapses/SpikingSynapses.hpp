@@ -31,10 +31,8 @@ namespace Backend {
       int synapse_type = EMPTY;
       int* num_activated_neurons = nullptr;
       int* max_efferents_per_group = nullptr;
-      int* active_synapse_counts = nullptr;
-      int* active_synapse_starts = nullptr;
-      int* active_presynaptic_neuron_indices = nullptr;
-      int* group_indices = nullptr;
+      int** efferent_synapse_counts = nullptr;
+      int** efferent_synapse_starts = nullptr;
 
       int num_synapse_groups = 0;
       int* synapse_neuron_group_indices = nullptr;
@@ -66,14 +64,11 @@ namespace Backend {
       
       // Variables used to determine active/inactive synapses
       int buffersize = 0;
-      int* group_indices = nullptr;
-      int* num_active_synapses = nullptr;
-      int* num_activated_neurons = nullptr;
-      int* active_synapse_counts = nullptr;
-      int* active_synapse_starts = nullptr;
-      int* active_presynaptic_neuron_indices = nullptr;
+      int** efferent_synapse_counts = nullptr;
+      int** efferent_synapse_starts = nullptr;
+      int** h_efferent_synapse_counts = nullptr;
+      int** h_efferent_synapse_starts = nullptr;
       int* max_efferents_per_group = nullptr;
-      int h_num_active_synapses = 0;
       // Device pointers
       int* delays = nullptr;
       
@@ -125,7 +120,7 @@ namespace Backend {
       int timestep_group_index,
       int preneuron_idx,
       int timestep_index,
-      bool is_input);
+      bool is_input) {};
     
     __global__ void activate_synapses(
         spiking_synapses_data_struct* synaptic_data,

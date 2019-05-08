@@ -17,6 +17,9 @@ namespace Backend {
     struct spiking_neurons_data_struct : neurons_data_struct {
         float* last_spike_time_of_each_neuron;
 
+        int* num_activated_neurons;
+        int* activated_neuron_ids;
+        int* activation_timestep_groupings;
         uint8_t* neuron_spike_time_bitbuffer;
         int* neuron_spike_time_bitbuffer_bytesize;
     };
@@ -34,6 +37,9 @@ namespace Backend {
 
       // Device Pointers
       float* last_spike_time_of_each_neuron = nullptr;
+      int* num_activated_neurons;
+      int* activated_neuron_ids;
+      int* activation_timestep_groupings;
 
       // Keeping neuorn spike times
       int h_neuron_spike_time_bitbuffer_bytesize;

@@ -12,8 +12,10 @@ namespace Backend {
       CudaSafeCall(cudaFree(last_spike_time_of_each_neuron));
       CudaSafeCall(cudaFree(d_neuron_data));
 
+      CudaSafeCall(cudaFree(neuron_spike_time_bitbuffer_bytesize));
       CudaSafeCall(cudaFree(neuron_spike_time_bitbuffer));
-      CudaSafeCall(cudaFree(neuron_spike_time_bitbuffer));
+      CudaSafeCall(cudaFree(activated_neuron_ids));
+      CudaSafeCall(cudaFree(activation_timestep_groupings));
     }
 
     void SpikingNeurons::allocate_device_pointers() {
@@ -25,6 +27,10 @@ namespace Backend {
       h_neuron_spike_time_bitbuffer_bytesize = ((frontend()->model->spiking_synapses->maximum_axonal_delay_in_timesteps + 2*frontend()->model->timestep_grouping) / 8) + 1;
       CudaSafeCall(cudaMalloc((void **)&neuron_spike_time_bitbuffer_bytesize, sizeof(int)));
       CudaSafeCall(cudaMalloc((void **)&neuron_spike_time_bitbuffer, sizeof(uint8_t)*frontend()->total_number_of_neurons*h_neuron_spike_time_bitbuffer_bytesize));
+      
+      CudaSafeCall(cudaMalloc((void **)&num_activated_neurons, 2*sizeof(int)));
+      CudaSafeCall(cudaMalloc((void **)&activated_neuron_ids, frontend()->total_number_of_neurons*sizeof(int)));
+      CudaSafeCall(cudaMalloc((void **)&activation_timestep_groupings, frontend()->total_number_of_neurons*sizeof(int)));
     }
 
     void SpikingNeurons::copy_constants_to_device() {
@@ -41,6 +47,9 @@ namespace Backend {
 
       neuron_data->neuron_spike_time_bitbuffer = neuron_spike_time_bitbuffer;
       neuron_data->neuron_spike_time_bitbuffer_bytesize = neuron_spike_time_bitbuffer_bytesize;
+      neuron_data->num_activated_neurons = num_activated_neurons;
+      neuron_data->activated_neuron_ids = activated_neuron_ids;
+      neuron_data->activation_timestep_groupings = activation_timestep_groupings;
 
 
       CudaSafeCall(cudaMemcpy(
@@ -69,6 +78,8 @@ namespace Backend {
                               &h_neuron_spike_time_bitbuffer_bytesize,
                               sizeof(int),
                               cudaMemcpyHostToDevice));
+      
+      CudaSafeCall(cudaMemset(num_activated_neurons, 0, sizeof(int)*2));
       // Free tmp_last_spike_times
       free (tmp_last_spike_times);
     }

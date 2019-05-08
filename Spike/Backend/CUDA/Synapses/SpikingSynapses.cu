@@ -13,12 +13,16 @@ namespace Backend {
     }
 
     SpikingSynapses::~SpikingSynapses() {
+      for (int u=0; u < synaptic_data->num_synapse_groups; u++){
+        CudaSafeCall(cudaFree(h_efferent_synapse_counts[u]));
+        CudaSafeCall(cudaFree(h_efferent_synapse_starts[u]));
+      }
+      CudaSafeCall(cudaFree(efferent_synapse_counts));
+      CudaSafeCall(cudaFree(efferent_synapse_starts));
+      free(h_efferent_synapse_counts);
+      free(h_efferent_synapse_starts);
+
       CudaSafeCall(cudaFree(delays));
-      CudaSafeCall(cudaFree(num_active_synapses));
-      CudaSafeCall(cudaFree(num_activated_neurons));
-      CudaSafeCall(cudaFree(active_synapse_counts));
-      CudaSafeCall(cudaFree(active_synapse_starts));
-      CudaSafeCall(cudaFree(active_presynaptic_neuron_indices));
       CudaSafeCall(cudaFree(neuron_inputs.circular_input_buffer));
       CudaSafeCall(cudaFree(d_synaptic_data));
       CudaSafeCall(cudaFree(max_efferents_per_group));
@@ -30,7 +34,6 @@ namespace Backend {
       Synapses::reset_state();
 
       // Spike Buffer Resetting
-      CudaSafeCall(cudaMemset(num_activated_neurons, 0, 2*sizeof(int)));
       for (int u = 0; u < frontend()->post_neuron_set.size(); u++){
         CudaSafeCall(cudaMemset(h_circular_input_buffer[u], 0.0f, sizeof(float)*neuron_inputs.temporal_buffersize*frontend()->post_neuron_set[u]->total_number_of_neurons));
       }
@@ -56,16 +59,18 @@ namespace Backend {
         h_input_buffersize[u] = frontend()->post_neuron_set[u]->total_number_of_neurons;
       neuron_inputs.temporal_buffersize = buffersize;
 
+      synaptic_data = new spiking_synapses_data_struct();
+      synaptic_data->synapse_type = EMPTY;
+      synaptic_data->num_synapse_groups = frontend()->post_neuron_set.size();
       
       allocate_device_pointers();
       copy_constants_and_initial_efficacies_to_device();
       
-      synaptic_data = new spiking_synapses_data_struct();
-      synaptic_data->synapse_type = EMPTY;
-      synaptic_data->num_synapse_groups = frontend()->post_neuron_set.size();
       synaptic_data->synapse_neuron_group_indices = synapse_neuron_group_indices;
       synaptic_data->neuron_inputs = neuron_inputs;
       synaptic_data->max_efferents_per_group = max_efferents_per_group;
+      synaptic_data->efferent_synapse_counts = efferent_synapse_counts;
+      synaptic_data->efferent_synapse_starts = efferent_synapse_starts;
       synaptic_data->postsynaptic_neuron_indices = postsynaptic_neuron_indices;
       synaptic_data->delays = delays;
       synaptic_data->synaptic_efficacies_or_weights = synaptic_efficacies_or_weights;
@@ -82,12 +87,6 @@ namespace Backend {
     void SpikingSynapses::allocate_device_pointers() {
       CudaSafeCall(cudaMalloc((void **)&delays, sizeof(int)*frontend()->total_number_of_synapses));
       // Device pointers for spike buffer and active synapse/neuron storage
-      CudaSafeCall(cudaMalloc((void **)&group_indices, sizeof(int)*(frontend()->total_number_of_synapses)));
-      CudaSafeCall(cudaMalloc((void **)&num_active_synapses, sizeof(int)));
-      CudaSafeCall(cudaMalloc((void **)&num_activated_neurons, 2*sizeof(int)));
-      CudaSafeCall(cudaMalloc((void **)&active_synapse_counts, sizeof(int)*(frontend()->total_number_of_synapses)));
-      CudaSafeCall(cudaMalloc((void **)&active_synapse_starts, sizeof(int)*(frontend()->total_number_of_synapses)));
-      CudaSafeCall(cudaMalloc((void **)&active_presynaptic_neuron_indices, sizeof(int)*(frontend()->total_number_of_synapses)));
       CudaSafeCall(cudaMalloc((void **)&d_synaptic_data, sizeof(spiking_synapses_data_struct)));
       // Setting injection kernel
       CudaSafeCall(cudaMemcpyFromSymbol(
@@ -109,6 +108,16 @@ namespace Backend {
       CudaSafeCall(cudaMalloc((void **)&d_pre_neurons_data, sizeof(spiking_neurons_data_struct)*frontend()->pre_neuron_set.size()));
       CudaSafeCall(cudaMalloc((void **)&d_post_neurons_data, sizeof(spiking_neurons_data_struct)*frontend()->post_neuron_set.size()));
 
+      h_efferent_synapse_counts = (int**)malloc(frontend()->efferent_num_per_group.size()*sizeof(int*));
+      for (int u=0; u < frontend()->efferent_num_per_group.size(); u++)
+        CudaSafeCall(cudaMalloc((void **)&h_efferent_synapse_counts[u], sizeof(int)*frontend()->efferent_num_per_group[u].size()));
+      CudaSafeCall(cudaMalloc((void **)&efferent_synapse_counts, sizeof(int*)*frontend()->efferent_num_per_group.size()));
+
+      h_efferent_synapse_starts = (int**)malloc(frontend()->efferent_starts_per_group.size()*sizeof(int*));
+      for (int u=0; u < frontend()->efferent_starts_per_group.size(); u++)
+        CudaSafeCall(cudaMalloc((void **)&h_efferent_synapse_starts[u], sizeof(int)*frontend()->efferent_starts_per_group[u].size()));
+      CudaSafeCall(cudaMalloc((void **)&efferent_synapse_starts, sizeof(int*)*frontend()->efferent_starts_per_group.size()));
+
     }
 
     void SpikingSynapses::copy_constants_and_initial_efficacies_to_device() {
@@ -128,6 +137,32 @@ namespace Backend {
         max_efferents_per_group,
         frontend()->maximum_number_of_efferent_synapses_per_group.data(),
         frontend()->maximum_number_of_efferent_synapses_per_group.size()*sizeof(int), cudaMemcpyHostToDevice));
+      
+      
+      for (int u=0; u < frontend()->efferent_num_per_group.size(); u++){
+        CudaSafeCall(cudaMemcpy(
+              h_efferent_synapse_counts[u],
+              frontend()->efferent_num_per_group[u].data(),
+              sizeof(int)*frontend()->efferent_num_per_group[u].size(),
+              cudaMemcpyHostToDevice));
+      }
+      CudaSafeCall(cudaMemcpy(
+            efferent_synapse_counts,
+            h_efferent_synapse_counts,
+            sizeof(int*)*frontend()->efferent_num_per_group.size(),
+            cudaMemcpyHostToDevice));
+      for (int u=0; u < frontend()->efferent_starts_per_group.size(); u++){
+        CudaSafeCall(cudaMemcpy(
+              h_efferent_synapse_starts[u],
+              frontend()->efferent_starts_per_group[u].data(),
+              sizeof(int)*frontend()->efferent_starts_per_group[u].size(),
+              cudaMemcpyHostToDevice));
+      }
+      CudaSafeCall(cudaMemcpy(
+            efferent_synapse_starts,
+            h_efferent_synapse_starts,
+            sizeof(int*)*frontend()->efferent_starts_per_group.size(),
+            cudaMemcpyHostToDevice));
 
       for (int u=0; u < frontend()->pre_neuron_set.size(); u++){
         ::Backend::CUDA::SpikingNeurons* neurons_backend =
@@ -156,7 +191,7 @@ namespace Backend {
 
 
 
-      activate_synapses<<<neurons_backend->number_of_neuron_blocks_per_grid, threads_per_block>>>(
+      activate_synapses<<<(dynamic_cast<::Backend::CUDA::SpikingNeurons*>(frontend()->post_neuron_set[0]->backend()))->number_of_neuron_blocks_per_grid, threads_per_block>>>(
           d_synaptic_data,
           d_pre_neurons_data,
           d_post_neurons_data,
@@ -168,22 +203,6 @@ namespace Backend {
       }
       
     }
-      
-    __device__ void get_active_synapses(
-      spiking_synapses_data_struct* synaptic_data,
-      spiking_neurons_data_struct* neuron_data,
-      int timestep_group_index,
-      int preneuron_idx,
-      int grouping_index,
-      bool is_input)
-    {
-      int pos = atomicAdd(&synaptic_data->num_activated_neurons[grouping_index % 2], 1);
-      int synapse_count = neuron_data->per_neuron_efferent_synapse_count[preneuron_idx];
-      int synapse_start = neuron_data->per_neuron_efferent_synapse_start[preneuron_idx];
-      synaptic_data->active_synapse_counts[pos] = synapse_count;
-      synaptic_data->active_synapse_starts[pos] = synapse_start;
-      synaptic_data->group_indices[pos] = timestep_group_index;
-    };
       
 
     __global__ void activate_synapses(
@@ -197,25 +216,24 @@ namespace Backend {
     {
       for (int synapse_group = 0; synapse_group < synaptic_data->num_synapse_groups; synapse_group++){
         int indx = threadIdx.x + blockIdx.x * blockDim.x;
-        if (indx == 0){
-          pre_neurons_data->num_activated_neurons[((current_time_in_timesteps / timestep_grouping) + 1) % 2] = 0;
-        }
-        while (indx < (synaptic_data->max_efferents_per_group[synapse_group]*pre_neurons_data->num_activated_neurons[((current_time_in_timesteps / timestep_grouping) % 2)])) {
+        while (indx < (synaptic_data->max_efferents_per_group[synapse_group]*pre_neurons_data[synapse_group].num_activated_neurons[((current_time_in_timesteps / timestep_grouping) % 2)])) {
           int pos = indx / synaptic_data->max_efferents_per_group[synapse_group]; 
+          int pre_idx = pre_neurons_data[synapse_group].activated_neuron_ids[pos];
           int idx = indx % synaptic_data->max_efferents_per_group[synapse_group]; 
 
           // NEEDS TO CHANGE TO A SYNAPSE VARIABLE BASED UPON THE ACTIVE NEURONS WHICH THE NEURON CLASS GIVES US
-          int synapse_count = synaptic_data->active_synapse_counts[pos];
+          int synapse_count = synaptic_data->efferent_synapse_counts[synapse_group][pre_idx];
 
           if (idx >= synapse_count){
             indx += blockDim.x * gridDim.x;
             continue;
           }
 
-          int synapse_id = synaptic_data->active_synapse_starts[pos] + idx;
+          int timestep_grouping_index = pre_neurons_data[synapse_group].activation_timestep_groupings[pos];
+          int synapse_id = synaptic_data->efferent_synapse_starts[synapse_group][pre_idx] + idx;
           int postneuron = synaptic_data->postsynaptic_neuron_indices[synapse_id];
           
-          int targetloc = (bufferloc + synaptic_data->delays[synapse_id] + synaptic_data->group_indices[pos]) % synaptic_data->neuron_inputs.temporal_buffersize;
+          int targetloc = (bufferloc + synaptic_data->delays[synapse_id] + timestep_grouping_index) % synaptic_data->neuron_inputs.temporal_buffersize;
           float weightinput = synaptic_data->synaptic_efficacies_or_weights[synapse_id]*synaptic_data->weight_scaling_constants[synapse_id];
           atomicAdd((int*)&(synaptic_data->neuron_inputs.circular_input_buffer[synapse_group][targetloc*synaptic_data->neuron_inputs.input_buffersize[synapse_group] + postneuron]), weightinput);
           indx += blockDim.x * gridDim.x;

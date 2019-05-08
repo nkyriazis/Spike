@@ -179,7 +179,10 @@ namespace Backend {
         size_t total_number_of_neurons) {
       // Get thread IDs
       int idx = threadIdx.x + blockIdx.x * blockDim.x;
-      int t_idx = threadIdx.x;
+      if (idx == 0){
+        in_neuron_data->num_activated_neurons[((current_time_in_timesteps / timestep_grouping) + 1) % 2] = 0;
+      }
+
       while (idx < total_number_of_neurons) {
 
         lif_spiking_neurons_data_struct* neuron_data = (lif_spiking_neurons_data_struct*) in_neuron_data;
@@ -189,7 +192,6 @@ namespace Backend {
         float temp_membrane_resistance_R = neuron_data->membrane_resistances_R[neuron_label];
         float background_current = neuron_data->background_currents[neuron_label];
         int refractory_period_in_timesteps = neuron_data->refractory_timesteps[neuron_label];
-        float voltage_input_for_timestep = 0.0f;
         int bufsize = in_neuron_data->neuron_spike_time_bitbuffer_bytesize[0];
         
         float membrane_potential_Vi = neuron_data->membrane_potentials_v[idx];
@@ -198,8 +200,10 @@ namespace Backend {
         for (int g=0; g < timestep_grouping; g++){
           int bitloc = (current_time_in_timesteps + g) % (bufsize*8);
           in_neuron_data->neuron_spike_time_bitbuffer[idx*bufsize + (bitloc / 8)] &= ~(1 << (bitloc % 8));
+          
+          float voltage_input_for_timestep = 0.0f;
           #ifndef INLINEDEVICEFUNCS
-            voltage_input_for_timestep = current_injection_kernel(
+            voltage_input_for_timestep += current_injection_kernel(
                   synaptic_data,
                   in_neuron_data,
                   temp_membrane_resistance_R,
@@ -212,7 +216,7 @@ namespace Backend {
             switch (synaptic_data->synapse_type)
             {
               case CONDUCTANCE: 
-                voltage_input_for_timestep = INLINE_LIF::my_conductance_spiking_injection_kernel(
+                voltage_input_for_timestep += INLINE_LIF::my_conductance_spiking_injection_kernel(
                   synaptic_data,
                   in_neuron_data,
                   temp_membrane_resistance_R,
@@ -222,8 +226,9 @@ namespace Backend {
                   idx,
                   g);
                 break;
+                /*
               case CURRENT: 
-                voltage_input_for_timestep = INLINE_LIF::my_current_spiking_injection_kernel(
+                voltage_input_for_timestep += INLINE_LIF::my_current_spiking_injection_kernel(
                   synaptic_data,
                   in_neuron_data,
                   temp_membrane_resistance_R,
@@ -234,7 +239,7 @@ namespace Backend {
                   g);
                 break;
               case VOLTAGE: 
-                voltage_input_for_timestep = INLINE_LIF::my_voltage_spiking_injection_kernel(
+                voltage_input_for_timestep += INLINE_LIF::my_voltage_spiking_injection_kernel(
                   synaptic_data,
                   in_neuron_data,
                   temp_membrane_resistance_R,
@@ -244,6 +249,7 @@ namespace Backend {
                   idx,
                   g);
                 break;
+                */
               default:
                 break;
             }
@@ -259,17 +265,12 @@ namespace Backend {
               neuron_data->refraction_counter[idx] = refractory_period_in_timesteps;
               neuron_data->last_spike_time_of_each_neuron[idx] = (current_time_in_timesteps + g)*timestep;
               membrane_potential_Vi = neuron_data->after_spike_reset_potentials_vreset[neuron_label];
-              #ifndef INLINEDEVICEFUNCS
-                syn_activation_kernel(
-              #else
-                INLINE_LIF::my_activate_synapses(
-              #endif
-                  synaptic_data,
-                  in_neuron_data,
-                  g,
-                  idx,
-                  current_time_in_timesteps / timestep_grouping,
-                  false);
+
+              // Adding this neuron to the list of activated neurons for the timestep grouping
+              int pos = atomicAdd(&neuron_data->num_activated_neurons[(current_time_in_timesteps / timestep_grouping) % 2], 1);
+              neuron_data->activated_neuron_ids[pos] = idx;
+              neuron_data->activation_timestep_groupings[pos] = g;
+              
             }
           } else {
             neuron_data->refraction_counter[idx] -= 1;
