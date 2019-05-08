@@ -22,9 +22,10 @@ namespace Backend {
       VOLTAGE
     };
     struct neuron_inputs_struct {
-      float** circular_input_buffer = nullptr;
-      int* input_buffersize = nullptr;
+      float* circular_input_buffer = nullptr;
+      int input_buffersize = 0;
       int temporal_buffersize = 0;
+      int total_buffersize = 0;
     };
     struct spiking_synapses_data_struct: synapses_data_struct {
       neuron_inputs_struct neuron_inputs;
@@ -76,10 +77,6 @@ namespace Backend {
       std::vector<spiking_neurons_data_struct*> h_post_neurons_data;
       spiking_neurons_data_struct** d_pre_neurons_data;
       spiking_neurons_data_struct** d_post_neurons_data;
-
-      float** h_circular_input_buffer = nullptr;
-      int* h_input_buffersize = nullptr;
-      float** d_circular_input_buffer = nullptr;
 
       neuron_inputs_struct neuron_inputs;
 
