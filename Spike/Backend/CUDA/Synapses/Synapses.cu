@@ -13,7 +13,7 @@ namespace Backend {
       CudaSafeCall(cudaFree(synaptic_efficacies_or_weights));
       CudaSafeCall(cudaFree(temp_synaptic_efficacies_or_weights));
       CudaSafeCall(cudaFree(weight_scaling_constants));
-      CudaSafeCall(cudaFree(synapse_neuron_set_indices));
+      CudaSafeCall(cudaFree(synapse_set_indices));
       CudaSafeCall(cudaFree(d_synaptic_data));
     }
 

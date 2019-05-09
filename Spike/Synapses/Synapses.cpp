@@ -54,7 +54,7 @@ void Synapses::sort_synapses(){
       }
 
       for (int s=0; s < total_number_of_synapses; s++){
-        if (pre_neuron_set[synapse_neuron_group_indices[s]] == unique_pre_neuron_set[p]){
+        if (pre_neuron_pointers[synapse_neuron_group_indices[s]] == unique_pre_neuron_set[p]){
           synapse_set_indices.push_back(p);
           per_pre_neuron_synapses[presynaptic_neuron_indices[s]].push_back(s);
         }
@@ -62,7 +62,7 @@ void Synapses::sort_synapses(){
      
       std::vector<int> efferent_num_per_pre; 
       std::vector<int> efferent_start_per_pre; 
-      maximum_number_of_efferent_synapses_per_group.push_back(0);
+      maximum_number_of_efferent_synapses_per_set.push_back(0);
       for (int n=0; n < total_pre_neurons; n++){
         efferent_num_per_pre.push_back((int)per_pre_neuron_synapses[n].size());
         efferent_start_per_pre.push_back(num_sorted_synapses);
@@ -149,7 +149,7 @@ int Synapses::AddGroup(int presynaptic_group_id,
   // Determine which neuron set for this synapse population
   pre_neuron_pointers.push_back(pre_neurons);
   post_neuron_pointers.push_back(post_neurons);
-  int synapse_set_group = pre_neuron_pointers.size() - 1;
+  int synapse_group_id = pre_neuron_pointers.size() - 1;
 
 
   // Getting group shapes, and pre and post-synaptic neuron indices

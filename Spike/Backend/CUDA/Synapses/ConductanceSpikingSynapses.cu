@@ -43,13 +43,13 @@ namespace Backend {
     void ConductanceSpikingSynapses::reset_state() {
       SpikingSynapses::reset_state();
       
-      CudaSafeCall(cudaMemset(neuron_wise_conductance_trace, 0.0f, sizeof(float)*frontend()->number_of_parameter_labels*frontend()->post_neuron_set[0]->total_number_of_neurons));
+      CudaSafeCall(cudaMemset(neuron_wise_conductance_trace, 0.0f, sizeof(float)*frontend()->number_of_parameter_labels*frontend()->post_neuron_pointers[0]->total_number_of_neurons));
     }
 
 
     void ConductanceSpikingSynapses::allocate_device_pointers() {
       // Set up per neuron conductances
-      CudaSafeCall(cudaMalloc((void **)&neuron_wise_conductance_trace, sizeof(float)*frontend()->number_of_parameter_labels*frontend()->post_neuron_set[0]->total_number_of_neurons));
+      CudaSafeCall(cudaMalloc((void **)&neuron_wise_conductance_trace, sizeof(float)*frontend()->number_of_parameter_labels*frontend()->post_neuron_pointers[0]->total_number_of_neurons));
 
 
       CudaSafeCall(cudaMalloc((void **)&d_decay_factors_g, sizeof(float)*synaptic_data->num_parameter_sets));
@@ -75,7 +75,7 @@ namespace Backend {
         &(frontend()->reversal_potentials_Vhat[0]),
         sizeof(float)*synaptic_data->num_parameter_sets, cudaMemcpyHostToDevice));
 
-      CudaSafeCall(cudaMemset(neuron_wise_conductance_trace, 0.0f, sizeof(float)*frontend()->number_of_parameter_labels*frontend()->post_neuron_set[0]->total_number_of_neurons));
+      CudaSafeCall(cudaMemset(neuron_wise_conductance_trace, 0.0f, sizeof(float)*frontend()->number_of_parameter_labels*frontend()->post_neuron_pointers[0]->total_number_of_neurons));
     }
 
 

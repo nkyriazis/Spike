@@ -42,7 +42,7 @@ namespace Backend {
         h_neuron_wise_current_trace[id] = 0.0f;
         */
 
-      CudaSafeCall(cudaMalloc((void **)&d_decay_terms_tau, sizeof(float)*synaptic_data->num_synapse_groups));
+      CudaSafeCall(cudaMalloc((void **)&d_decay_terms_tau, sizeof(float)*frontend()->number_of_parameter_labels));
       CudaSafeCall(cudaFree(d_synaptic_data));
       CudaSafeCall(cudaMalloc((void **)&d_synaptic_data, sizeof(current_spiking_synapses_data_struct)));
       CudaSafeCall(cudaMemcpyFromSymbol(
@@ -55,7 +55,7 @@ namespace Backend {
       CudaSafeCall(cudaMemcpy(
         d_decay_terms_tau,
         &(frontend()->decay_terms_tau[0]),
-        sizeof(float)*synaptic_data->num_synapse_groups, cudaMemcpyHostToDevice));
+        sizeof(float)*frontend()->number_of_parameter_labels, cudaMemcpyHostToDevice));
     }
 
     void CurrentSpikingSynapses::reset_state() {
