@@ -27,23 +27,23 @@ __device__ float my_conductance_spiking_injection_kernel(
     
     
   float total_current = 0.0f;
-  for (int synapse_group = 0; synapse_group < synaptic_data->num_synapse_groups; synapse_group++){
+  for (int param_label = 0; param_label < synaptic_data->num_parameter_sets; param_label++){
     int bufferloc = ((current_time_in_timesteps + g) % synaptic_data->neuron_inputs.temporal_buffersize)*synaptic_data->neuron_inputs.input_buffersize;
-    float decay_factor = synaptic_data->decay_factors_g[synapse_group];
-    float reversal_value = synaptic_data->reversal_potentials_Vhat[synapse_group];
-    float synaptic_conductance_g = synaptic_data->neuron_wise_conductance_trace[synapse_group*neuron_data->total_number_of_neurons + idx];
+    float decay_factor = synaptic_data->decay_factors_g[param_label];
+    float reversal_value = synaptic_data->reversal_potentials_Vhat[param_label];
+    float synaptic_conductance_g = synaptic_data->neuron_wise_conductance_trace[param_label*neuron_data->total_number_of_neurons + idx];
     // Update the synaptic conductance
     synaptic_conductance_g *= decay_factor;
-    float conductance_increment = synaptic_data->neuron_inputs.circular_input_buffer[synapse_group*synaptic_data->neuron_inputs.total_buffersize + bufferloc + idx];
+    float conductance_increment = synaptic_data->neuron_inputs.circular_input_buffer[param_label*synaptic_data->neuron_inputs.total_buffersize + bufferloc + idx];
     if (conductance_increment != 0.0f){
       synaptic_conductance_g += conductance_increment;
       // Reset the conductance update
-      synaptic_data->neuron_inputs.circular_input_buffer[synapse_group*synaptic_data->neuron_inputs.total_buffersize + bufferloc + idx] = 0.0f;
+      synaptic_data->neuron_inputs.circular_input_buffer[param_label*synaptic_data->neuron_inputs.total_buffersize + bufferloc + idx] = 0.0f;
     }
     
     total_current += synaptic_conductance_g*(reversal_value - current_membrane_voltage);
 
-    synaptic_data->neuron_wise_conductance_trace[synapse_group*neuron_data->total_number_of_neurons + idx] = synaptic_conductance_g;
+    synaptic_data->neuron_wise_conductance_trace[param_label*neuron_data->total_number_of_neurons + idx] = synaptic_conductance_g;
 
   }
   return total_current*multiplication_to_volts;

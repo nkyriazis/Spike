@@ -31,12 +31,13 @@ namespace Backend {
       neuron_inputs_struct neuron_inputs;
       int synapse_type = EMPTY;
       int* num_activated_neurons = nullptr;
-      int* max_efferents_per_group = nullptr;
+      int* max_efferents_per_set = nullptr;
       int** efferent_synapse_counts = nullptr;
       int** efferent_synapse_starts = nullptr;
 
-      int num_synapse_groups = 0;
-      int* synapse_neuron_group_indices = nullptr;
+      int num_synapse_sets = 0;
+      int num_parameter_sets = 0;
+      int* parameter_labels = nullptr;
       int* postsynaptic_neuron_indices = nullptr;
       int* delays = nullptr;
       float* synaptic_efficacies_or_weights = nullptr;
@@ -70,7 +71,8 @@ namespace Backend {
       int** efferent_synapse_starts = nullptr;
       int** h_efferent_synapse_counts = nullptr;
       int** h_efferent_synapse_starts = nullptr;
-      int* max_efferents_per_group = nullptr;
+      int* max_efferents_per_set = nullptr;
+      int* parameter_labels = nullptr;
       // Device pointers
       int* delays = nullptr;
       

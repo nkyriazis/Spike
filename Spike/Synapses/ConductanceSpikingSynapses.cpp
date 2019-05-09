@@ -3,16 +3,6 @@
 
 // ConductanceSpikingSynapses Destructor
 ConductanceSpikingSynapses::~ConductanceSpikingSynapses() {
-
-#ifdef CRAZY_DEBUG
-  std::cout << "@@@@@@@@@@ 0 " << synaptic_conductances_g << " \n";
-#endif
-
-  free(synaptic_conductances_g);
-
-#ifdef CRAZY_DEBUG
-  std::cout << "@@@@@@@@@@ 1\n";
-#endif
 }
 
 
@@ -50,12 +40,14 @@ int ConductanceSpikingSynapses::AddGroup(int presynaptic_group_id,
     // Set constants
     reversal_potentials_Vhat.push_back(conductance_spiking_synapse_group_params->reversal_potential_Vhat);
     decay_terms_tau_g.push_back(conductance_spiking_synapse_group_params->decay_term_tau_g);
+    
+    // Keep number of parameter labels up to date
+    number_of_parameter_labels = reversal_potentials_Vhat.size();
   }
 
 
 
   for (int i = (total_number_of_synapses - temp_number_of_synapses_in_last_group); i < total_number_of_synapses; i++) {
-    synaptic_conductances_g[i] = 0.0f;
     parameter_labels[i] = param_label;
   }
   
@@ -63,9 +55,6 @@ int ConductanceSpikingSynapses::AddGroup(int presynaptic_group_id,
 }
 
 void ConductanceSpikingSynapses::increment_number_of_synapses(int increment) {
-
-  synaptic_conductances_g = (float*)realloc(synaptic_conductances_g, total_number_of_synapses * sizeof(float));
-  parameter_labels = (int*)realloc(parameter_labels, total_number_of_synapses * sizeof(int));
 }
 
 

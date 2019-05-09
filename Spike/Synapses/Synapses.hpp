@@ -118,6 +118,7 @@ public:
   std::vector<std::vector<int>> efferent_starts_per_set;
   std::vector<std::vector<int>> efferent_num_per_set;
   std::vector<int> maximum_number_of_efferent_synapses_per_set;
+  std::vector<int> synapse_set_indices;
 
   std::vector<Neurons*> pre_neuron_pointers;
   std::vector<Neurons*> post_neuron_pointers;

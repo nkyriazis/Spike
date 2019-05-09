@@ -33,6 +33,8 @@ public:
   void prepare_backend_early() override;
 
   // Host Pointers
+  int number_of_parameter_labels = 1;
+  int * parameter_labels = nullptr;
   int* delays = nullptr;
   SpikingModel* model = nullptr;
 

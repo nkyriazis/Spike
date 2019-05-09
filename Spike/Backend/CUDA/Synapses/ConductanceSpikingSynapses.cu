@@ -43,17 +43,17 @@ namespace Backend {
     void ConductanceSpikingSynapses::reset_state() {
       SpikingSynapses::reset_state();
       
-      CudaSafeCall(cudaMemset(neuron_wise_conductance_trace, 0.0f, sizeof(float)*frontend()->pre_neuron_set.size()*frontend()->post_neuron_set[0]->total_number_of_neurons));
+      CudaSafeCall(cudaMemset(neuron_wise_conductance_trace, 0.0f, sizeof(float)*frontend()->number_of_parameter_labels*frontend()->post_neuron_set[0]->total_number_of_neurons));
     }
 
 
     void ConductanceSpikingSynapses::allocate_device_pointers() {
       // Set up per neuron conductances
-      CudaSafeCall(cudaMalloc((void **)&neuron_wise_conductance_trace, sizeof(float)*frontend()->pre_neuron_set.size()*frontend()->post_neuron_set[0]->total_number_of_neurons));
+      CudaSafeCall(cudaMalloc((void **)&neuron_wise_conductance_trace, sizeof(float)*frontend()->number_of_parameter_labels*frontend()->post_neuron_set[0]->total_number_of_neurons));
 
 
-      CudaSafeCall(cudaMalloc((void **)&d_decay_factors_g, sizeof(float)*synaptic_data->num_synapse_groups));
-      CudaSafeCall(cudaMalloc((void **)&d_reversal_potentials_Vhat, sizeof(float)*synaptic_data->num_synapse_groups));
+      CudaSafeCall(cudaMalloc((void **)&d_decay_factors_g, sizeof(float)*synaptic_data->num_parameter_sets));
+      CudaSafeCall(cudaMalloc((void **)&d_reversal_potentials_Vhat, sizeof(float)*synaptic_data->num_parameter_sets));
       CudaSafeCall(cudaFree(d_synaptic_data));
       CudaSafeCall(cudaMalloc((void **)&d_synaptic_data, sizeof(conductance_spiking_synapses_data_struct)));
       CudaSafeCall(cudaMemcpyFromSymbol(
@@ -64,18 +64,18 @@ namespace Backend {
 
     void ConductanceSpikingSynapses::copy_constants_and_initial_efficacies_to_device() {
       vector<float> decay_vals_g;
-      for (int syn_label_indx = 0; syn_label_indx < synaptic_data->num_synapse_groups; syn_label_indx++)
+      for (int syn_label_indx = 0; syn_label_indx < synaptic_data->num_parameter_sets; syn_label_indx++)
         decay_vals_g.push_back((expf(-frontend()->model->timestep / frontend()->decay_terms_tau_g[syn_label_indx])));
       CudaSafeCall(cudaMemcpy(
         d_decay_factors_g,
         decay_vals_g.data(),
-        sizeof(float)*synaptic_data->num_synapse_groups, cudaMemcpyHostToDevice));
+        sizeof(float)*synaptic_data->num_parameter_sets, cudaMemcpyHostToDevice));
       CudaSafeCall(cudaMemcpy(
         d_reversal_potentials_Vhat,
         &(frontend()->reversal_potentials_Vhat[0]),
-        sizeof(float)*synaptic_data->num_synapse_groups, cudaMemcpyHostToDevice));
+        sizeof(float)*synaptic_data->num_parameter_sets, cudaMemcpyHostToDevice));
 
-      CudaSafeCall(cudaMemset(neuron_wise_conductance_trace, 0.0f, sizeof(float)*frontend()->pre_neuron_set.size()*frontend()->post_neuron_set[0]->total_number_of_neurons));
+      CudaSafeCall(cudaMemset(neuron_wise_conductance_trace, 0.0f, sizeof(float)*frontend()->number_of_parameter_labels*frontend()->post_neuron_set[0]->total_number_of_neurons));
     }
 
 

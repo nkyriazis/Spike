@@ -2,11 +2,8 @@
 #include "../Helpers/TerminalHelpers.hpp"
 
 SpikingSynapses::~SpikingSynapses() {
-#ifdef CRAZY_DEBUG
-  std::cout << "SpikingSynapses::~SpikingSynapses\n";
-#endif
+  free(parameter_labels);
   free(delays);
-
 }
 
 void SpikingSynapses::prepare_backend_early() {
@@ -86,6 +83,9 @@ int SpikingSynapses::AddGroup(int presynaptic_group_id,
     // Ensure max/min delays are set correctly
     if (delays[i] > maximum_axonal_delay_in_timesteps) maximum_axonal_delay_in_timesteps = delays[i];
     if (delays[i] < minimum_axonal_delay_in_timesteps) minimum_axonal_delay_in_timesteps = delays[i];
+
+    // Set Parameter Label -- to be re-set later
+    parameter_labels[i] = 0;
   }
 
   return groupID;
@@ -94,6 +94,7 @@ int SpikingSynapses::AddGroup(int presynaptic_group_id,
 
 void SpikingSynapses::increment_number_of_synapses(int increment) {
   delays = (int*)realloc(delays, total_number_of_synapses * sizeof(int));
+  parameter_labels = (int*)realloc(parameter_labels, total_number_of_synapses * sizeof(int));
 }
 
 

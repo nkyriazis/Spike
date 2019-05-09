@@ -13,7 +13,7 @@ namespace Backend {
       CudaSafeCall(cudaFree(synaptic_efficacies_or_weights));
       CudaSafeCall(cudaFree(temp_synaptic_efficacies_or_weights));
       CudaSafeCall(cudaFree(weight_scaling_constants));
-      CudaSafeCall(cudaFree(synapse_neuron_group_indices));
+      CudaSafeCall(cudaFree(synapse_neuron_set_indices));
       CudaSafeCall(cudaFree(d_synaptic_data));
     }
 
@@ -29,7 +29,7 @@ namespace Backend {
                               sizeof(float)*frontend()->total_number_of_synapses));
       CudaSafeCall(cudaMalloc((void **)&weight_scaling_constants,
                               sizeof(float)*frontend()->total_number_of_synapses));
-      CudaSafeCall(cudaMalloc((void **)&synapse_neuron_group_indices,
+      CudaSafeCall(cudaMalloc((void **)&synapse_set_indices,
                               sizeof(int)*frontend()->total_number_of_synapses));
       CudaSafeCall(cudaMalloc((void **)&d_synaptic_data,
                               sizeof(synapses_data_struct)));
@@ -52,8 +52,8 @@ namespace Backend {
       CudaSafeCall(cudaMemcpy(weight_scaling_constants,
                               frontend()->weight_scaling_constants,
                               sizeof(float)*frontend()->total_number_of_synapses, cudaMemcpyHostToDevice));
-      CudaSafeCall(cudaMemcpy(synapse_neuron_group_indices,
-                              frontend()->synapse_neuron_group_indices,
+      CudaSafeCall(cudaMemcpy(synapse_set_indices,
+                              frontend()->synapse_set_indices.data(),
                               sizeof(int)*frontend()->total_number_of_synapses,
                               cudaMemcpyHostToDevice));
     }

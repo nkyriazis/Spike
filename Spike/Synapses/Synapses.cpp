@@ -55,6 +55,7 @@ void Synapses::sort_synapses(){
 
       for (int s=0; s < total_number_of_synapses; s++){
         if (pre_neuron_set[synapse_neuron_group_indices[s]] == unique_pre_neuron_set[p]){
+          synapse_set_indices.push_back(p);
           per_pre_neuron_synapses[presynaptic_neuron_indices[s]].push_back(s);
         }
       }
@@ -65,16 +66,16 @@ void Synapses::sort_synapses(){
       for (int n=0; n < total_pre_neurons; n++){
         efferent_num_per_pre.push_back((int)per_pre_neuron_synapses[n].size());
         efferent_start_per_pre.push_back(num_sorted_synapses);
-        if (efferent_num_per_pre[n] > maximum_number_of_efferent_synapses_per_group[p])
-          maximum_number_of_efferent_synapses_per_group[p] = efferent_num_per_pre[n];
+        if (efferent_num_per_pre[n] > maximum_number_of_efferent_synapses_per_set[p])
+          maximum_number_of_efferent_synapses_per_set[p] = efferent_num_per_pre[n];
         for (int s=0; s < per_pre_neuron_synapses[n].size(); s++){
           synapse_sort_indices[num_sorted_synapses] = per_pre_neuron_synapses[n][s];
           num_sorted_synapses++;
         }
       }
 
-      efferent_num_per_group.push_back(efferent_num_per_pre);
-      efferent_starts_per_group.push_back(efferent_start_per_pre);
+      efferent_num_per_set.push_back(efferent_num_per_pre);
+      efferent_starts_per_set.push_back(efferent_start_per_pre);
     }
 
     if (num_sorted_synapses != total_number_of_synapses)
@@ -148,7 +149,7 @@ int Synapses::AddGroup(int presynaptic_group_id,
   // Determine which neuron set for this synapse population
   pre_neuron_pointers.push_back(pre_neurons);
   post_neuron_pointers.push_back(post_neurons);
-  int synapse_set_id = pre_neuron_pointers.size() - 1;
+  int synapse_set_group = pre_neuron_pointers.size() - 1;
 
 
   // Getting group shapes, and pre and post-synaptic neuron indices
@@ -178,7 +179,7 @@ int Synapses::AddGroup(int presynaptic_group_id,
           {
             
             int increment = (preend-prestart)*(postend-poststart);
-            Synapses::increment_number_of_synapses(increment, synapse_set_id);
+            Synapses::increment_number_of_synapses(increment, synapse_group_id);
 
             // If the connectivity is all_to_all
             for (int i = prestart; i < preend; i++){
@@ -197,7 +198,7 @@ int Synapses::AddGroup(int presynaptic_group_id,
             if ((preend-prestart) != (postend-poststart)) print_message_and_exit("Unequal populations for one_to_one.");
             
             int increment = (preend-prestart);
-            Synapses::increment_number_of_synapses(increment, synapse_set_id);
+            Synapses::increment_number_of_synapses(increment, synapse_group_id);
             
             // If the connectivity is one_to_one
             // Create the connectivity
@@ -219,7 +220,7 @@ int Synapses::AddGroup(int presynaptic_group_id,
                 // If it is within the probability range, connect!
                 if (prob < synapse_params->random_connectivity_probability){
             
-                  Synapses::increment_number_of_synapses(1, synapse_set_id);
+                  Synapses::increment_number_of_synapses(1, synapse_group_id);
                   presynaptic_neuron_indices[total_number_of_synapses - 1] = i;
                   postsynaptic_neuron_indices[total_number_of_synapses - 1] = j;
                 }
@@ -240,7 +241,7 @@ int Synapses::AddGroup(int presynaptic_group_id,
       
             int number_of_postsynaptic_neurons_in_group = postend - poststart;
             int total_number_of_new_synapses = number_of_new_synapses_per_postsynaptic_neuron * number_of_postsynaptic_neurons_in_group;
-            Synapses::increment_number_of_synapses(total_number_of_new_synapses, synapse_set_id);
+            Synapses::increment_number_of_synapses(total_number_of_new_synapses, synapse_group_id);
 
             for (int postid = 0; postid < number_of_postsynaptic_neurons_in_group; postid++){
               float post_fractional_centre_x = ((float)(postid % postsynaptic_group_shape[0]) / (float)postsynaptic_group_shape[0]);
@@ -295,7 +296,7 @@ int Synapses::AddGroup(int presynaptic_group_id,
         exit(1);
       }
 
-      Synapses::increment_number_of_synapses(synapse_params->pairwise_connect_presynaptic.size(), synapse_set_id);
+      Synapses::increment_number_of_synapses(synapse_params->pairwise_connect_presynaptic.size(), synapse_group_id);
 
       int numpostneurons = postsynaptic_group_shape[0]*postsynaptic_group_shape[1];
       int numpreneurons = presynaptic_group_shape[0]*presynaptic_group_shape[1];
@@ -327,7 +328,7 @@ int Synapses::AddGroup(int presynaptic_group_id,
   for (int i = original_number_of_synapses; i < total_number_of_synapses; i++){
     weight_scaling_constants[i] = synapse_params->weight_scaling_constant;
     synaptic_efficacies_or_weights[i] = synapse_params->weight_range[0] + (synapse_params->weight_range[1] - synapse_params->weight_range[0])*((float)rand() / (RAND_MAX));
-    synapse_neuron_group_indices[i] = synapse_set_id;
+    synapse_neuron_group_indices[i] = synapse_group_id;
     
     if (synapse_params->connectivity_type == CONNECTIVITY_TYPE_PAIRWISE){
       if (synapse_params->pairwise_connect_weight.size() == temp_number_of_synapses_in_last_group){
@@ -376,7 +377,7 @@ int Synapses::AddGroup(int presynaptic_group_id,
 }
 
 
-void Synapses::increment_number_of_synapses(int increment, int synapse_set_id) {
+void Synapses::increment_number_of_synapses(int increment, int synapse_group_id) {
 
   total_number_of_synapses += increment;
 
