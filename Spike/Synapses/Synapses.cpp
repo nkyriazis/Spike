@@ -27,11 +27,26 @@ void Synapses::prepare_backend_early() {
 
 void Synapses::sort_synapses(){
   if (!synapses_sorted){
-    // We first organise all synapses by pre-synaptic neuron, regardless of set
+    // Get the unique set of pre-synaptic neurons
+    for (int pre=0; pre < pre_neuron_pointers.size(); pre++){
+      bool found = false;
+      for (int u=0; u < unique_pre_neuron_set.size(); u++){
+        if (unique_pre_neuron_set[u] == pre_neuron_pointers[pre]){
+          found = true;
+          break;
+        }
+      }
+
+      if (!found){
+        unique_pre_neuron_set.push_back(pre_neuron_pointers[pre]);
+       }
+    }
+
+    // Organise all synapses by pre-synaptic neuron, regardless of set
     int num_sorted_synapses = 0;
-    for (int p = 0; p < pre_neuron_set.size(); p++){
+    for (int p = 0; p < unique_pre_neuron_set.size(); p++){
       // For each pre-synaptic neuron, collect its efferent synapses
-      int total_pre_neurons = pre_neuron_set[p]->total_number_of_neurons;
+      int total_pre_neurons = unique_pre_neuron_set[p]->total_number_of_neurons;
       std::vector<std::vector<int>> per_pre_neuron_synapses;
       for (int n=0; n < total_pre_neurons; n++){
         std::vector<int> empty;
@@ -39,7 +54,7 @@ void Synapses::sort_synapses(){
       }
 
       for (int s=0; s < total_number_of_synapses; s++){
-        if (synapse_neuron_group_indices[s] == p){
+        if (pre_neuron_set[synapse_neuron_group_indices[s]] == unique_pre_neuron_set[p]){
           per_pre_neuron_synapses[presynaptic_neuron_indices[s]].push_back(s);
         }
       }
@@ -131,9 +146,9 @@ int Synapses::AddGroup(int presynaptic_group_id,
   }
 
   // Determine which neuron set for this synapse population
-  pre_neuron_set.push_back(pre_neurons);
-  post_neuron_set.push_back(post_neurons);
-  int synapse_set_id = post_neuron_set.size() - 1;
+  pre_neuron_pointers.push_back(pre_neurons);
+  post_neuron_pointers.push_back(post_neurons);
+  int synapse_set_id = pre_neuron_pointers.size() - 1;
 
 
   // Getting group shapes, and pre and post-synaptic neuron indices

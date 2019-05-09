@@ -31,6 +31,7 @@ public:
   void init_backend(Context* ctx = _global_ctx) override;
 
   float * synaptic_conductances_g = nullptr;
+  int * parameter_labels = nullptr;
   vector<float> reversal_potentials_Vhat;
   vector<float> decay_terms_tau_g;
 
