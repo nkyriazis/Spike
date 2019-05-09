@@ -182,10 +182,11 @@ namespace Backend {
       if (idx == 0){
         in_neuron_data->num_activated_neurons[((current_time_in_timesteps / timestep_grouping) + 1) % 2] = 0;
       }
+      
+      lif_spiking_neurons_data_struct* neuron_data = (lif_spiking_neurons_data_struct*) in_neuron_data;
 
       while (idx < total_number_of_neurons) {
 
-        lif_spiking_neurons_data_struct* neuron_data = (lif_spiking_neurons_data_struct*) in_neuron_data;
         int neuron_label = neuron_data->neuron_labels[idx];
         float equation_constant = neuron_data->membrane_decay_constants[neuron_label];
         float resting_potential_V0 = neuron_data->resting_potentials_v0[neuron_label];
@@ -203,6 +204,7 @@ namespace Backend {
           
           float voltage_input_for_timestep = 0.0f;
           #ifndef INLINEDEVICEFUNCS
+          /*
             voltage_input_for_timestep += current_injection_kernel(
                   synaptic_data,
                   in_neuron_data,
@@ -211,8 +213,18 @@ namespace Backend {
                   current_time_in_timesteps,
                   timestep,
                   idx,
-                  g);
+                  g);*/
           #else
+                voltage_input_for_timestep += INLINE_LIF::my_conductance_spiking_injection_kernel(
+                  synaptic_data,
+                  in_neuron_data,
+                  temp_membrane_resistance_R,
+                  membrane_potential_Vi,
+                  current_time_in_timesteps,
+                  timestep,
+                  idx,
+                  g);
+                /*
             switch (synaptic_data->synapse_type)
             {
               case CONDUCTANCE: 
@@ -226,7 +238,6 @@ namespace Backend {
                   idx,
                   g);
                 break;
-                /*
               case CURRENT: 
                 voltage_input_for_timestep += INLINE_LIF::my_current_spiking_injection_kernel(
                   synaptic_data,
@@ -249,10 +260,10 @@ namespace Backend {
                   idx,
                   g);
                 break;
-                */
               default:
                 break;
             }
+                */
           #endif
           if (neuron_data->refraction_counter[idx] <= 0){
             membrane_potential_Vi += resting_potential_V0 - equation_constant * membrane_potential_Vi + background_current + voltage_input_for_timestep;
@@ -270,7 +281,6 @@ namespace Backend {
               int pos = atomicAdd(&neuron_data->num_activated_neurons[(current_time_in_timesteps / timestep_grouping) % 2], 1);
               neuron_data->activated_neuron_ids[pos] = idx;
               neuron_data->activation_timestep_groupings[pos] = g;
-              
             }
           } else {
             neuron_data->refraction_counter[idx] -= 1;
