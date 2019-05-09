@@ -61,6 +61,8 @@ namespace Backend {
       allocate_device_pointers();
       copy_constants_and_initial_efficacies_to_device();
       
+      synaptic_data->num_synapse_sets = frontend()->unique_pre_neuron_set.size();
+      synaptic_data->num_parameter_sets = frontend()->number_of_parameter_labels;
       synaptic_data->neuron_inputs = neuron_inputs;
       synaptic_data->max_efferents_per_set = max_efferents_per_set;
       synaptic_data->efferent_synapse_counts = efferent_synapse_counts;
@@ -201,6 +203,7 @@ namespace Backend {
         unsigned int current_time_in_timesteps,
         int timestep_grouping)
     {
+      /*
       int indx = threadIdx.x + blockIdx.x * blockDim.x;
       int synapse_set = 0;
 
@@ -226,10 +229,11 @@ namespace Backend {
         }
 
           
-        int timestep_grouping_index = pre_neurons_data[synapse_set]->activation_timestep_groupings[pos];
         int synapse_id = synaptic_data->efferent_synapse_starts[synapse_set][pre_idx] + idx;
         int param_label = synaptic_data->parameter_labels[synapse_id];
         int postneuron = synaptic_data->postsynaptic_neuron_indices[synapse_id];
+        
+        int timestep_grouping_index = pre_neurons_data[synapse_set]->activation_timestep_groupings[pos];
         
         int targetloc = (bufferloc + synaptic_data->delays[synapse_id] + timestep_grouping_index) % synaptic_data->neuron_inputs.temporal_buffersize;
         float weightinput = synaptic_data->synaptic_efficacies_or_weights[synapse_id]*synaptic_data->weight_scaling_constants[synapse_id];
@@ -237,14 +241,15 @@ namespace Backend {
       
         indx += blockDim.x * gridDim.x;
       }
+      */
 
 
-      /*
-      for (int synapse_group = 0; synapse_group < synaptic_data->num_synapse_groups; synapse_group++){
+      //for (int synapse_group = 0; synapse_group < synaptic_data->num_synapse_sets; synapse_group++){
+      int synapse_group = 0;
         int indx = threadIdx.x + blockIdx.x * blockDim.x;
-        while (indx < (synaptic_data->max_efferents_per_group[synapse_group]*pre_neurons_data[synapse_group]->num_activated_neurons[((current_time_in_timesteps / timestep_grouping) % 2)])) {
-          int pos = indx / synaptic_data->max_efferents_per_group[synapse_group]; 
-          int idx = indx % synaptic_data->max_efferents_per_group[synapse_group]; 
+        while (indx < (synaptic_data->max_efferents_per_set[synapse_group]*pre_neurons_data[synapse_group]->num_activated_neurons[((current_time_in_timesteps / timestep_grouping) % 2)])) {
+          int pos = indx / synaptic_data->max_efferents_per_set[synapse_group]; 
+          int idx = indx % synaptic_data->max_efferents_per_set[synapse_group]; 
           
           int pre_idx = pre_neurons_data[synapse_group]->activated_neuron_ids[pos];
 
@@ -257,15 +262,16 @@ namespace Backend {
 
           int timestep_grouping_index = pre_neurons_data[synapse_group]->activation_timestep_groupings[pos];
           int synapse_id = synaptic_data->efferent_synapse_starts[synapse_group][pre_idx] + idx;
+          int param_label = synaptic_data->parameter_labels[synapse_id];
           int postneuron = synaptic_data->postsynaptic_neuron_indices[synapse_id];
           
           int targetloc = (bufferloc + synaptic_data->delays[synapse_id] + timestep_grouping_index) % synaptic_data->neuron_inputs.temporal_buffersize;
           float weightinput = synaptic_data->synaptic_efficacies_or_weights[synapse_id]*synaptic_data->weight_scaling_constants[synapse_id];
-          atomicAdd(&(synaptic_data->neuron_inputs.circular_input_buffer[synapse_group*synaptic_data->neuron_inputs.total_buffersize + targetloc*synaptic_data->neuron_inputs.input_buffersize + postneuron]), weightinput);
+          //atomicAdd(&(synaptic_data->neuron_inputs.circular_input_buffer[targetloc*synaptic_data->neuron_inputs.input_buffersize + postneuron*synaptic_data->num_parameter_sets + param_label]), weightinput);
+          atomicAdd(&(synaptic_data->neuron_inputs.circular_input_buffer[param_label*synaptic_data->neuron_inputs.total_buffersize + targetloc*synaptic_data->neuron_inputs.input_buffersize + postneuron]), weightinput);
           indx += blockDim.x * gridDim.x;
-        }
+        //}
       }
-      */
     }
 
     __device__ float spiking_current_injection_kernel(
