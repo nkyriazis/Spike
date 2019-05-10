@@ -14,8 +14,7 @@
 namespace Backend {
   namespace CUDA {
     struct current_spiking_synapses_data_struct: spiking_synapses_data_struct {
-	    float* neuron_wise_current_trace;
-      float* decay_terms_tau;
+      float* decay_factors;
     };
     class CurrentSpikingSynapses : public virtual ::Backend::CUDA::SpikingSynapses,
                                    public virtual ::Backend::CurrentSpikingSynapses {
@@ -24,10 +23,7 @@ namespace Backend {
       SPIKE_MAKE_BACKEND_CONSTRUCTOR(CurrentSpikingSynapses);
       using ::Backend::CurrentSpikingSynapses::frontend;
       
-      int current_array_length = 0;
-      float* neuron_wise_current_trace = nullptr;
-      float* h_neuron_wise_current_trace = nullptr;
-      float* d_decay_terms_tau = nullptr;
+      float* d_decay_factors = nullptr;
       
       void prepare() override;
       void reset_state() override;

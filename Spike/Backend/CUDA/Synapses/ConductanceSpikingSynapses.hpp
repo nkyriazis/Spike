@@ -13,7 +13,6 @@ namespace Backend {
     struct conductance_spiking_synapses_data_struct: spiking_synapses_data_struct {
       float* decay_factors_g;
       float* reversal_potentials_Vhat;
-      float* neuron_wise_conductance_trace;
     };
     class ConductanceSpikingSynapses : public virtual ::Backend::CUDA::SpikingSynapses,
                                        public virtual ::Backend::ConductanceSpikingSynapses {
@@ -24,8 +23,6 @@ namespace Backend {
       using ::Backend::ConductanceSpikingSynapses::frontend;
 
       // Variables used for memory-trace based synaptic input
-      int conductance_trace_length = 0;
-      float* neuron_wise_conductance_trace = nullptr;
       float* d_decay_factors_g = nullptr;
       float* d_reversal_potentials_Vhat = nullptr;
 

@@ -9,7 +9,6 @@ namespace Backend {
 
     // ConductanceSpikingSynapses Destructor
     ConductanceSpikingSynapses::~ConductanceSpikingSynapses() {
-      CudaSafeCall(cudaFree(neuron_wise_conductance_trace));
       CudaSafeCall(cudaFree(d_synaptic_data));
       CudaSafeCall(cudaFree(d_decay_factors_g));
       CudaSafeCall(cudaFree(d_reversal_potentials_Vhat));
@@ -31,7 +30,6 @@ namespace Backend {
       conductance_spiking_synapses_data_struct* this_synaptic_data = static_cast<conductance_spiking_synapses_data_struct*>(synaptic_data); 
       this_synaptic_data->decay_factors_g = d_decay_factors_g;
       this_synaptic_data->reversal_potentials_Vhat = d_reversal_potentials_Vhat;
-      this_synaptic_data->neuron_wise_conductance_trace = neuron_wise_conductance_trace;
       this_synaptic_data->synapse_type = CONDUCTANCE;
       CudaSafeCall(cudaMemcpy(
         d_synaptic_data,
@@ -43,14 +41,11 @@ namespace Backend {
     void ConductanceSpikingSynapses::reset_state() {
       SpikingSynapses::reset_state();
       
-      CudaSafeCall(cudaMemset(neuron_wise_conductance_trace, 0.0f, sizeof(float)*frontend()->number_of_parameter_labels*frontend()->post_neuron_pointers[0]->total_number_of_neurons));
     }
 
 
     void ConductanceSpikingSynapses::allocate_device_pointers() {
       // Set up per neuron conductances
-      CudaSafeCall(cudaMalloc((void **)&neuron_wise_conductance_trace, sizeof(float)*frontend()->number_of_parameter_labels*frontend()->post_neuron_pointers[0]->total_number_of_neurons));
-
 
       CudaSafeCall(cudaMalloc((void **)&d_decay_factors_g, sizeof(float)*synaptic_data->num_parameter_sets));
       CudaSafeCall(cudaMalloc((void **)&d_reversal_potentials_Vhat, sizeof(float)*synaptic_data->num_parameter_sets));
@@ -75,7 +70,6 @@ namespace Backend {
         &(frontend()->reversal_potentials_Vhat[0]),
         sizeof(float)*synaptic_data->num_parameter_sets, cudaMemcpyHostToDevice));
 
-      CudaSafeCall(cudaMemset(neuron_wise_conductance_trace, 0.0f, sizeof(float)*frontend()->number_of_parameter_labels*frontend()->post_neuron_pointers[0]->total_number_of_neurons));
     }
 
 
