@@ -65,7 +65,7 @@ namespace Backend {
                               sizeof(float)*frontend()->membrane_time_constants_tau_m.size(),
                               cudaMemcpyHostToDevice));
       CudaSafeCall(cudaMemcpy(adaptations,
-                              frontend()->adaptations.data(),
+                              (bool*)frontend()->adaptations.data(),
                               sizeof(bool)*frontend()->adaptations.size(),
                               cudaMemcpyHostToDevice));
       CudaSafeCall(cudaMemcpy(adaptation_taus,
