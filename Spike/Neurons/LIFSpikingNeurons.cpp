@@ -12,11 +12,6 @@ LIFSpikingNeurons::~LIFSpikingNeurons() {
 
 void LIFSpikingNeurons::prepare_backend_early() {
   SpikingNeurons::prepare_backend_early();
-  assert(backend() && "Backend needs to have been prepared before calling this!");
-  if (!random_state_manager) {
-    random_state_manager = new RandomStateManager();
-    random_state_manager->init_backend(backend()->context);
-  }
 }
 
 
