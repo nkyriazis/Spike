@@ -46,7 +46,13 @@ int LIFSpikingNeurons::AddGroup(neuron_parameters_struct * group_params){
     if (this_group_params->absolute_refractory_period == refractory_periods[label])
       matches += 1;
 
-    if (matches == 7){
+    if ((this_group_params->adaptation == adaptations[label]) && (this_group_params->adaptation_reversal_potential == adaptation_reversal_potentials[label]) && (this_group_params->adaptation_strength == adaptation_strengths[label]) && (this_group_params->adaptation_tau == adaptation_taus[label])){
+      matches += 1;
+    } else if ((this_group_params->adaptation == false) && (this_group_params->adaptation == adaptations[label])){
+      matches += 1;
+    }
+
+    if (matches == 8){
       index = label;
       break;
     }
@@ -60,6 +66,11 @@ int LIFSpikingNeurons::AddGroup(neuron_parameters_struct * group_params){
     membrane_resistances_R.push_back(1.0 / this_group_params->somatic_leakage_conductance_g0);
     background_currents.push_back(this_group_params->background_current);
     refractory_periods.push_back(this_group_params->absolute_refractory_period);
+
+    adaptations.push_back(this_group_params->adaptation);
+    adaptation_reversal_potentials.push_back(this_group_params->adaptation_reversal_potential);
+    adaptation_strengths.push_back(this_group_params->adaptation_strength);
+    adaptation_taus.push_back(this_group_params->adaptation_tau);
   }
 
   for (int i = total_number_of_neurons - number_of_neurons_in_new_group; i < total_number_of_neurons; i++) {

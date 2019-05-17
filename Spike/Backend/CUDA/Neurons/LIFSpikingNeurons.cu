@@ -20,10 +20,16 @@ namespace Backend {
       CudaSafeCall(cudaFree(background_currents));
       CudaSafeCall(cudaFree(refractory_timesteps));
       CudaSafeCall(cudaFree(refraction_counter));
+      CudaSafeCall(cudaFree(adaptations));
+      CudaSafeCall(cudaFree(adaptation_strengths));
+      CudaSafeCall(cudaFree(adaptation_taus));
+      CudaSafeCall(cudaFree(adaptation_reversal_potentials));
+      CudaSafeCall(cudaFree(adaptation_values));
     }
 
     void LIFSpikingNeurons::allocate_device_pointers() {
       CudaSafeCall(cudaMalloc((void **)&membrane_potentials_v, sizeof(float)*frontend()->total_number_of_neurons));
+      CudaSafeCall(cudaMalloc((void **)&adaptation_values, sizeof(float)*frontend()->total_number_of_neurons));
       CudaSafeCall(cudaMalloc((void **)&thresholds_for_action_potential_spikes, sizeof(float)*frontend()->spiking_thresholds_vthresh.size()));
       CudaSafeCall(cudaMalloc((void **)&resting_potentials_v0, sizeof(float)*frontend()->resting_potentials_v0.size()));
       CudaSafeCall(cudaMalloc((void **)&after_spike_reset_potentials_vreset, sizeof(float)*frontend()->after_spike_reset_potentials_vreset.size()));
@@ -32,6 +38,11 @@ namespace Backend {
       CudaSafeCall(cudaMalloc((void **)&membrane_resistances_R, sizeof(float)*frontend()->membrane_resistances_R.size()));
       CudaSafeCall(cudaMalloc((void **)&refractory_timesteps, sizeof(int)*frontend()->refractory_periods.size()));
       CudaSafeCall(cudaMalloc((void **)&background_currents, sizeof(int)*frontend()->background_currents.size()));
+      CudaSafeCall(cudaMalloc((void **)&adaptations, sizeof(bool)*frontend()->adaptations.size()));
+      CudaSafeCall(cudaMalloc((void **)&adaptation_strengths, sizeof(float)*frontend()->adaptation_strengths.size()));
+      CudaSafeCall(cudaMalloc((void **)&adaptation_taus, sizeof(float)*frontend()->adaptation_taus.size()));
+      CudaSafeCall(cudaMalloc((void **)&adaptation_reversal_potentials, sizeof(float)*frontend()->adaptation_reversal_potentials.size()));
+      
       
       
       CudaSafeCall(cudaMalloc((void **)&neuron_labels, sizeof(int)*frontend()->total_number_of_neurons));
@@ -52,6 +63,22 @@ namespace Backend {
       CudaSafeCall(cudaMemcpy(membrane_time_constants_tau_m,
                               frontend()->membrane_time_constants_tau_m.data(),
                               sizeof(float)*frontend()->membrane_time_constants_tau_m.size(),
+                              cudaMemcpyHostToDevice));
+      CudaSafeCall(cudaMemcpy(adaptations,
+                              frontend()->adaptations.data(),
+                              sizeof(bool)*frontend()->adaptations.size(),
+                              cudaMemcpyHostToDevice));
+      CudaSafeCall(cudaMemcpy(adaptation_taus,
+                              frontend()->adaptation_taus.data(),
+                              sizeof(float)*frontend()->adaptation_taus.size(),
+                              cudaMemcpyHostToDevice));
+      CudaSafeCall(cudaMemcpy(adaptation_strengths,
+                              frontend()->adaptation_strengths.data(),
+                              sizeof(float)*frontend()->adaptation_strengths.size(),
+                              cudaMemcpyHostToDevice));
+      CudaSafeCall(cudaMemcpy(adaptation_reversal_potentials,
+                              frontend()->adaptation_reversal_potentials.data(),
+                              sizeof(float)*frontend()->adaptation_reversal_potentials.size(),
                               cudaMemcpyHostToDevice));
      
       
@@ -114,6 +141,7 @@ namespace Backend {
       lif_spiking_neurons_data_struct* this_neuron_data = static_cast<lif_spiking_neurons_data_struct*>(neuron_data);
       
       this_neuron_data->membrane_potentials_v = membrane_potentials_v;
+      this_neuron_data->adaptation_values = adaptation_values;
       this_neuron_data->total_number_of_neurons = frontend()->total_number_of_neurons;
       this_neuron_data->thresholds_for_action_potential_spikes = thresholds_for_action_potential_spikes;
       this_neuron_data->resting_potentials_v0 = resting_potentials_v0;
@@ -123,6 +151,10 @@ namespace Backend {
       this_neuron_data->membrane_decay_constants = membrane_decay_constants;
       this_neuron_data->membrane_resistances_R = membrane_resistances_R;
       this_neuron_data->background_currents = background_currents;
+      this_neuron_data->adaptations = adaptations;
+      this_neuron_data->adaptation_strengths = adaptation_strengths;
+      this_neuron_data->adaptation_taus = adaptation_taus;
+      this_neuron_data->adaptation_reversal_potentials = adaptation_reversal_potentials;
       
       this_neuron_data->refraction_counter = refraction_counter;
       this_neuron_data->neuron_labels = neuron_labels;
@@ -148,6 +180,16 @@ namespace Backend {
                               frontend()->membrane_potentials_v.data(),
                               sizeof(float)*frontend()->membrane_potentials_v.size(),
                               cudaMemcpyHostToDevice));
+      vector<float> tmp_adaptation_values;
+      for (int i=0; i < frontend()->total_number_of_neurons; i++){
+        tmp_adaptation_values.push_back(0.0);
+      }
+      CudaSafeCall(cudaMemcpy(adaptation_values,
+                              tmp_adaptation_values.data(),
+                              sizeof(float)*tmp_adaptation_values.size(),
+                              cudaMemcpyHostToDevice));
+
+
     }
 
     void LIFSpikingNeurons::state_update(unsigned int current_time_in_timesteps, float timestep) {
@@ -193,9 +235,14 @@ namespace Backend {
         int bufsize = in_neuron_data->neuron_spike_time_bitbuffer_bytesize[0];
         
         float membrane_potential_Vi = neuron_data->membrane_potentials_v[idx];
+        float adaptation_value = neuron_data->adaptation_values[idx];
+        bool adaptation = neuron_data->adaptations[neuron_label];
       
           
         for (int g=0; g < timestep_grouping; g++){
+          if (adaptation)
+            adaptation_value *= expf(-timestep / neuron_data->adaptation_taus[neuron_label]);
+          
           int bitloc = (current_time_in_timesteps + g) % (bufsize*8);
           in_neuron_data->neuron_spike_time_bitbuffer[idx*bufsize + (bitloc / 8)] &= ~(1 << (bitloc % 8));
           #ifndef INLINEDEVICEFUNCS
@@ -249,12 +296,19 @@ namespace Backend {
             }
           #endif
           if (neuron_data->refraction_counter[idx] <= 0){
+            if (adaptation)
+              voltage_input_for_timestep += adaptation_value*(neuron_data->adaptation_reversal_potentials[neuron_label] - membrane_potential_Vi);
+
             membrane_potential_Vi += resting_potential_V0 - equation_constant * membrane_potential_Vi + background_current + voltage_input_for_timestep;
             
     
             // Finally check for a spike
             if (membrane_potential_Vi >= neuron_data->thresholds_for_action_potential_spikes[neuron_label]){
               in_neuron_data->neuron_spike_time_bitbuffer[idx*bufsize + (bitloc / 8)] |= (1 << (bitloc % 8));
+
+              if (adaptation)
+                adaptation_value += neuron_data->adaptation_strengths[neuron_label];
+
 
               neuron_data->refraction_counter[idx] = refractory_period_in_timesteps;
               neuron_data->last_spike_time_of_each_neuron[idx] = (current_time_in_timesteps + g)*timestep;
@@ -276,6 +330,7 @@ namespace Backend {
           }
       }
       neuron_data->membrane_potentials_v[idx] = membrane_potential_Vi;
+      neuron_data->adaptation_values[idx] = adaptation_value;
       idx += blockDim.x * gridDim.x;
       }
     } 

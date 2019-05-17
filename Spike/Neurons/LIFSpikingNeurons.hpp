@@ -17,6 +17,11 @@ struct lif_spiking_neuron_parameters_struct : spiking_neuron_parameters_struct {
   float somatic_leakage_conductance_g0;
   float background_current;
 
+  bool adaptation = false;
+  float adaptation_tau = 0.100;
+  float adaptation_reversal_potential = -0.080;
+  float adaptation_strength = 0.1;
+
 };
 
 class LIFSpikingNeurons; // forward definition
@@ -48,6 +53,10 @@ public:
   vector<float> membrane_resistances_R;
   vector<float> background_currents;
   vector<float> refractory_periods;
+  vector<bool> adaptations;
+  vector<float> adaptation_taus;
+  vector<float> adaptation_reversal_potentials;
+  vector<float> adaptation_strengths;
   
   int AddGroup(neuron_parameters_struct * group_params) override;
   void prepare_backend_early() override;

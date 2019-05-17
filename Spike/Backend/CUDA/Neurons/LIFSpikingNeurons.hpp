@@ -15,6 +15,7 @@ namespace Backend {
   namespace CUDA {
     struct lif_spiking_neurons_data_struct: spiking_neurons_data_struct {
       float* membrane_potentials_v; 
+      float* adaptation_values;
       float* membrane_time_constants_tau_m;
       float* membrane_decay_constants;
       float* membrane_resistances_R;
@@ -25,12 +26,17 @@ namespace Backend {
       int* refractory_timesteps;
       int* refraction_counter;
       int* neuron_labels;
+
+      bool* adaptations;
+      float* adaptation_strengths;
+      float* adaptation_taus;
+      float* adaptation_reversal_potentials;
     };
 
     class LIFSpikingNeurons : public virtual ::Backend::CUDA::SpikingNeurons,
                               public virtual ::Backend::LIFSpikingNeurons {
     public:
-      float* membrane_potentials_v;
+      float* membrane_potentials_v = nullptr;
       float * membrane_time_constants_tau_m = nullptr;
       float * membrane_decay_constants = nullptr;
       float * membrane_resistances_R = nullptr;
@@ -39,6 +45,12 @@ namespace Backend {
       float* after_spike_reset_potentials_vreset = nullptr;
       float* background_currents = nullptr;
       int* refractory_timesteps = nullptr;
+      
+      bool* adaptations = nullptr;
+      float* adaptation_values = nullptr;
+      float* adaptation_strengths = nullptr;
+      float* adaptation_taus = nullptr;
+      float* adaptation_reversal_potentials = nullptr;
 
       int* refraction_counter = nullptr;
       int* neuron_labels = nullptr;
