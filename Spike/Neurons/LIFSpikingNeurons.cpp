@@ -68,10 +68,13 @@ int LIFSpikingNeurons::AddGroup(neuron_parameters_struct * group_params){
     background_currents.push_back(this_group_params->background_current);
     refractory_periods.push_back(this_group_params->absolute_refractory_period);
 
-    adaptations.push_back(this_group_params->adaptation);
     adaptation_reversal_potentials.push_back(this_group_params->adaptation_reversal_potential);
     adaptation_strengths.push_back(this_group_params->adaptation_strength);
     adaptation_taus.push_back(this_group_params->adaptation_tau);
+    
+    // Because bool vectors are not treated like usual ones ...
+    adaptations = (bool*)realloc(adaptations, sizeof(bool)*adaptation_strengths.size());
+    adaptations[adaptation_strengths.size() - 1] = this_group_params->adaptation;
     
     index = after_spike_reset_potentials_vreset.size() - 1;
   }

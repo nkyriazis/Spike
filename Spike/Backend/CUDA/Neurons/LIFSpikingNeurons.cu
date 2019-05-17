@@ -38,7 +38,7 @@ namespace Backend {
       CudaSafeCall(cudaMalloc((void **)&membrane_resistances_R, sizeof(float)*frontend()->membrane_resistances_R.size()));
       CudaSafeCall(cudaMalloc((void **)&refractory_timesteps, sizeof(int)*frontend()->refractory_periods.size()));
       CudaSafeCall(cudaMalloc((void **)&background_currents, sizeof(int)*frontend()->background_currents.size()));
-      CudaSafeCall(cudaMalloc((void **)&adaptations, sizeof(bool)*frontend()->adaptations.size()));
+      CudaSafeCall(cudaMalloc((void **)&adaptations, sizeof(bool)*frontend()->adaptation_strengths.size()));
       CudaSafeCall(cudaMalloc((void **)&adaptation_strengths, sizeof(float)*frontend()->adaptation_strengths.size()));
       CudaSafeCall(cudaMalloc((void **)&adaptation_taus, sizeof(float)*frontend()->adaptation_taus.size()));
       CudaSafeCall(cudaMalloc((void **)&adaptation_reversal_potentials, sizeof(float)*frontend()->adaptation_reversal_potentials.size()));
@@ -65,8 +65,8 @@ namespace Backend {
                               sizeof(float)*frontend()->membrane_time_constants_tau_m.size(),
                               cudaMemcpyHostToDevice));
       CudaSafeCall(cudaMemcpy(adaptations,
-                              (bool*)frontend()->adaptations.data(),
-                              sizeof(bool)*frontend()->adaptations.size(),
+                              frontend()->adaptations,
+                              sizeof(bool)*frontend()->adaptation_strengths.size(),
                               cudaMemcpyHostToDevice));
       CudaSafeCall(cudaMemcpy(adaptation_taus,
                               frontend()->adaptation_taus.data(),

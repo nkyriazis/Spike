@@ -53,7 +53,7 @@ public:
   vector<float> membrane_resistances_R;
   vector<float> background_currents;
   vector<float> refractory_periods;
-  vector<bool> adaptations;
+  bool* adaptations = nullptr;
   vector<float> adaptation_taus;
   vector<float> adaptation_reversal_potentials;
   vector<float> adaptation_strengths;
