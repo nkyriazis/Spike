@@ -30,7 +30,6 @@ public:
   int num_measurements = 0;
   float * neuron_measurements = nullptr;
 
-  void prepare_backend_early() override;
   void state_update(unsigned int current_time_in_timesteps, float timestep) override;
   void final_update(unsigned int current_time_in_timesteps, float timestep) override;
   void reset_state() override;

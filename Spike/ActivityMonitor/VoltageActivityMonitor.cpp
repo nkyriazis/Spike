@@ -16,14 +16,10 @@ VoltageActivityMonitor::VoltageActivityMonitor(SpikingNeurons * neurons_paramete
 }
 
 void VoltageActivityMonitor::reset_state() {
-  free(neuron_membrane_voltages);
-  neuron_membrane_voltages = nullptr;
+  free(neuron_measurements);
+  neuron_measurements = nullptr;
   num_measurements = 0;
   backend()->reset_state();
-}
-
-void VoltageActivityMonitor::prepare_backend_early() {
-  per_neuron_spike_counts = (int *)malloc(sizeof(int)*neurons->total_number_of_neurons);
 }
 
 void VoltageActivityMonitor::state_update(unsigned int current_time_in_timesteps, float timestep) {
@@ -42,7 +38,7 @@ void VoltageActivityMonitor::save_measurements_as_txt(string path, string prefix
 
   // Send the data
   for (int i = 0; i < num_measurements; i++) {
-    measurementsfile << neuron_membrane_voltages[i] << endl;
+    measurementsfile << neuron_measurements[i] << endl;
   }
   // Close the files
   measurementsfile.close();
@@ -55,7 +51,7 @@ void VoltageActivityMonitor::save_measurements_as_binary(string path, string pre
   measurementsfile.open((path + "/" + prefix + "MemVoltages.bin"), ios::out | ios::binary);
 
   // Send the data
-  measurementsfile.write((char *)neuron_membrane_voltages, num_measurements*sizeof(int));
+  measurementsfile.write((char *)neuron_measurements, num_measurements*sizeof(int));
   // Close the files
   measurementsfile.close();
 }

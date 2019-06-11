@@ -28,5 +28,6 @@
 // Monitors
 #include "Spike/ActivityMonitor/SpikingActivityMonitor.hpp"
 #include "Spike/ActivityMonitor/RateActivityMonitor.hpp"
+#include "Spike/ActivityMonitor/VoltageActivityMonitor.hpp"
 
 #endif

@@ -11,6 +11,9 @@ namespace Backend {
     void VoltageActivityMonitor::reset_state() {
       ActivityMonitor::reset_state();
     }
+    
+    void VoltageActivityMonitor::collect_measurement(unsigned int current_time_in_timesteps, float timestep){
+    }
 
     void VoltageActivityMonitor::copy_data_to_host() {
     }

@@ -27,7 +27,6 @@ namespace Backend {
       for (int i = 0; i < num_measurements; i++){
         frontend()->neuron_measurements[frontend()->num_measurements + i] = neuron_measurements[i];
       }
-
       frontend()->num_measurements += num_measurements;
       reset_state();
     }
@@ -40,6 +39,9 @@ namespace Backend {
                               cudaMemcpyDeviceToHost));
 
       num_measurements++;
+
+      if (num_measurements == max_num_measurements)
+        copy_data_to_host();
     }
 
 
