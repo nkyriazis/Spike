@@ -3,9 +3,6 @@
 #include "Spike/ActivityMonitor/ActivityMonitor.hpp"
 #include "Spike/Backend/CUDA/CUDABackend.hpp"
 
-#include "Spike/Neurons/SpikingNeurons.hpp"
-#include "Spike/Backend/CUDA/Neurons/SpikingNeurons.hpp"
-
 #include <cuda.h>
 #include <vector_types.h>
 #include <curand.h>

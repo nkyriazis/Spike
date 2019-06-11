@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Spike/Neurons/SpikingNeurons.hpp"
+#include "Spike/Backend/CUDA/Neurons/SpikingNeurons.hpp"
+
 #include "Spike/ActivityMonitor/RateActivityMonitor.hpp"
 #include "ActivityMonitor.hpp"
 #include "Spike/Backend/CUDA/CUDABackend.hpp"

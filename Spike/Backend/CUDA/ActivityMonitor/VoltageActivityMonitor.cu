@@ -19,10 +19,6 @@ namespace Backend {
       neurons_frontend = frontend()->neurons;
       neurons_backend =
         dynamic_cast<::Backend::CUDA::LIFSpikingNeurons*>(neurons_frontend->backend());
-      allocate_pointers_for_spike_count();
-    }
-
-    void VoltageActivityMonitor::allocate_pointers_for_spike_count() {
       neuron_measurements = (float*)malloc(sizeof(float)*max_num_measurements);
     }
 

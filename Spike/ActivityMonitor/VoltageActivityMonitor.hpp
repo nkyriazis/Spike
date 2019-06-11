@@ -34,7 +34,8 @@ public:
   void state_update(unsigned int current_time_in_timesteps, float timestep) override;
   void final_update(unsigned int current_time_in_timesteps, float timestep) override;
   void reset_state() override;
-  void add_spikes_to_per_neuron_spike_count(unsigned int current_time_in_timesteps, float timestep);
+  void save_measurements_as_txt(string path, string prefix);
+  void save_measurements_as_binary(string path, string prefix);
 
 private:
   std::shared_ptr<::Backend::VoltageActivityMonitor> _backend;

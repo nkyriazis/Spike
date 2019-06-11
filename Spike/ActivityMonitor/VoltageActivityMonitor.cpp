@@ -34,4 +34,30 @@ void VoltageActivityMonitor::final_update(unsigned int current_time_in_timesteps
   backend()->copy_data_to_host();
 }
 
-SPIKE_MAKE_INIT_BACKEND(RateActivityMonitor);
+void VoltageActivityMonitor::save_measurements_as_txt(string path, string prefix){
+  ofstream measurementsfile;
+
+  // Open output files
+  measurementsfile.open((path + "/" + prefix + "MemVoltages.txt"), ios::out | ios::binary);
+
+  // Send the data
+  for (int i = 0; i < num_measurements; i++) {
+    measurementsfile << neuron_membrane_voltages[i] << endl;
+  }
+  // Close the files
+  measurementsfile.close();
+}
+
+void VoltageActivityMonitor::save_measurements_as_binary(string path, string prefix){
+  ofstream measurementsfile;
+
+  // Open output files
+  measurementsfile.open((path + "/" + prefix + "MemVoltages.bin"), ios::out | ios::binary);
+
+  // Send the data
+  measurementsfile.write((char *)neuron_membrane_voltages, num_measurements*sizeof(int));
+  // Close the files
+  measurementsfile.close();
+}
+
+SPIKE_MAKE_INIT_BACKEND(VoltageActivityMonitor);
