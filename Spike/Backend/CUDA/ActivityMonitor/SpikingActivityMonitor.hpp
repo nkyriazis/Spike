@@ -29,6 +29,9 @@ namespace Backend {
       int* neuron_ids_of_stored_spikes_on_device = nullptr;
       int* total_number_of_spikes_stored_on_device = nullptr;
       float* time_in_seconds_of_stored_spikes_on_device = nullptr;
+    private:
+      ::SpikingNeurons* neurons_frontend = nullptr;
+      ::Backend::CUDA::SpikingNeurons* neurons_backend = nullptr;
     };
 
     __global__ void collect_spikes_for_timestep_kernel

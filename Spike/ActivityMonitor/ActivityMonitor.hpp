@@ -32,7 +32,6 @@ public:
   void init_backend(Context* ctx = _global_ctx) override;
   SPIKE_ADD_BACKEND_GETSET(ActivityMonitor, SpikeBase);
 
-  SpikingNeurons* neurons = nullptr;
   SpikingModel* model = nullptr;
   virtual void state_update(unsigned int current_time_in_timesteps, float timestep) = 0;
   virtual void final_update(unsigned int current_time_in_timesteps, float timestep) = 0;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Spike/ActivityMonitor/RateActivityMonitor.hpp"
+#include "Spike/ActivityMonitor/VoltageActivityMonitor.hpp"
 #include "ActivityMonitor.hpp"
 #include "Spike/Backend/CUDA/CUDABackend.hpp"
 #include <cuda.h>
@@ -10,27 +10,30 @@
 
 namespace Backend {
   namespace CUDA {
-    class RateActivityMonitor :
+    class VoltageActivityMonitor :
       public virtual ::Backend::CUDA::ActivityMonitor,
-      public virtual ::Backend::RateActivityMonitor {
+      public virtual ::Backend::VoltageActivityMonitor {
     public:
-      ~RateActivityMonitor() override;
-      SPIKE_MAKE_BACKEND_CONSTRUCTOR(RateActivityMonitor);
-      using ::Backend::RateActivityMonitor::frontend;
-      
-      int * per_neuron_spike_counts = nullptr;
+      ~VoltageActivityMonitor() override;
+      SPIKE_MAKE_BACKEND_CONSTRUCTOR(VoltageActivityMonitor);
+      using ::Backend::VoltageActivityMonitor::frontend;
+
+      int max_num_measurements = 1000;
+      int num_measurements = 0;
+      float * neuron_measurements = nullptr;
       
       void prepare() override;
       void reset_state() override;
 
-      void allocate_pointers_for_spike_count(); // Not virtual
+      void allocate_pointers_for_data();
 
-      void copy_spike_count_to_host() override;
-      void add_spikes_to_per_neuron_spike_count(unsigned int current_time_in_timesteps, float timestep) override;
-
+      void copy_data_to_host() override;
+      void collect_measurement(unsigned int current_time_in_timesteps, float timestep) override;
+    
     private:
       ::SpikingNeurons* neurons_frontend = nullptr;
-      ::Backend::CUDA::SpikingNeurons* neurons_backend = nullptr;
+      ::Backend::CUDA::LIFSpikingNeurons* neurons_backend = nullptr;
+
     };
 
     __global__ void add_spikes_to_per_neuron_spike_count_kernel

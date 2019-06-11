@@ -20,9 +20,6 @@ namespace Backend {
       void prepare() override;
       void reset_state() override;
 
-    protected:
-      ::SpikingNeurons* neurons_frontend = nullptr;
-      ::Backend::CUDA::SpikingNeurons* neurons_backend = nullptr;
     };
   }
 }

@@ -27,6 +27,7 @@ public:
   ~RateActivityMonitor() override = default;
       
   int * per_neuron_spike_counts = nullptr;
+  SpikingNeurons* neurons = nullptr;
 
   void prepare_backend_early() override;
   void state_update(unsigned int current_time_in_timesteps, float timestep) override;
