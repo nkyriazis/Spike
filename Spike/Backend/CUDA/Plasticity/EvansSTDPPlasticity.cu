@@ -123,7 +123,7 @@ namespace Backend {
             syn_update_val += ((1 - old_synaptic_weight) * recent_presynaptic_activity_C);
           }
 
-          new_synaptic_weight = old_synaptic_weight + syn_update_val;
+          new_synaptic_weight = old_synaptic_weight + stdp_vars.learning_rate_rho*syn_update_val;
           if (new_synaptic_weight < 0.0f)
             new_synaptic_weight = 0.0f;
           if (new_synaptic_weight > 1.0f)
