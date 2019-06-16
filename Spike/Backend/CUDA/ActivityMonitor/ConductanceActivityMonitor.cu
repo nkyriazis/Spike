@@ -33,7 +33,7 @@ namespace Backend {
     void ConductanceActivityMonitor::collect_measurement
     (unsigned int current_time_in_timesteps, float timestep) {
       CudaSafeCall(cudaMemcpy(frontend()->measurements + num_measurements,
-                              synapses_backend->synaptic_data->neuron_wise_conductance_trace + (frontend()->label_id + frontend()->neuron_id*synapses_backend->synaptic_data->num_syn_labels),
+                              synapses_backend->neuron_wise_conductance_trace + (frontend()->label_id + frontend()->neuron_id*synapses_backend->num_syn_labels),
                               sizeof(float), 
                               cudaMemcpyDeviceToHost));
 
