@@ -51,7 +51,7 @@ void VoltageActivityMonitor::save_measurements_as_binary(string path, string pre
   measurementsfile.open((path + "/" + prefix + "MemVoltages.bin"), ios::out | ios::binary);
 
   // Send the data
-  measurementsfile.write((char *)neuron_measurements, num_measurements*sizeof(int));
+  measurementsfile.write((char *)neuron_measurements, num_measurements*sizeof(float));
   // Close the files
   measurementsfile.close();
 }
