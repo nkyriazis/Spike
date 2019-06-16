@@ -3,7 +3,7 @@
 #include "Spike/Neurons/LIFSpikingNeurons.hpp"
 #include "Spike/Backend/CUDA/Neurons/LIFSpikingNeurons.hpp"
 
-#include "Spike/ActivityMonitor/VoltageActivityMonitor.hpp"
+#include "Spike/ActivityMonitor/ConductanceActivityMonitor.hpp"
 #include "ActivityMonitor.hpp"
 #include "Spike/Backend/CUDA/CUDABackend.hpp"
 #include <cuda.h>
@@ -13,13 +13,13 @@
 
 namespace Backend {
   namespace CUDA {
-    class VoltageActivityMonitor :
+    class ConductanceActivityMonitor :
       public virtual ::Backend::CUDA::ActivityMonitor,
-      public virtual ::Backend::VoltageActivityMonitor {
+      public virtual ::Backend::ConductanceActivityMonitor {
     public:
-      ~VoltageActivityMonitor() override;
-      SPIKE_MAKE_BACKEND_CONSTRUCTOR(VoltageActivityMonitor);
-      using ::Backend::VoltageActivityMonitor::frontend;
+      ~ConductanceActivityMonitor() override;
+      SPIKE_MAKE_BACKEND_CONSTRUCTOR(ConductanceActivityMonitor);
+      using ::Backend::ConductanceActivityMonitor::frontend;
 
       int max_num_measurements = 1000;
       int num_measurements = 0;
@@ -33,10 +33,9 @@ namespace Backend {
       void collect_measurement(unsigned int current_time_in_timesteps, float timestep) override;
     
     private:
-      ::SpikingNeurons* neurons_frontend = nullptr;
-      ::Backend::CUDA::LIFSpikingNeurons* neurons_backend = nullptr;
+      ::ConductanceSpikingSynapses* synapses_frontend = nullptr;
+      ::Backend::CUDA::ConductanceSpikingSynapses* synapses_backend = nullptr;
 
     };
-
   }
 }
