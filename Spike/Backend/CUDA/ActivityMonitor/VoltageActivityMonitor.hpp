@@ -23,6 +23,7 @@ namespace Backend {
 
       int max_num_measurements = 1000;
       int num_measurements = 0;
+      float* measurements = nullptr;
       
       void prepare() override;
       void reset_state() override;

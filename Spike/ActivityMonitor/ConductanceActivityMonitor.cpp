@@ -12,8 +12,8 @@ using namespace std;
 // ConductanceActivityMonitor Constructor
 ConductanceActivityMonitor::ConductanceActivityMonitor(ConductanceSpikingSynapses * synapses_point, int id, int label){
   synapses = synapses_point;
-  neuron_id = neuron_id;
-  syn_label = syn_label;
+  neuron_id = _id;
+  syn_label = label;
 }
 
 void ConductanceActivityMonitor::reset_state() {

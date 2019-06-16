@@ -12,7 +12,7 @@ using namespace std;
 // VoltageActivityMonitor Constructor
 VoltageActivityMonitor::VoltageActivityMonitor(SpikingNeurons * neurons_parameter, int id){
   neurons = neurons_parameter;
-  neuron_id = neuron_id;
+  neuron_id = id;
 }
 
 void VoltageActivityMonitor::reset_state() {

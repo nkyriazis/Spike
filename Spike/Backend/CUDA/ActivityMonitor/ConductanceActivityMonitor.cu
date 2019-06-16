@@ -18,6 +18,7 @@ namespace Backend {
       synapses_frontend = frontend()->synapses;
       synapses_backend =
         dynamic_cast<::Backend::CUDA::ConductanceSpikingSynapses*>(synapses_frontend->backend());
+      measurements = (float*)realloc(measurements, sizeof(float)*(max_num_measurements));
     }
 
     void ConductanceActivityMonitor::copy_data_to_host(){
