@@ -2,6 +2,7 @@
 
 #include "Spike/Neurons/LIFSpikingNeurons.hpp"
 #include "Spike/Backend/CUDA/Neurons/LIFSpikingNeurons.hpp"
+#include "Spike/Backend/CUDA/Synapses/ConductanceSpikingSynapses.hpp"
 
 #include "Spike/ActivityMonitor/ConductanceActivityMonitor.hpp"
 #include "ActivityMonitor.hpp"

@@ -2,6 +2,7 @@
 #define ConductanceActivityMonitor_H
 
 
+#include "Spike/Synapses/ConductanceSpikingSynapses.hpp"
 #include "../ActivityMonitor/ActivityMonitor.hpp"
 
 class ConductanceActivityMonitor; // forward definition
