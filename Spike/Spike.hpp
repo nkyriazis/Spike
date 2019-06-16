@@ -29,5 +29,6 @@
 #include "Spike/ActivityMonitor/SpikingActivityMonitor.hpp"
 #include "Spike/ActivityMonitor/RateActivityMonitor.hpp"
 #include "Spike/ActivityMonitor/VoltageActivityMonitor.hpp"
+#include "Spike/ActivityMonitor/ConductanceActivityMonitor.hpp"
 
 #endif

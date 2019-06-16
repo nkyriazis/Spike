@@ -22,7 +22,7 @@ public:
   void init_backend(Context* ctx = _global_ctx) override;
   
   // Constructor/Destructor
-  ConductanceActivityMonitor(ConductanceSpikingSynapses * synapses, int neuron_id);
+  ConductanceActivityMonitor(ConductanceSpikingSynapses * synapses, int neuron_id, int label_id);
   ~ConductanceActivityMonitor() override = default;
       
   ConductanceSpikingSynapses* synapses = nullptr;
