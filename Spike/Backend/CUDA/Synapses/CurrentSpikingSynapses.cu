@@ -110,6 +110,7 @@ namespace Backend {
         
         return total_current*multiplication_to_volts;
         */
+        return 0.0f;
     };
 
   }

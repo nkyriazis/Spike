@@ -112,6 +112,7 @@ namespace Backend {
         float timestep,
         int idx,
         int g){
+
       /*
       conductance_spiking_synapses_data_struct* synaptic_data = (conductance_spiking_synapses_data_struct*) in_synaptic_data;
         
@@ -133,6 +134,7 @@ namespace Backend {
       }
       return total_current*multiplication_to_volts;
       */
+      return 0.0f;
     };
   }
 }

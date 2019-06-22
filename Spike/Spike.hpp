@@ -30,5 +30,6 @@
 #include "Spike/ActivityMonitor/RateActivityMonitor.hpp"
 #include "Spike/ActivityMonitor/VoltageActivityMonitor.hpp"
 #include "Spike/ActivityMonitor/ConductanceActivityMonitor.hpp"
+#include "Spike/ActivityMonitor/CurrentActivityMonitor.hpp"
 
 #endif
