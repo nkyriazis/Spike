@@ -14,7 +14,7 @@
 namespace Backend {
   namespace CUDA {
     struct current_spiking_synapses_data_struct: spiking_synapses_data_struct {
-	    float* neuron_wise_current_trace;
+      float* neuron_wise_current_trace;
       float* decay_terms_tau;
     };
     class CurrentSpikingSynapses : public virtual ::Backend::CUDA::SpikingSynapses,
@@ -37,8 +37,9 @@ namespace Backend {
 
       void state_update
       (unsigned int current_time_in_timesteps, float timestep) final;
-      
+
     };
+
     __device__ float current_spiking_current_injection_kernel(
         spiking_synapses_data_struct* in_synaptic_data,
         spiking_neurons_data_struct* neuron_data,
@@ -48,6 +49,7 @@ namespace Backend {
         float timestep,
         int idx,
         int g);
+
   }
 }
 
