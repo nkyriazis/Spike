@@ -16,6 +16,7 @@ namespace Backend {
     struct current_spiking_synapses_data_struct: spiking_synapses_data_struct {
       float* neuron_wise_current_trace;
       float* decay_terms_tau;
+      float* weight_scaling_constants;
     };
     class CurrentSpikingSynapses : public virtual ::Backend::CUDA::SpikingSynapses,
                                    public virtual ::Backend::CurrentSpikingSynapses {
@@ -28,6 +29,7 @@ namespace Backend {
       float* neuron_wise_current_trace = nullptr;
       float* h_neuron_wise_current_trace = nullptr;
       float* d_decay_terms_tau = nullptr;
+      float* d_weight_scaling_constants = nullptr;
       
       void prepare() override;
       void reset_state() override;

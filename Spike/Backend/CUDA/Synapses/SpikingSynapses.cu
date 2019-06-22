@@ -66,7 +66,6 @@ namespace Backend {
       synaptic_data->postsynaptic_neuron_indices = postsynaptic_neuron_indices;
       synaptic_data->delays = delays;
       synaptic_data->synaptic_efficacies_or_weights = synaptic_efficacies_or_weights;
-      synaptic_data->weight_scaling_constants = weight_scaling_constants;
 
 
       CudaSafeCall(cudaMemcpy(d_synaptic_data,
@@ -191,7 +190,6 @@ namespace Backend {
         
         int targetloc = (bufferloc + synaptic_data->delays[synapse_id] + synaptic_data->group_indices[pos]) % synaptic_data->neuron_inputs.temporal_buffersize;
         int syn_label = synaptic_data->syn_labels[synapse_id];
-        float weightinput = synaptic_data->synaptic_efficacies_or_weights[synapse_id]*synaptic_data->weight_scaling_constants[synapse_id];
         atomicAdd(&synaptic_data->neuron_inputs.circular_input_buffer[targetloc*synaptic_data->neuron_inputs.input_buffersize + syn_label + postneuron*synaptic_data->num_syn_labels], weightinput);
         indx += blockDim.x * gridDim.x;
       }

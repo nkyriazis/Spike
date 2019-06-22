@@ -38,21 +38,20 @@ int ConductanceSpikingSynapses::AddGroup(int presynaptic_group_id,
 
   for (int i = (total_number_of_synapses - temp_number_of_synapses_in_last_group); i < total_number_of_synapses; i++) {
     synaptic_conductances_g[i] = 0.0f;
-    //reversal_potentials_Vhat[i] = conductance_spiking_synapse_group_params->reversal_potential_Vhat;
-    //decay_terms_tau_g[i] = conductance_spiking_synapse_group_params->decay_term_tau_g;
   }
   if (reversal_potentials_Vhat.size() == 0){
     // If a group has not yet been initialized, make it of this type
     reversal_potentials_Vhat.push_back(conductance_spiking_synapse_group_params->reversal_potential_Vhat);
     decay_terms_tau_g.push_back(conductance_spiking_synapse_group_params->decay_term_tau_g);
-    //num_syn_labels++;
+    weight_scaling_constants.push_back(conductance_spiking_synapse_group_params->weight_scaling_constant);
   } else {
     // Check if this pair exists, if yes set the syn_labels or create a new syn_label
     bool isfound = false;
     int indextoset = 0;
     for (int index = 0; index < reversal_potentials_Vhat.size(); index++){
       if (  (reversal_potentials_Vhat[index] == conductance_spiking_synapse_group_params->reversal_potential_Vhat) &&
-        (decay_terms_tau_g[index] == conductance_spiking_synapse_group_params->decay_term_tau_g) ){
+        (decay_terms_tau_g[index] == conductance_spiking_synapse_group_params->decay_term_tau_g) &&
+        (weight_scaling_constants[index] == conductance_spiking_synapse_group_params->weight_scaling_constant)){
         isfound = true;
         indextoset = index;
         break;
@@ -61,6 +60,7 @@ int ConductanceSpikingSynapses::AddGroup(int presynaptic_group_id,
     if (!isfound){
       reversal_potentials_Vhat.push_back(conductance_spiking_synapse_group_params->reversal_potential_Vhat);
       decay_terms_tau_g.push_back(conductance_spiking_synapse_group_params->decay_term_tau_g);
+      weight_scaling_constants.push_back(conductance_spiking_synapse_group_params->weight_scaling_constant);
       indextoset = num_syn_labels;
       num_syn_labels++;
 
@@ -77,8 +77,6 @@ int ConductanceSpikingSynapses::AddGroup(int presynaptic_group_id,
 void ConductanceSpikingSynapses::increment_number_of_synapses(int increment) {
 
   synaptic_conductances_g = (float*)realloc(synaptic_conductances_g, total_number_of_synapses * sizeof(float));
-  //reversal_potentials_Vhat = (float*)realloc(reversal_potentials_Vhat, total_number_of_synapses * sizeof(float));
-  //decay_terms_tau_g = (float*)realloc(decay_terms_tau_g, total_number_of_synapses * sizeof(float));
 }
 
 

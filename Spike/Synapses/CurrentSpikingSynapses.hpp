@@ -5,9 +5,10 @@
 #include "Spike/Neurons/SpikingNeurons.hpp"
 
 struct current_spiking_synapse_parameters_struct : spiking_synapse_parameters_struct {
-	current_spiking_synapse_parameters_struct(): decay_term_tau(0.001f) { spiking_synapse_parameters_struct(); }
+  float weight_scaling_constant = 1.0;
+  current_spiking_synapse_parameters_struct(): decay_term_tau(0.001f) { spiking_synapse_parameters_struct(); }
 
-	float decay_term_tau;
+  float decay_term_tau;
 };
 
 
@@ -29,6 +30,7 @@ public:
   void init_backend(Context* ctx = _global_ctx) override;
   
   vector<float> decay_terms_tau;
+  vector<float> weight_scaling_constants;
   int AddGroup(int presynaptic_group_id, 
                 int postsynaptic_group_id, 
                 Neurons * neurons,

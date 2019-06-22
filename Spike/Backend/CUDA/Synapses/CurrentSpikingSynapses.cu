@@ -10,6 +10,7 @@ namespace Backend {
     CurrentSpikingSynapses::~CurrentSpikingSynapses(){
       CudaSafeCall(cudaFree(neuron_wise_current_trace));
       CudaSafeCall(cudaFree(d_decay_terms_tau));
+      CudaSafeCall(cudaFree(d_weight_scaling_constants));
       free(h_neuron_wise_current_trace);
     }
     void CurrentSpikingSynapses::prepare() {
@@ -27,6 +28,7 @@ namespace Backend {
       current_spiking_synapses_data_struct* this_synaptic_data = static_cast<current_spiking_synapses_data_struct*>(synaptic_data);
       this_synaptic_data->neuron_wise_current_trace = neuron_wise_current_trace;
       this_synaptic_data->decay_terms_tau = d_decay_terms_tau;
+      this_synaptic_data->weight_scaling_constants = d_weight_scaling_constants;
       this_synaptic_data->synapse_type = CURRENT;
       CudaSafeCall(cudaMemcpy(
         d_synaptic_data,
@@ -43,6 +45,7 @@ namespace Backend {
 
       CudaSafeCall(cudaMalloc((void **)&neuron_wise_current_trace, sizeof(float)*current_array_length));
       CudaSafeCall(cudaMalloc((void **)&d_decay_terms_tau, sizeof(float)*frontend()->num_syn_labels));
+      CudaSafeCall(cudaMalloc((void **)&d_weight_scaling_constants, sizeof(float)*frontend()->num_syn_labels));
       CudaSafeCall(cudaFree(d_synaptic_data));
       CudaSafeCall(cudaMalloc((void **)&d_synaptic_data, sizeof(current_spiking_synapses_data_struct)));
       CudaSafeCall(cudaMemcpyFromSymbol(
@@ -55,6 +58,10 @@ namespace Backend {
       CudaSafeCall(cudaMemcpy(
         d_decay_terms_tau,
         &(frontend()->decay_terms_tau[0]),
+        sizeof(float)*frontend()->num_syn_labels, cudaMemcpyHostToDevice));
+      CudaSafeCall(cudaMemcpy(
+        d_weight_scaling_constants,
+        &(frontend()->weight_scaling_constants[0]),
         sizeof(float)*frontend()->num_syn_labels, cudaMemcpyHostToDevice));
     }
 
@@ -81,6 +88,7 @@ namespace Backend {
         int idx,
         int g){
       
+      /*
       current_spiking_synapses_data_struct* synaptic_data = (current_spiking_synapses_data_struct*) in_synaptic_data;
         
       int total_number_of_neurons =  neuron_data->total_number_of_neurons;
@@ -101,6 +109,7 @@ namespace Backend {
         }
         
         return total_current*multiplication_to_volts;
+        */
     };
 
   }

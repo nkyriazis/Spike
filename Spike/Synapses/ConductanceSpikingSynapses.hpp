@@ -5,8 +5,9 @@
 #include "Spike/Neurons/SpikingNeurons.hpp"
 
 struct conductance_spiking_synapse_parameters_struct : spiking_synapse_parameters_struct {
-	conductance_spiking_synapse_parameters_struct(): reversal_potential_Vhat(0.0f), decay_term_tau_g(0.001f) { spiking_synapse_parameters_struct(); }
+  conductance_spiking_synapse_parameters_struct(): reversal_potential_Vhat(0.0f), decay_term_tau_g(0.001f) { spiking_synapse_parameters_struct(); }
 
+  float weight_scaling_constant = 1.0;
   float reversal_potential_Vhat;
   float decay_term_tau_g;
 };
@@ -33,6 +34,7 @@ public:
   float * synaptic_conductances_g = nullptr;
   vector<float> reversal_potentials_Vhat;
   vector<float> decay_terms_tau_g;
+  vector<float> weight_scaling_constants;
 
   // Synapse Functions
   int AddGroup(int presynaptic_group_id, 

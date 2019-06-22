@@ -42,7 +42,7 @@ __device__ float my_conductance_spiking_injection_kernel(
     synaptic_conductance_g *= decay_factor;
     float conductance_increment = synaptic_data->neuron_inputs.circular_input_buffer[bufferloc + syn_label + idx*synaptic_data->num_syn_labels];
     if (conductance_increment != 0.0f){
-      synaptic_conductance_g += conductance_increment;
+      synaptic_conductance_g += conductance_increment*synaptic_data->weight_scaling_constants[syn_label];
       // Reset the conductance update
       synaptic_data->neuron_inputs.circular_input_buffer[bufferloc + syn_label + idx*synaptic_data->num_syn_labels] = 0.0f;
     }
@@ -77,7 +77,7 @@ __device__ float my_current_spiking_injection_kernel(
     synaptic_current *= decay_factor;
     float current_increment = synaptic_data->neuron_inputs.circular_input_buffer[bufferloc + syn_label + idx*synaptic_data->num_syn_labels];
     if (current_increment != 0.0){
-      synaptic_current += current_increment;
+      synaptic_current += current_increment*synaptic_data->weight_scaling_constants[syn_label];
       // Reset the current update
       synaptic_data->neuron_inputs.circular_input_buffer[bufferloc + syn_label + idx*synaptic_data->num_syn_labels] = 0.0f;
     }

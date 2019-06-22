@@ -20,13 +20,14 @@ int CurrentSpikingSynapses::AddGroup(int presynaptic_group_id,
   if (decay_terms_tau.size() == 0){
     // If a group has not yet been initialized, make it of this type
     decay_terms_tau.push_back(current_spiking_synapse_group_params->decay_term_tau);
-    //num_syn_labels++; // These already start with one
+    weight_scaling_constants.push_back(current_spiking_synapse_group_params->weight_scaling_constant);
   } else {
     // Check if this pair exists, if yes set the syn_labels or create a new syn_label
     bool isfound = false;
     int indextoset = 0;
     for (int index = 0; index < decay_terms_tau.size(); index++){
-      if (decay_terms_tau[index] == current_spiking_synapse_group_params->decay_term_tau){
+      if ((decay_terms_tau[index] == current_spiking_synapse_group_params->decay_term_tau) &&
+          (weight_scaling_constants[index] == current_spiking_synapse_group_params->weight_scaling_constant)){
         isfound = true;
         indextoset = index;
         break;
@@ -35,6 +36,7 @@ int CurrentSpikingSynapses::AddGroup(int presynaptic_group_id,
 
     if (!isfound){
       decay_terms_tau.push_back(current_spiking_synapse_group_params->decay_term_tau);
+      weight_scaling_constants.push_back(current_spiking_synapse_group_params->weight_scaling_constant);
       indextoset = num_syn_labels;
       num_syn_labels++;
     }

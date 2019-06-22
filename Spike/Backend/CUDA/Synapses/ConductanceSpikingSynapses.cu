@@ -13,6 +13,7 @@ namespace Backend {
       CudaSafeCall(cudaFree(d_synaptic_data));
       CudaSafeCall(cudaFree(d_decay_factors_g));
       CudaSafeCall(cudaFree(d_reversal_potentials_Vhat));
+      CudaSafeCall(cudaFree(d_weight_scaling_constants));
       free(h_neuron_wise_conductance_trace);
     }
 
@@ -37,6 +38,7 @@ namespace Backend {
       conductance_spiking_synapses_data_struct* this_synaptic_data = static_cast<conductance_spiking_synapses_data_struct*>(synaptic_data); 
       this_synaptic_data->decay_factors_g = d_decay_factors_g;
       this_synaptic_data->reversal_potentials_Vhat = d_reversal_potentials_Vhat;
+      this_synaptic_data->weight_scaling_constants = d_weight_scaling_constants;
       this_synaptic_data->neuron_wise_conductance_trace = neuron_wise_conductance_trace;
       this_synaptic_data->synapse_type = CONDUCTANCE;
       CudaSafeCall(cudaMemcpy(
@@ -60,6 +62,7 @@ namespace Backend {
       CudaSafeCall(cudaMalloc((void **)&neuron_wise_conductance_trace, sizeof(float)*conductance_trace_length));
       CudaSafeCall(cudaMalloc((void **)&d_decay_factors_g, sizeof(float)*frontend()->num_syn_labels));
       CudaSafeCall(cudaMalloc((void **)&d_reversal_potentials_Vhat, sizeof(float)*frontend()->num_syn_labels));
+      CudaSafeCall(cudaMalloc((void **)&d_weight_scaling_constants, sizeof(float)*frontend()->num_syn_labels));
       CudaSafeCall(cudaFree(d_synaptic_data));
       CudaSafeCall(cudaMalloc((void **)&d_synaptic_data, sizeof(conductance_spiking_synapses_data_struct)));
       CudaSafeCall(cudaMemcpyFromSymbol(
@@ -84,6 +87,10 @@ namespace Backend {
         d_reversal_potentials_Vhat,
         &(frontend()->reversal_potentials_Vhat[0]),
         sizeof(float)*frontend()->num_syn_labels, cudaMemcpyHostToDevice));
+      CudaSafeCall(cudaMemcpy(
+        d_weight_scaling_constants,
+        &(frontend()->weight_scaling_constants[0]),
+        sizeof(float)*frontend()->num_syn_labels, cudaMemcpyHostToDevice));
     }
 
 
@@ -105,7 +112,7 @@ namespace Backend {
         float timestep,
         int idx,
         int g){
-      
+      /*
       conductance_spiking_synapses_data_struct* synaptic_data = (conductance_spiking_synapses_data_struct*) in_synaptic_data;
         
       int bufferloc = ((current_time_in_timesteps + g) % synaptic_data->neuron_inputs.temporal_buffersize)*synaptic_data->neuron_inputs.input_buffersize;
@@ -125,6 +132,7 @@ namespace Backend {
     
       }
       return total_current*multiplication_to_volts;
+      */
     };
   }
 }

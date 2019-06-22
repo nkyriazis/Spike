@@ -56,7 +56,6 @@ void Synapses::sort_synapses(Neurons* input_neurons, Neurons* neurons){
       temp_presyn_array[s] = presynaptic_neuron_indices[synapse_sort_indices[s]];
       temp_postsyn_array[s] = postsynaptic_neuron_indices[synapse_sort_indices[s]];
       temp_weight_array[s] = synaptic_efficacies_or_weights[synapse_sort_indices[s]];
-      temp_scaling_array[s] = weight_scaling_constants[synapse_sort_indices[s]];
 
       synapse_reversesort_indices[synapse_sort_indices[s]] = s;
     }
@@ -64,12 +63,10 @@ void Synapses::sort_synapses(Neurons* input_neurons, Neurons* neurons){
     free(presynaptic_neuron_indices);
     free(postsynaptic_neuron_indices);
     free(synaptic_efficacies_or_weights);
-    free(weight_scaling_constants);
 
     presynaptic_neuron_indices = temp_presyn_array;
     postsynaptic_neuron_indices = temp_postsyn_array;
     synaptic_efficacies_or_weights = temp_weight_array;
-    weight_scaling_constants = temp_scaling_array;
 
     synapses_sorted = true;
   }
@@ -83,7 +80,6 @@ Synapses::~Synapses() {
   free(synapse_postsynaptic_neuron_count_index);
   free(synapse_sort_indices);
   free(synapse_reversesort_indices);
-  free(weight_scaling_constants);
 
   delete random_state_manager;
 }
@@ -321,7 +317,6 @@ int Synapses::AddGroup(int presynaptic_group_id,
 
   for (int i = original_number_of_synapses; i < total_number_of_synapses; i++){
           
-          weight_scaling_constants[i] = synapse_params->weight_scaling_constant;
     
           float weight_range_bottom = synapse_params->weight_range[0];
           float weight_range_top = synapse_params->weight_range[1];
@@ -404,7 +399,6 @@ void Synapses::increment_number_of_synapses(int increment) {
           presynaptic_neuron_indices = (int*)malloc(total_number_of_synapses * sizeof(int));
           postsynaptic_neuron_indices = (int*)malloc(total_number_of_synapses * sizeof(int));
           synaptic_efficacies_or_weights = (float*)malloc(total_number_of_synapses * sizeof(float));
-          weight_scaling_constants = (float*)malloc(total_number_of_synapses * sizeof(float));
           synapse_postsynaptic_neuron_count_index = (int*)malloc(total_number_of_synapses * sizeof(int));
           synapse_sort_indices = (int*)malloc(total_number_of_synapses * sizeof(int));
           synapse_reversesort_indices = (int*)malloc(total_number_of_synapses * sizeof(int));
@@ -413,7 +407,6 @@ void Synapses::increment_number_of_synapses(int increment) {
     int* temp_postsynaptic_neuron_indices = (int*)realloc(postsynaptic_neuron_indices, total_number_of_synapses * sizeof(int));
     float* temp_synaptic_efficacies_or_weights = (float*)realloc(synaptic_efficacies_or_weights, total_number_of_synapses * sizeof(float));
     int* temp_synapse_postsynaptic_neuron_count_index = (int*)realloc(synapse_postsynaptic_neuron_count_index, total_number_of_synapses * sizeof(int));
-    float* temp_weight_scaling_constants = (float*)realloc(weight_scaling_constants, total_number_of_synapses * sizeof(float));
     int* temp_sort_indices = (int*)realloc(synapse_sort_indices, total_number_of_synapses * sizeof(int));
     int* temp_revsort_indices = (int*)realloc(synapse_reversesort_indices, total_number_of_synapses * sizeof(int));
 
@@ -421,7 +414,6 @@ void Synapses::increment_number_of_synapses(int increment) {
     if (temp_postsynaptic_neuron_indices != nullptr) postsynaptic_neuron_indices = temp_postsynaptic_neuron_indices;
     if (temp_synaptic_efficacies_or_weights != nullptr) synaptic_efficacies_or_weights = temp_synaptic_efficacies_or_weights;
     if (temp_synapse_postsynaptic_neuron_count_index != nullptr) synapse_postsynaptic_neuron_count_index = temp_synapse_postsynaptic_neuron_count_index;
-    if (temp_weight_scaling_constants != nullptr) weight_scaling_constants = temp_weight_scaling_constants;
     if (temp_sort_indices != nullptr) synapse_sort_indices = temp_sort_indices;
     if (temp_revsort_indices != nullptr) synapse_reversesort_indices = temp_revsort_indices;
   }
