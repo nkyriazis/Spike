@@ -9,16 +9,20 @@ namespace Backend {
     }
 
     SpikingNeurons::~SpikingNeurons() {
-      CudaSafeCall(cudaFree(last_spike_time_of_each_neuron));
       CudaSafeCall(cudaFree(d_neuron_data));
+      CudaSafeCall(cudaFree(num_activated_neurons));
+      CudaSafeCall(cudaFree(activated_neuron_ids));
+      CudaSafeCall(cudaFree(activation_subtimesteps));
 
-      CudaSafeCall(cudaFree(neuron_spike_time_bitbuffer));
+      CudaSafeCall(cudaFree(neuron_spike_time_bitbuffer_bytesize));
       CudaSafeCall(cudaFree(neuron_spike_time_bitbuffer));
     }
 
     void SpikingNeurons::allocate_device_pointers() {
       
-      CudaSafeCall(cudaMalloc((void **)&last_spike_time_of_each_neuron, sizeof(float)*frontend()->total_number_of_neurons));
+      CudaSafeCall(cudaMalloc((void **)&num_activated_neurons, sizeof(int)*2));
+      CudaSafeCall(cudaMalloc((void **)&activated_neuron_ids, sizeof(int)*frontend()->total_number_of_neurons));
+      CudaSafeCall(cudaMalloc((void **)&activation_subtimesteps, sizeof(int)*frontend()->total_number_of_neurons));
 
       CudaSafeCall(cudaMalloc((void **)&d_neuron_data, sizeof(spiking_neurons_data_struct)));
       
@@ -37,8 +41,9 @@ namespace Backend {
 
       neuron_data = new spiking_neurons_data_struct();
       memcpy(neuron_data, (static_cast<SpikingNeurons*>(this)->Neurons::neuron_data), sizeof(neurons_data_struct));
-      neuron_data->last_spike_time_of_each_neuron = last_spike_time_of_each_neuron;
 
+      neuron_data->activated_neuron_ids = activated_neuron_ids;
+      neuron_data->activation_subtimesteps = activation_subtimesteps;
       neuron_data->neuron_spike_time_bitbuffer = neuron_spike_time_bitbuffer;
       neuron_data->neuron_spike_time_bitbuffer_bytesize = neuron_spike_time_bitbuffer_bytesize;
 
@@ -52,25 +57,12 @@ namespace Backend {
     void SpikingNeurons::reset_state() {
       Neurons::reset_state();
 
-      // Set last spike times to -1000 so that the times do not affect current simulation.
-      float* tmp_last_spike_times;
-      tmp_last_spike_times = (float*)malloc(sizeof(float)*frontend()->total_number_of_neurons);
-      for (int i=0; i < frontend()->total_number_of_neurons; i++){
-        tmp_last_spike_times[i] = -1000.0f;
-      }
-
-      CudaSafeCall(cudaMemcpy(last_spike_time_of_each_neuron,
-                              tmp_last_spike_times,
-                              frontend()->total_number_of_neurons*sizeof(float),
-                              cudaMemcpyHostToDevice));
-
+      CudaSafeCall(cudaMemset(num_activated_neurons, 0, (sizeof(int)*2)));
       CudaSafeCall(cudaMemset(neuron_spike_time_bitbuffer, 0, (sizeof(uint8_t)*frontend()->total_number_of_neurons*h_neuron_spike_time_bitbuffer_bytesize)));
       CudaSafeCall(cudaMemcpy(neuron_spike_time_bitbuffer_bytesize,
                               &h_neuron_spike_time_bitbuffer_bytesize,
                               sizeof(int),
                               cudaMemcpyHostToDevice));
-      // Free tmp_last_spike_times
-      free (tmp_last_spike_times);
     }
     
     void SpikingNeurons::state_update(unsigned int current_time_in_timesteps, float timestep) {

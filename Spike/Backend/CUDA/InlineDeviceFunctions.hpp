@@ -1,24 +1,5 @@
 #pragma once
 
-
-__device__ void my_activate_synapses(
-  spiking_synapses_data_struct* synaptic_data,
-  spiking_neurons_data_struct* neuron_data,
-  int timestep_group_index,
-  int preneuron_idx,
-  int grouping_index,
-  bool is_input)
-{
-  int pos = atomicAdd(&synaptic_data->num_activated_neurons[grouping_index % 2], 1);
-  int synapse_count = neuron_data->per_neuron_efferent_synapse_count[preneuron_idx];
-  int synapse_start = neuron_data->per_neuron_efferent_synapse_start[preneuron_idx];
-  synaptic_data->active_synapse_counts[pos] = synapse_count;
-  synaptic_data->active_synapse_starts[pos] = synapse_start;
-  synaptic_data->group_indices[pos] = timestep_group_index;
-};
-
-
-
 __device__ float my_conductance_spiking_injection_kernel(
     spiking_synapses_data_struct* in_synaptic_data,
     spiking_neurons_data_struct* neuron_data,

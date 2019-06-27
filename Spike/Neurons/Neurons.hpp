@@ -66,13 +66,8 @@ public:
   // Host Pointers
   int *start_neuron_indices_for_each_group = nullptr;	/**< Indices of the beginnings of each group in the total population. */
   int *last_neuron_indices_for_each_group = nullptr;	/**< Indices of the final neuron in each group. */
-  int * per_neuron_afferent_synapse_count = nullptr;	/**< A (host-side) count of the number of afferent synapses for each neuron */
   int **group_shapes = nullptr;							/**< The 2D shape of each group. */
 
-  int *per_neuron_efferent_synapse_count = nullptr;	/**< An array containing the number of output synapses from each neuron */
-  int *per_neuron_efferent_synapse_start = nullptr;
-  int max_num_efferent_synapses = 0;
-  
   /**  
    *  Determines the total number of neurons by which the simulation should increase.
    This is a virtual function to allow polymorphism in the methods of various SpikingNeuron implementations.
@@ -86,14 +81,6 @@ public:
    *  Resets any undesired data which is dynamically reassigned during a simulation. 
    */
   void reset_state() override;
-
-
-  /**
-   * Adds efferent synapse IDs to the per neuron efferent synapse groiups
-   \param neuron_id the id of the presynaptic neuron from which the synapse emerges
-   \param synapse_id the id of the efferent synapse
-  */
-  void AddEfferentSynapse(int neuron_id, int synapse_id);
 
 private:
   std::shared_ptr<::Backend::Neurons> _backend;

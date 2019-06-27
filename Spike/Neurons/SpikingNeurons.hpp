@@ -34,7 +34,6 @@ public:
   void prepare_backend_early() override;
 
   // Host Pointers
-  unsigned char* bitarray_of_neuron_spikes = nullptr;
   SpikingModel* model = nullptr;
 
   // Functions

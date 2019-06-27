@@ -59,7 +59,6 @@ namespace Backend {
            d_neuron_data,
            neuron_ids_for_stimulus,
            spike_times_for_stimulus,
-           last_spike_time_of_each_neuron,
            current_time_in_timesteps*timestep,
            frontend()->stimulus_onset_adjustment,
            timestep,
@@ -96,7 +95,6 @@ namespace Backend {
         spiking_neurons_data_struct* neuron_data,
         int *d_neuron_ids_for_stimulus,
         float *d_spike_times_for_stimulus,
-        float* d_last_spike_time_of_each_neuron,
         float current_time_in_seconds,
         float stimulus_onset_adjustment,
         float timestep,
@@ -107,24 +105,19 @@ namespace Backend {
 
       // Get thread IDs
       int idx = threadIdx.x + blockIdx.x * blockDim.x;
+      if (idx == 0){
+        neuron_data->num_activated_neurons[((current_time_in_timesteps / timestep_grouping) + 1) % 2] = 0;
+      }
       int bufsize = neuron_data->neuron_spike_time_bitbuffer_bytesize[0];
       while (idx < number_of_spikes_in_stimulus) {
         for (int g=0; g < timestep_grouping; g++){
           if (fabs((current_time_in_seconds - stimulus_onset_adjustment + g*timestep) - d_spike_times_for_stimulus[idx]) < 0.5 * timestep) {
             int bitloc = (current_time_in_timesteps + g) % (8*bufsize);
             neuron_data->neuron_spike_time_bitbuffer[d_neuron_ids_for_stimulus[idx]*bufsize + (bitloc / 8)] |= (1 << (bitloc % 8));
-           neuron_data->last_spike_time_of_each_neuron[d_neuron_ids_for_stimulus[idx]] = current_time_in_seconds + g*timestep;
-           #ifndef INLINEDEVICEFUNCS
-             syn_activation_kernel(
-           #else
-             INLINE_GENE::my_activate_synapses(
-           #endif
-               synaptic_data,
-               neuron_data,
-               g,
-               d_neuron_ids_for_stimulus[idx],
-               current_time_in_timesteps / timestep_grouping,
-               false);
+            // Recording the neuron which has spiked and which sub-timestep within which it did
+            int pos = atomicAdd(&neuron_data->num_activated_neurons[(current_time_in_timesteps / timestep_grouping) % 2], 1);
+            neuron_data->activated_neuron_ids[pos] = d_neuron_ids_for_stimulus[idx];
+            neuron_data->activation_subtimesteps[pos] = g;
           }
         }
         idx += blockDim.x * gridDim.x;

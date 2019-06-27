@@ -15,7 +15,9 @@
 namespace Backend {
   namespace CUDA {
     struct spiking_neurons_data_struct : neurons_data_struct {
-        float* last_spike_time_of_each_neuron;
+        int* num_activated_neurons;
+        int* activated_neuron_ids;
+        int* activation_subtimesteps;
 
         uint8_t* neuron_spike_time_bitbuffer;
         int* neuron_spike_time_bitbuffer_bytesize;
@@ -33,7 +35,9 @@ namespace Backend {
       void reset_state() override;
 
       // Device Pointers
-      float* last_spike_time_of_each_neuron = nullptr;
+      int* num_activated_neurons = nullptr;
+      int* activated_neuron_ids = nullptr;
+      int* activation_subtimesteps = nullptr;
 
       // Keeping neuorn spike times
       int h_neuron_spike_time_bitbuffer_bytesize;

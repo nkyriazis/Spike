@@ -30,9 +30,9 @@ public:
 
   // Host Pointers
   int* number_of_spikes_in_stimuli = nullptr;
+  float* temporal_lengths_of_stimuli = nullptr;
   int** neuron_id_matrix_for_stimuli = nullptr;
   float** spike_times_matrix_for_stimuli = nullptr;
-  float* temporal_lengths_of_stimuli = nullptr;
 
   int add_stimulus(int spikenumber, int* ids, float* spiketimes);
   int add_stimulus(std::vector<int> ids, std::vector<float> spiketimes);

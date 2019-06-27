@@ -90,8 +90,11 @@ namespace Backend {
        int current_stimulus_index) {
 
    
-      int t_idx = threadIdx.x + blockIdx.x * blockDim.x;
-      int idx = t_idx;
+      int idx = threadIdx.x + blockIdx.x * blockDim.x;
+      if (idx == 0){
+        in_neuron_data->num_activated_neurons[((current_time_in_timesteps / timestep_grouping) + 1) % 2] = 0;
+      }
+      
       int bufsize = in_neuron_data->neuron_spike_time_bitbuffer_bytesize[0];
 
       while (idx < total_number_of_input_neurons){
@@ -109,19 +112,11 @@ namespace Backend {
               float random_float = curand_uniform(&d_states[t_idx]);
               next_spike_timestep_of_each_neuron[idx] = (int)ceilf((- (1.0f / rate)*logf(random_float))/timestep);//(current_time_in_timesteps + g)*timestep +  - (1.0f / rate)*logf(random_float);
               if (active[idx]){
-                in_neuron_data->last_spike_time_of_each_neuron[idx] = (current_time_in_timesteps + g)*timestep;
                 in_neuron_data->neuron_spike_time_bitbuffer[idx*bufsize + (bitloc / 8)] |= (1 << (bitloc % 8));
-              #ifndef INLINEDEVICEFUNCS
-                syn_activation_kernel(
-              #else
-                INLINE_POIS::my_activate_synapses(
-              #endif
-                  synaptic_data,
-                  in_neuron_data,
-                  g,
-                  idx,
-                  current_time_in_timesteps / timestep_grouping,
-                  true);
+                // Recording the neuron which has spiked and which sub-timestep within which it did
+                int pos = atomicAdd(&in_neuron_data->num_activated_neurons[(current_time_in_timesteps / timestep_grouping) % 2], 1);
+                in_neuron_data->activated_neuron_ids[pos] = idx;
+                in_neuron_data->activation_subtimesteps[pos] = g;
               } else {
                 active[idx] = true;
               }

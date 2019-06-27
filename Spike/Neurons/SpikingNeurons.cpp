@@ -7,7 +7,6 @@ SpikingNeurons::SpikingNeurons() {
 
 // SpikingNeurons Destructor
 SpikingNeurons::~SpikingNeurons() {
-  free(bitarray_of_neuron_spikes);
 }
 
 void SpikingNeurons::prepare_backend_early() {

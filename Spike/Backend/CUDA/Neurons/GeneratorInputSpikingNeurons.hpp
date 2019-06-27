@@ -45,7 +45,6 @@ namespace Backend {
         spiking_neurons_data_struct* in_neuron_data,
         int *d_neuron_ids_for_stimulus,
         float *d_spike_times_for_stimulus,
-        float* d_last_spike_time_of_each_neuron,
         float current_time_in_seconds,
         float stimulus_onset_adjustment,
         float timestep,
