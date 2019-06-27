@@ -54,16 +54,9 @@ namespace Backend {
      size_t total_number_of_neurons) {
       
       int idx = threadIdx.x + blockIdx.x * blockDim.x;
-      int bufsize = neuron_data->neuron_spike_time_bitbuffer_bytesize[0];
-      while (idx < total_number_of_neurons) {
-        for (int g=0; g < timestep_grouping; g++){
-          int bitloc = (current_time_in_timesteps + g) % (8*bufsize);
-          // If a neuron has fired
-          if (neuron_data->neuron_spike_time_bitbuffer[idx*bufsize + (bitloc / 8)] & (1 << (bitloc % 8))){
-            atomicAdd(&d_per_neuron_spike_counts[idx], 1);
-          }
-        }
-
+      int loc = (current_time_in_timesteps / timestep_grouping) % 2
+      while (idx < neuron_data->num_activated_neurons[loc]){
+        atomicAdd(&d_per_neuron_spike_counts[neuron_data->activated_neuron_ids[idx]], 1);
         idx += blockDim.x * gridDim.x;
       }
     }

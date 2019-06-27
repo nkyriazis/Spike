@@ -77,22 +77,12 @@ namespace Backend {
      size_t total_number_of_neurons){
 
       int idx = threadIdx.x + blockIdx.x * blockDim.x;
-      int bufsize = neuron_data->neuron_spike_time_bitbuffer_bytesize[0];
-      while (idx < total_number_of_neurons) {
-        for (int g=0; g < timestep_grouping; g++){
-          int bitloc = (current_time_in_timesteps + g) % (8*bufsize);
-          // If a neuron has fired
-          if (neuron_data->neuron_spike_time_bitbuffer[idx*bufsize + (bitloc / 8)] & (1 << (bitloc % 8))){
-            // Increase the number of spikes stored
-            // NOTE: atomicAdd return value is actually original (atomic) value BEFORE incrementation!
-            //    - So first value is actually 0 not 1!!!
-            int i = atomicAdd(&d_total_number_of_spikes_stored_on_device[0], 1);
-
-            // In the location, add the id and the time
-            d_neuron_ids_of_stored_spikes_on_device[i] = idx;
-            d_time_in_seconds_of_stored_spikes_on_device[i] = (current_time_in_timesteps + g)*timestep;
-          }
-        }
+      int loc = (current_time_in_timesteps / timestep_grouping) % 2
+      while (idx < neuron_data->num_activated_neurons[loc]) {
+        int i = atomicAdd(&d_total_number_of_spikes_stored_on_device[0], 1);
+        d_neuron_ids_of_stored_spikes_on_device[i] = neuron_data->activated_neuron_ids[idx];
+        d_time_in_seconds_of_stored_spikes_on_device[i] = (current_time_in_timesteps + neuron_data->activation_subtimesteps[idx])*timestep;
+        
         idx += blockDim.x * gridDim.x;
       }
     }
