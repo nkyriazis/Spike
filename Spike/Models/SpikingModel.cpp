@@ -86,9 +86,9 @@ void SpikingModel::finalise_model() {
     printf("\n");
 
 
-    spiking_synapses->model = this;
-    spiking_neurons->model = this;
     input_spiking_neurons->model = this;
+    spiking_neurons->model = this;
+    spiking_synapses->model = this;
     for (int plasticity_id = 0; plasticity_id < plasticity_rule_vec.size(); plasticity_id++){
       plasticity_rule_vec[plasticity_id]->model = this;
     }
@@ -115,9 +115,9 @@ void SpikingModel::init_backend() {
   context->params.threads_per_block_synapses = 32;
 
   // NB All these also call prepare_backend for the initial state:
-  spiking_synapses->init_backend(context);
-  spiking_neurons->init_backend(context);
   input_spiking_neurons->init_backend(context);
+  spiking_neurons->init_backend(context);
+  spiking_synapses->init_backend(context);
   for (int plasticity_id = 0; plasticity_id < plasticity_rule_vec.size(); plasticity_id++){
     plasticity_rule_vec[plasticity_id]->init_backend(context);
   }
@@ -132,11 +132,11 @@ void SpikingModel::init_backend() {
 
 
 void SpikingModel::prepare_backend() {
+  input_spiking_neurons->prepare_backend();
+  spiking_neurons->prepare_backend();
+  
   spiking_synapses->prepare_backend();
   context->params.maximum_axonal_delay_in_timesteps = spiking_synapses->maximum_axonal_delay_in_timesteps;
-  
-  spiking_neurons->prepare_backend();
-  input_spiking_neurons->prepare_backend();
 
   for (int plasticity_id = 0; plasticity_id < plasticity_rule_vec.size(); plasticity_id++){
     plasticity_rule_vec[plasticity_id]->prepare_backend();

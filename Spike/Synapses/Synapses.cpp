@@ -339,7 +339,8 @@ int Synapses::AddGroup(int presynaptic_group_id,
   int original_num_plasticity_indices = 0;
   for (int vecid = 0; vecid < synapse_params->plasticity_vec.size(); vecid++){
     Plasticity* plasticity_ptr = synapse_params->plasticity_vec[vecid];
-    plasticity_ptr->AddSynapseIndices((total_number_of_synapses - temp_number_of_synapses_in_last_group), temp_number_of_synapses_in_last_group);
+    if (plasticity_ptr)
+      plasticity_ptr->AddSynapseIndices((total_number_of_synapses - temp_number_of_synapses_in_last_group), temp_number_of_synapses_in_last_group);
   }
 
 

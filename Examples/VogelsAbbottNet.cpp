@@ -15,7 +15,7 @@
 #include "Spike/Spike.hpp"
 #include "Spike/Backend/CUDA/Helpers/ErrorCheck.hpp"
 // Utility functions in case you want to load from .mat file
-#include "UtilityFunctions.hpp"
+//#include "UtilityFunctions.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -194,10 +194,20 @@ int main (int argc, char *argv[]){
   /*
    *    CREATE SYNAPSES
    */
-  BenchModel->AddSynapseGroup(EXCITATORY_NEURONS[0], EXCITATORY_NEURONS[0], EXC_OUT_SYN_PARAMS);
-  BenchModel->AddSynapseGroup(EXCITATORY_NEURONS[0], INHIBITORY_NEURONS[0], EXC_OUT_SYN_PARAMS);
-  BenchModel->AddSynapseGroup(INHIBITORY_NEURONS[0], EXCITATORY_NEURONS[0], INH_OUT_SYN_PARAMS);
-  BenchModel->AddSynapseGroup(INHIBITORY_NEURONS[0], INHIBITORY_NEURONS[0], INH_OUT_SYN_PARAMS);
+  printf("Pre Synapses\n");
+  conductance_spiking_synapses->AddGroup(EXCITATORY_NEURONS[0], EXCITATORY_NEURONS[0], lif_spiking_neurons, lif_spiking_neurons, timestep, EXC_OUT_SYN_PARAMS);
+  printf("Pre Synapses\n");
+  conductance_spiking_synapses->AddGroup(EXCITATORY_NEURONS[0], INHIBITORY_NEURONS[0], lif_spiking_neurons, lif_spiking_neurons, timestep, EXC_OUT_SYN_PARAMS);
+  printf("Pre Synapses\n");
+  conductance_spiking_synapses->AddGroup(INHIBITORY_NEURONS[0], EXCITATORY_NEURONS[0], lif_spiking_neurons, lif_spiking_neurons, timestep, INH_OUT_SYN_PARAMS);
+  printf("Pre Synapses\n");
+  conductance_spiking_synapses->AddGroup(INHIBITORY_NEURONS[0], INHIBITORY_NEURONS[0], lif_spiking_neurons, lif_spiking_neurons, timestep, INH_OUT_SYN_PARAMS);
+  printf("Post Synapses\n");
+
+  //BenchModel->AddSynapseGroup(EXCITATORY_NEURONS[0], EXCITATORY_NEURONS[0], EXC_OUT_SYN_PARAMS);
+  //BenchModel->AddSynapseGroup(EXCITATORY_NEURONS[0], INHIBITORY_NEURONS[0], EXC_OUT_SYN_PARAMS);
+  //BenchModel->AddSynapseGroup(INHIBITORY_NEURONS[0], EXCITATORY_NEURONS[0], INH_OUT_SYN_PARAMS);
+  //BenchModel->AddSynapseGroup(INHIBITORY_NEURONS[0], INHIBITORY_NEURONS[0], INH_OUT_SYN_PARAMS);
   
   /*
   // Adding connections based upon matrices given

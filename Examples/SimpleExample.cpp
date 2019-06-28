@@ -133,9 +133,9 @@ int main (int argc, char *argv[]){
   // CREATING SYNAPSES
   // When creating synapses, the ids of the presynaptic and postsynaptic populations are all that are required
   // Note: Input neuron populations cannot be post-synaptic on any synapse
-  ExampleModel->AddSynapseGroup(input_layer_ID, excitatory_neuron_layer_ID, input_to_excitatory_parameters);
-  ExampleModel->AddSynapseGroup(excitatory_neuron_layer_ID, inhibitory_neuron_layer_ID, excitatory_to_inhibitory_parameters);
-  ExampleModel->AddSynapseGroup(inhibitory_neuron_layer_ID, excitatory_neuron_layer_ID, inhibitory_to_excitatory_parameters);
+  conductance_spiking_synapses->AddGroup(input_layer_ID, excitatory_neuron_layer_ID, lif_spiking_neurons, generator_input_neurons, timestep, input_to_excitatory_parameters);
+  conductance_spiking_synapses->AddGroup(excitatory_neuron_layer_ID, inhibitory_neuron_layer_ID, lif_spiking_neurons, lif_spiking_neurons, timestep, excitatory_to_inhibitory_parameters);
+  conductance_spiking_synapses->AddGroup(inhibitory_neuron_layer_ID, excitatory_neuron_layer_ID, lif_spiking_neurons, lif_spiking_neurons, timestep, inhibitory_to_excitatory_parameters);
 
 
   /*
