@@ -45,16 +45,16 @@ void SpikingSynapses::sort_synapses(){
 //    Parameter = either probability for random synapses or S.D. for Gaussian
 int SpikingSynapses::AddGroup(int presynaptic_group_id, 
             int postsynaptic_group_id, 
-            Neurons * neurons,
-            Neurons * input_neurons,
+            Neurons * post_neurons,
+            Neurons * pre_neurons,
             float timestep,
             synapse_parameters_struct * synapse_params) {
   
   
   int groupID = Synapses::AddGroup(presynaptic_group_id, 
               postsynaptic_group_id, 
-              neurons,
-              input_neurons,
+              post_neurons,
+              pre_neurons,
               timestep,
               synapse_params);
 
@@ -70,15 +70,7 @@ int SpikingSynapses::AddGroup(int presynaptic_group_id,
   if ((delay_range_in_timesteps[0] < 1) || (delay_range_in_timesteps[1] < 1)) {
     printf("%d\n", delay_range_in_timesteps[0]);
     printf("%d\n", delay_range_in_timesteps[1]);
-#ifdef CRAZY_DEBUG
-                // spiking_synapse_group_params->delay_range[0] = timestep;
-                // spiking_synapse_group_params->delay_range[1] = timestep;
-    printf("################### Delay range must be at least one timestep\n");
-#else
-
-        
     print_message_and_exit("Delay range must be at least one timestep.");
-#endif
   }
   
   for (int i = (total_number_of_synapses - temp_number_of_synapses_in_last_group); i < total_number_of_synapses; i++){
@@ -103,9 +95,6 @@ int SpikingSynapses::AddGroup(int presynaptic_group_id,
     if (delays[i] > maximum_axonal_delay_in_timesteps) maximum_axonal_delay_in_timesteps = delays[i];
     if (delays[i] < minimum_axonal_delay_in_timesteps) minimum_axonal_delay_in_timesteps = delays[i];
   }
-  if (neurons->total_number_of_neurons > neuron_pop_size)
-    neuron_pop_size = neurons->total_number_of_neurons; 
-
   return groupID;
 
 }

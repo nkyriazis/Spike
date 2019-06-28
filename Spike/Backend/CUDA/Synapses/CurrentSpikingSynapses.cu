@@ -38,7 +38,7 @@ namespace Backend {
     
     void CurrentSpikingSynapses::allocate_device_pointers() {
       // Set up per neuron current
-      current_array_length = frontend()->neuron_pop_size*frontend()->num_syn_labels;
+      current_array_length = frontend()->postsynaptic_neuron_pointer->total_number_of_neurons*frontend()->num_syn_labels;
       h_neuron_wise_current_trace = (float*)realloc(h_neuron_wise_current_trace, current_array_length*sizeof(float));
       for (int id = 0; id < current_array_length; id++)
         h_neuron_wise_current_trace[id] = 0.0f;

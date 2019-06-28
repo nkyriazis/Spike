@@ -3,16 +3,6 @@
 
 // ConductanceSpikingSynapses Destructor
 ConductanceSpikingSynapses::~ConductanceSpikingSynapses() {
-
-#ifdef CRAZY_DEBUG
-  std::cout << "@@@@@@@@@@ 0 " << synaptic_conductances_g << " \n";
-#endif
-
-  free(synaptic_conductances_g);
-
-#ifdef CRAZY_DEBUG
-  std::cout << "@@@@@@@@@@ 1\n";
-#endif
 }
 
 
@@ -36,9 +26,6 @@ int ConductanceSpikingSynapses::AddGroup(int presynaptic_group_id,
   // Incrementing number of synapses
   ConductanceSpikingSynapses::increment_number_of_synapses(temp_number_of_synapses_in_last_group);
 
-  for (int i = (total_number_of_synapses - temp_number_of_synapses_in_last_group); i < total_number_of_synapses; i++) {
-    synaptic_conductances_g[i] = 0.0f;
-  }
   if (reversal_potentials_Vhat.size() == 0){
     // If a group has not yet been initialized, make it of this type
     reversal_potentials_Vhat.push_back(conductance_spiking_synapse_group_params->reversal_potential_Vhat);
@@ -75,8 +62,6 @@ int ConductanceSpikingSynapses::AddGroup(int presynaptic_group_id,
 }
 
 void ConductanceSpikingSynapses::increment_number_of_synapses(int increment) {
-
-  synaptic_conductances_g = (float*)realloc(synaptic_conductances_g, total_number_of_synapses * sizeof(float));
 }
 
 

@@ -46,7 +46,7 @@ namespace Backend {
      
       // Extra buffer size for current time and extra to reset before last
       buffersize = frontend()->maximum_axonal_delay_in_timesteps + 2*frontend()->model->timestep_grouping + 1;
-      neuron_inputs.input_buffersize = frontend()->neuron_pop_size*frontend()->num_syn_labels;
+      neuron_inputs.input_buffersize = frontend()->postsynaptic_neuron_pointer->total_number_of_neurons*frontend()->num_syn_labels;
       neuron_inputs.temporal_buffersize = buffersize;
       
       allocate_device_pointers();
