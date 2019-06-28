@@ -40,7 +40,6 @@ namespace Backend {
         int timestep_grouping,
         int total_number_of_neurons);
     __global__ void check_for_generator_spikes_kernel(
-        synaptic_activation_kernel syn_activation_kernel,
         spiking_synapses_data_struct* synaptic_data,
         spiking_neurons_data_struct* in_neuron_data,
         int *d_neuron_ids_for_stimulus,

@@ -45,7 +45,7 @@ namespace Backend {
     void WeightDependentSTDPPlasticity::apply_stdp_to_synapse_weights(unsigned int current_time_in_timesteps, float timestep) {
         ltp_and_ltd<<<synapses_backend->number_of_synapse_blocks_per_grid, synapses_backend->threads_per_block>>>
           (synapses_backend->d_synaptic_data,
-           synapses_backend->postsynaptic_neuron_data
+           synapses_backend->postsynaptic_neuron_data,
            synapses_backend->d_pre_neurons_data,
            stdp_pre_memory_trace,
            stdp_post_memory_trace,
@@ -54,7 +54,7 @@ namespace Backend {
            *(frontend()->stdp_params),
            timestep,
            frontend()->model->timestep_grouping,
-           current_time_in_timesteps*timestep,
+           current_time_in_timesteps,
            plastic_synapse_indices,
            total_number_of_plastic_synapses);
           CudaCheckError();
@@ -72,7 +72,7 @@ namespace Backend {
            weightdependent_stdp_plasticity_parameters_struct stdp_vars,
            float timestep,
            int timestep_grouping,
-           float current_time_in_seconds,
+           int current_time_in_timesteps,
            int* d_plastic_synapse_indices,
            size_t total_number_of_plastic_synapses){
       // Global Index
@@ -88,7 +88,7 @@ namespace Backend {
         int postid = synaptic_data->postsynaptic_neuron_indices[idx];
         int preid = synaptic_data->presynaptic_neuron_indices[idx];
         int pointerid = synaptic_data->presynaptic_pointer_indices[idx];
-        int bufsize = pre_neuron_data[pointerid]->neuron_spike_time_bitbuffer_bytesize[0];
+        int bufsize = pre_neurons_data[pointerid]->neuron_spike_time_bitbuffer_bytesize[0];
         float old_synaptic_weight = synaptic_data->synaptic_efficacies_or_weights[idx];
         float new_synaptic_weight = old_synaptic_weight;
 
@@ -100,7 +100,7 @@ namespace Backend {
         
           // Bit Indexing to detect spikes
           int postbitloc = (current_time_in_timesteps + g) % (bufsize*8);
-          int prebitloc = postbitloc - d_syndelays[idx];
+          int prebitloc = postbitloc - synaptic_data->delays[idx];
           prebitloc = (prebitloc < 0) ? (bufsize*8 + prebitloc) : prebitloc;
 
           // OnPre Trace Update
@@ -132,7 +132,7 @@ namespace Backend {
             new_synaptic_weight = 0.0f;
         }
         // Weight Update
-        d_synaptic_efficacies_or_weights[idx] = new_synaptic_weight;
+        synaptic_data->synaptic_efficacies_or_weights[idx] = new_synaptic_weight;
 
         // Correctly set the trace values
         stdp_pre_memory_trace[indx] = stdp_pre_memory_trace_val;

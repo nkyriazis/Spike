@@ -48,7 +48,7 @@ namespace Backend {
     void InhibitorySTDPPlasticity::apply_stdp_to_synapse_weights(unsigned int current_time_in_timesteps, float timestep) {
 
     // Vogels update rule requires a neuron wise memory trace. This must be updated upon neuron firing.
-    vogels_apply_stdp_to_synapse_weights_kernel<<<neurons_backend->number_of_neuron_blocks_per_grid, neurons_backend->threads_per_block>>>
+    vogels_apply_stdp_to_synapse_weights_kernel<<<synapses_backend->number_of_synapse_blocks_per_grid, synapses_backend->threads_per_block>>>
        (synapses_backend->d_synaptic_data,
        synapses_backend->postsynaptic_neuron_data,
        synapses_backend->d_pre_neurons_data,
@@ -94,9 +94,6 @@ namespace Backend {
         float old_synaptic_weight = synaptic_data->synaptic_efficacies_or_weights[idx];
         float new_synaptic_weight = old_synaptic_weight;
 
-        // Correcting for input vs output neuron types
-        bool is_input = PRESYNAPTIC_IS_INPUT(preid);
-        int corr_preid = CORRECTED_PRESYNAPTIC_ID(preid, is_input);
 
         // Looping over timesteps
         for (int g=0; g < timestep_grouping; g++){	
@@ -106,7 +103,7 @@ namespace Backend {
           
           // Bit Indexing to detect spikes
           int postbitloc = (current_time_in_timesteps + g) % (bufsize*8);
-          int prebitloc = postbitloc - d_syndelays[idx];
+          int prebitloc = postbitloc - synaptic_data->delays[idx];
           prebitloc = (prebitloc < 0) ? (bufsize*8 + prebitloc) : prebitloc;
 
           // OnPre Trace Update

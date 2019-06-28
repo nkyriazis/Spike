@@ -54,7 +54,6 @@ namespace Backend {
         CudaCheckError();
 
         check_for_generator_spikes_kernel<<<number_of_neuron_blocks_per_grid, threads_per_block>>>(
-           synapses_backend->host_syn_activation_kernel,
            synapses_backend->d_synaptic_data,
            d_neuron_data,
            neuron_ids_for_stimulus,
@@ -90,7 +89,6 @@ namespace Backend {
 
 
     __global__ void check_for_generator_spikes_kernel(
-        synaptic_activation_kernel syn_activation_kernel,
         spiking_synapses_data_struct* synaptic_data,
         spiking_neurons_data_struct* neuron_data,
         int *d_neuron_ids_for_stimulus,

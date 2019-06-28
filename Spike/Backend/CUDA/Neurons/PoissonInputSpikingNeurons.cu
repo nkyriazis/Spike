@@ -59,7 +59,6 @@ namespace Backend {
       ::Backend::CUDA::SpikingSynapses* synapses_backend =
         dynamic_cast<::Backend::CUDA::SpikingSynapses*>(frontend()->model->spiking_synapses->backend());
       poisson_update_membrane_potentials_kernel<<<random_state_manager_backend->block_dimensions, random_state_manager_backend->threads_per_block>>>(
-         synapses_backend->host_syn_activation_kernel,
          synapses_backend->d_synaptic_data,
          d_neuron_data,
          random_state_manager_backend->states,
@@ -76,7 +75,6 @@ namespace Backend {
     }
 
     __global__ void poisson_update_membrane_potentials_kernel(
-        synaptic_activation_kernel syn_activation_kernel,
         spiking_synapses_data_struct* synaptic_data,
         spiking_neurons_data_struct* in_neuron_data,
         curandState_t* d_states,
@@ -91,6 +89,7 @@ namespace Backend {
 
    
       int idx = threadIdx.x + blockIdx.x * blockDim.x;
+      int t_idx = idx;
       if (idx == 0){
         in_neuron_data->num_activated_neurons[((current_time_in_timesteps / timestep_grouping) + 1) % 2] = 0;
       }

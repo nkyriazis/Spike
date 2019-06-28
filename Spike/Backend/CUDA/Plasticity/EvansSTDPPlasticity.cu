@@ -82,10 +82,6 @@ namespace Backend {
         float old_synaptic_weight = synaptic_data->synaptic_efficacies_or_weights[idx];
         float new_synaptic_weight = old_synaptic_weight;
 
-        // Correcting for input vs output neuron types
-        bool is_input = PRESYNAPTIC_IS_INPUT(preid);
-        int corr_preid = CORRECTED_PRESYNAPTIC_ID(preid, is_input);
-
         // Looping over timesteps
         for (int g=0; g < timestep_grouping; g++){
           // Decaying STDP traces
@@ -94,7 +90,7 @@ namespace Backend {
 
           // Bit Indexing to detect spikes
           int postbitloc = (current_time_in_timesteps + g) % (bufsize*8);
-          int prebitloc = postbitloc - d_syndelays[idx];
+          int prebitloc = postbitloc - synaptic_data->delays[idx];
           prebitloc = (prebitloc < 0) ? (bufsize*8 + prebitloc) : prebitloc;
 
           // OnPre Trace Update

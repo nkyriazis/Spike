@@ -78,7 +78,6 @@ void Synapses::sort_synapses(){
       temp_presyn_array[s] = presynaptic_neuron_indices[synapse_sort_indices[s]];
       temp_postsyn_array[s] = postsynaptic_neuron_indices[synapse_sort_indices[s]];
       temp_weight_array[s] = synaptic_efficacies_or_weights[synapse_sort_indices[s]];
-      temp_scaling_array[s] = weight_scaling_constants[synapse_sort_indices[s]];
       temp_presynaptic_pointer_indices[s] = presynaptic_pointer_indices[synapse_sort_indices[s]];
 
       synapse_reversesort_indices[synapse_sort_indices[s]] = s;
@@ -87,14 +86,12 @@ void Synapses::sort_synapses(){
     free(presynaptic_neuron_indices);
     free(postsynaptic_neuron_indices);
     free(synaptic_efficacies_or_weights);
-    free(weight_scaling_constants);
     free(presynaptic_pointer_indices);
 
     if (temp_presyn_array) presynaptic_neuron_indices = temp_presyn_array;
     if (temp_postsyn_array) postsynaptic_neuron_indices = temp_postsyn_array;
     if (temp_weight_array) synaptic_efficacies_or_weights = temp_weight_array;
-    if (temp_scaling_array) weight_scaling_constants = temp_scaling_array;
-    if (temp_presynaptic_pointer_indices) presynaptic_pointer_indices = temp_presynaptic_neuron_indices;
+    if (temp_presynaptic_pointer_indices) presynaptic_pointer_indices = temp_presynaptic_pointer_indices;
 
     synapses_sorted = true;
   }
@@ -333,7 +330,7 @@ int Synapses::AddGroup(int presynaptic_group_id,
       }
     }
 
-    presynaptic_pointer_indices.push_back(pre_pointer_index);
+    presynaptic_pointer_indices[i] = pre_pointer_index;
     synapse_sort_indices[i] = i;
     synapse_reversesort_indices[i] = i;
   }

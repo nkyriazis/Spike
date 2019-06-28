@@ -36,7 +36,7 @@ namespace Backend {
 
       int num_presynaptic_pointers = 0;
       int* presynaptic_pointer_indices = nullptr;
-      int* max_efferents_per_pointer = nullptr;
+      int* max_efferents_per_set = nullptr;
       int** efferent_synapse_counts = nullptr;
       int** efferent_synapse_starts = nullptr;
 
@@ -67,14 +67,14 @@ namespace Backend {
       int* delays = nullptr;
       int* d_syn_labels = nullptr;
       
-      int* max_efferents_per_pointer = nullptr;
+      int* max_efferents_per_set = nullptr;
       int** h_efferent_synapse_counts = nullptr;
       int** efferent_synapse_counts = nullptr;
       int** h_efferent_synapse_starts = nullptr;
       int** efferent_synapse_starts = nullptr;
 
       
-      spiking_neurons_data_struct* post_neuron_data;
+      spiking_neurons_data_struct* postsynaptic_neuron_data;
       std::vector<spiking_neurons_data_struct*> h_pre_neurons_data;
       spiking_neurons_data_struct** d_pre_neurons_data;
 

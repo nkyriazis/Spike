@@ -54,7 +54,7 @@ namespace Backend {
      size_t total_number_of_neurons) {
       
       int idx = threadIdx.x + blockIdx.x * blockDim.x;
-      int loc = (current_time_in_timesteps / timestep_grouping) % 2
+      int loc = (current_time_in_timesteps / timestep_grouping) % 2;
       while (idx < neuron_data->num_activated_neurons[loc]){
         atomicAdd(&d_per_neuron_spike_counts[neuron_data->activated_neuron_ids[idx]], 1);
         idx += blockDim.x * gridDim.x;

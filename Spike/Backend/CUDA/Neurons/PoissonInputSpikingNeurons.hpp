@@ -42,7 +42,6 @@ namespace Backend {
       void state_update(unsigned int current_time_in_timesteps, float timestep) override;
     };
     __global__ void poisson_update_membrane_potentials_kernel(
-        synaptic_activation_kernel syn_activation_kernel,
         spiking_synapses_data_struct* synaptic_data,
         spiking_neurons_data_struct* in_neuron_data,
         curandState_t* d_states,

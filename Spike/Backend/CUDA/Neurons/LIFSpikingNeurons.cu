@@ -155,7 +155,6 @@ namespace Backend {
         dynamic_cast<::Backend::CUDA::SpikingSynapses*>(frontend()->model->spiking_synapses->backend());
       lif_update_membrane_potentials<<<number_of_neuron_blocks_per_grid, threads_per_block>>>
         (synapses_backend->host_injection_kernel,
-         synapses_backend->host_syn_activation_kernel,
          synapses_backend->d_synaptic_data,
          d_neuron_data,
          timestep,
@@ -169,7 +168,6 @@ namespace Backend {
     /* KERNELS BELOW */
     __global__ void lif_update_membrane_potentials(
         injection_kernel current_injection_kernel,
-        synaptic_activation_kernel syn_activation_kernel,
         spiking_synapses_data_struct* synaptic_data,
         spiking_neurons_data_struct* in_neuron_data,
         float timestep,

@@ -5,10 +5,14 @@
 class SpikingModel; // Forward Declaration
 
 #include <stdio.h>
-#include "../Spike.hpp"
 #include "../Backend/Context.hpp"
+#include "../Synapses/SpikingSynapses.hpp"
+#include "../Plasticity/STDPPlasticity.hpp"
+#include "../Neurons/Neurons.hpp"
+#include "../Neurons/SpikingNeurons.hpp"
 #include "../Helpers/TimerWithMessages.hpp"
 #include "../Helpers/RandomStateManager.hpp"
+#include "../ActivityMonitor/ActivityMonitor.hpp"
 #include <string>
 #include <fstream>
 #include <vector>
@@ -30,13 +34,9 @@ public:
 
   Context* context = nullptr; // Call init_backend to set this up!
   SpikingNeurons * spiking_neurons = nullptr;
+  SpikingNeurons * input_spiking_neurons = nullptr;
   SpikingSynapses * spiking_synapses = nullptr;
 
-  // Possible Input Neuron Types
-  PoissonInputSpikingNeurons * poisson_input_spiking_neurons = nullptr;
-  PatternedPoissonInputSpikingNeurons * patterned_poisson_input_spiking_neurons = nullptr;
-  ImagePoissonInputSpikingNeurons * image_poisson_input_spiking_neurons = nullptr;
-  GeneratorInputSpikingNeurons * generator_input_spiking_neurons = nullptr;
   
   vector<STDPPlasticity*> plasticity_rule_vec; 
   vector<ActivityMonitor*> monitors_vec; 

@@ -58,7 +58,6 @@ namespace Backend {
 
     __global__ void lif_update_membrane_potentials(
         injection_kernel current_injection_kernel,
-        synaptic_activation_kernel syn_activation_kernel,
         spiking_synapses_data_struct* synaptic_data,
         spiking_neurons_data_struct* neuron_data,
         float timestep,

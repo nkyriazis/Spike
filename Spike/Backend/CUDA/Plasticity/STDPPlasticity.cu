@@ -15,13 +15,7 @@ namespace Backend {
       synapses_backend = dynamic_cast<::Backend::CUDA::SpikingSynapses*>
         (frontend()->model->spiking_synapses->backend());
 
-      // Get the correct ID
-      int plasticity_id = frontend()->plasticity_rule_id;
-      if (plasticity_id >= 0){
-        total_number_of_plastic_synapses = frontend()->plastic_synapses.size();
-      } else {
-        total_number_of_plastic_synapses = 0;
-      }
+      total_number_of_plastic_synapses = frontend()->plastic_synapses.size();
 
       allocate_device_pointers();
     }

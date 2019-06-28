@@ -92,7 +92,7 @@ namespace Backend {
       CudaSafeCall(cudaMalloc((void **)&max_efferents_per_set, sizeof(int)*frontend()->presynaptic_neuron_pointers.size()));
       
       CudaSafeCall(cudaMalloc((void **)&d_pre_neurons_data, sizeof(spiking_neurons_data_struct*)*frontend()->presynaptic_neuron_pointers.size()));
-      CudaSafeCall(cudaMalloc((void **)&post_neuron_data, sizeof(spiking_neurons_data_struct)));
+      CudaSafeCall(cudaMalloc((void **)&postsynaptic_neuron_data, sizeof(spiking_neurons_data_struct)));
 
       h_efferent_synapse_counts = (int**)malloc(frontend()->efferent_num_per_set.size()*sizeof(int*));
       for (int u=0; u < frontend()->efferent_num_per_set.size(); u++)
@@ -150,16 +150,18 @@ namespace Backend {
         h_pre_neurons_data.push_back(neurons_backend->d_neuron_data);
       }
       CudaSafeCall(cudaMemcpy(d_pre_neurons_data, h_pre_neurons_data.data(),
-        sizeof(spiking_neurons_data_struct*)*frontend()->unique_pre_neuron_set.size(),
+        sizeof(spiking_neurons_data_struct*)*frontend()->presynaptic_neuron_pointers.size(),
         cudaMemcpyHostToDevice));
 
-      postsynaptic_neuron_data = (dynamic_cast<::Backend::CUDA::SpikingNeurons*>)(frontend()->postsynaptic_neuron_pointer->backend())->d_neuron_data;
+      postsynaptic_neuron_data = (dynamic_cast<::Backend::CUDA::SpikingNeurons*>(frontend()->postsynaptic_neuron_pointer->backend()))->d_neuron_data;
     }
 
     void SpikingSynapses::state_update
     (unsigned int current_time_in_timesteps, float timestep) {
 
       if (frontend()->total_number_of_synapses > 0){
+        ::Backend::CUDA::SpikingNeurons* neurons_backend =
+                  dynamic_cast<::Backend::CUDA::SpikingNeurons*>(frontend()->postsynaptic_neuron_pointer->backend());
       
         // Calculate buffer location
         int bufferloc = current_time_in_timesteps % buffersize;
@@ -203,7 +205,6 @@ namespace Backend {
 
           int timestep_grouping_index = pre_neurons_data[p]->activation_subtimesteps[pos];
           int synapse_id = synaptic_data->efferent_synapse_starts[p][pre_idx] + idx;
-          int param_label = synaptic_data->[synapse_id];
           int postneuron = synaptic_data->postsynaptic_neuron_indices[synapse_id];
           
           int targetloc = (bufferloc + synaptic_data->delays[synapse_id] + timestep_grouping_index) % synaptic_data->neuron_inputs.temporal_buffersize;
