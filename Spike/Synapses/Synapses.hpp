@@ -92,31 +92,28 @@ public:
   SPIKE_ADD_BACKEND_GETSET(Synapses, SpikeBase);
   void init_backend(Context* ctx = _global_ctx) override;
   void prepare_backend_early() override;
+  bool print_synapse_group_details = false;         /**< A flag used to indicate whether group details should be printed */
   
   // Variables
   RandomStateManager * random_state_manager;
   int total_number_of_synapses = 0;                 /**< Tracks the total number of synapses in the connectivity */
   int temp_number_of_synapses_in_last_group = 0;    /**< Tracks the number of synapses in the last added group. */
-  int largest_synapse_group_size = 0;               /**< Tracks the size of the largest synaptic group. */
-  bool print_synapse_group_details = false;         /**< A flag used to indicate whether group details should be printed */
-  std::vector<Plasticity*> plasticity_rule_vec;     /**< A vector of pointers to the plasticity rules to be used in the simulation */
-  std::vector<int> last_index_of_synapse_per_group; 
-  std::vector<bool> prepop_is_input;
-  std::vector<int> prepop_start_per_group;
-  std::vector<int> postpop_start_per_group;
-  
 
-	
+  Neurons* postsynaptic_neuron_pointer;             /**< Target post-synaptic population of this synapse object*/
+  std::vector<Neurons*> presynaptic_neuron_pointers;
+  std::vector<int> last_index_of_synapse_per_group; /**< Tracks the synapses in each group for saving protocols */
+  std::vector<int> prepop_start_per_group;          /**< For each synapse group, keeps track of relative to start */
+  std::vector<int> postpop_start_per_group;         /**< Same as prepop version but for the post-synaptic population */
+
   // Host Pointers
+  std::vector<int> presynaptic_pointer_indices = nullptr;
   int* presynaptic_neuron_indices = nullptr;                /**< Indices of presynaptic neuron IDs */
   int* postsynaptic_neuron_indices = nullptr;               /**< Indices of postsynaptic neuron IDs */
-  int* synapse_postsynaptic_neuron_count_index = nullptr;   /**< An array of the number of incoming synapses to each postsynaptic neuron */
   float* synaptic_efficacies_or_weights = nullptr;          /**< An array of synaptic efficacies/weights accompanying the pre/postsynaptic_neuron_indices */
-  int maximum_number_of_afferent_synapses = 0;
 
   bool synapses_sorted = false;
-  int* synapse_sort_indices = nullptr;   // Re-sorting synapses by pre-synaptic neuron
-  int* synapse_reversesort_indices = nullptr;   // Re-sorting synapses by pre-synaptic neuron
+  int* synapse_sort_indices = nullptr;
+  int* synapse_reversesort_indices = nullptr;       /**< Indices to undo sort -- useful for synapse dumping */
 
   // Functions
 
@@ -143,12 +140,10 @@ public:
      /param increment The number of synapses for which allocated memory must be expanded.
   */
   void increment_number_of_synapses(int increment);
-  void sort_synapses(Neurons* input_neurons, Neurons* neurons);
+  void sort_synapses();
   
   virtual void save_connectivity_as_txt(std::string path, std::string prefix="", int synapsegroupid=-1);
   virtual void save_connectivity_as_binary(std::string path, std::string prefix="", int synapsegroupid=-1);
-  //virtual void load_connectivity_from_txt(std::string path, std::string prefix="");
-  //virtual void load_connectivity_from_bin(std::string path, std::string prefix="");
 
   void save_weights_as_txt(std::string path, std::string prefix="", int synapsegroupid=-1);
   void save_weights_as_binary(std::string path, std::string prefix="", int synapsegroupid=-1);
@@ -163,6 +158,4 @@ private:
   std::shared_ptr<::Backend::Synapses> _backend;
 };
 
-// GAUSS random number generator
-double randn (double mu, double sigma);
 #endif

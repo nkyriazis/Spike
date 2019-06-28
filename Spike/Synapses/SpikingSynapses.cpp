@@ -11,7 +11,7 @@ SpikingSynapses::~SpikingSynapses() {
 
 void SpikingSynapses::prepare_backend_early() {
   Synapses::prepare_backend_early();
-  Synapses::sort_synapses(model->input_spiking_neurons, model->spiking_neurons);
+  Synapses::sort_synapses();
   SpikingSynapses::sort_synapses();
   
   // Setting Neuron and InputNeuron start indices

@@ -17,7 +17,6 @@
 #include "Spike/Plasticity/EvansSTDPPlasticity.hpp"
 #include "Spike/Plasticity/InhibitorySTDPPlasticity.hpp"
 #include "Spike/Plasticity/WeightDependentSTDPPlasticity.hpp"
-#include "Spike/Plasticity/WeightNormSTDPPlasticity.hpp"
 #include "Spike/Plasticity/CustomSTDPPlasticity.hpp"
 
 // Synapses

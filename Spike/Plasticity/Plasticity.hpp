@@ -50,9 +50,6 @@ public:
   SPIKE_ADD_BACKEND_GETSET(Plasticity, SpikeBase);
   void reset_state() override;
 
-  // ID for Plasticity Rules
-  int plasticity_rule_id = -1;
-
   virtual void AddSynapseIndices(int synapse_id_start, int num_synapses_to_add) = 0;
   virtual void state_update(unsigned int current_time_in_timesteps, float timestep) = 0;
 
