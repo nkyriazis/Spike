@@ -14,23 +14,7 @@ void SpikingSynapses::prepare_backend_early() {
   Synapses::sort_synapses();
   SpikingSynapses::sort_synapses();
   
-  // Setting Neuron and InputNeuron start indices
-  set_synapse_start(presynaptic_neuron_indices[0], 0);
-  for (int s=1; s < total_number_of_synapses; s++){
-    if (presynaptic_neuron_indices[s-1] != presynaptic_neuron_indices[s])
-      set_synapse_start(presynaptic_neuron_indices[s], s); 
-  }
 }
-
-void SpikingSynapses::set_synapse_start(int pre_index, int syn_start){
-  bool is_presynaptic = PRESYNAPTIC_IS_INPUT(pre_index);
-  int corr_pre_index = CORRECTED_PRESYNAPTIC_ID(pre_index, is_presynaptic);
-
-  int* neuron_start_indices = is_presynaptic ? model->input_spiking_neurons->per_neuron_efferent_synapse_start : model->spiking_neurons->per_neuron_efferent_synapse_start;
-
-  neuron_start_indices[corr_pre_index] = syn_start;
-}
-
 
 void SpikingSynapses::sort_synapses(){
   

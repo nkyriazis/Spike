@@ -31,42 +31,11 @@ int SpikingModel::AddNeuronGroup(neuron_parameters_struct * group_params) {
   return neuron_group_id;
 }
 
-
 int SpikingModel::AddInputNeuronGroup(neuron_parameters_struct * group_params) {
   if (input_spiking_neurons == nullptr) print_message_and_exit("Please set input_neurons pointer before adding inputs groups.");
 
   int input_group_id = input_spiking_neurons->AddGroup(group_params);
   return input_group_id;
-}
-
-
-int SpikingModel::AddSynapseGroup(int presynaptic_group_id, 
-              int postsynaptic_group_id, 
-              synapse_parameters_struct * synapse_params) {
-  if (spiking_synapses == nullptr) print_message_and_exit("Please set synapse pointer before adding synapses.");
-
-  int groupID = spiking_synapses->AddGroup(presynaptic_group_id, 
-              postsynaptic_group_id, 
-              spiking_neurons,
-              input_spiking_neurons,
-              timestep,
-              synapse_params);
-
-  return(groupID);
-}
-
-
-void SpikingModel::AddSynapseGroupsForNeuronGroupAndEachInputGroup(int postsynaptic_group_id, 
-              synapse_parameters_struct * synapse_params) {
-
-  for (int i = 0; i < input_spiking_neurons->total_number_of_groups; i++) {
-
-    AddSynapseGroup(CORRECTED_PRESYNAPTIC_ID(i, true), 
-              postsynaptic_group_id,
-              synapse_params);
-
-  }
-
 }
 
 void SpikingModel::AddPlasticityRule(STDPPlasticity * plasticity_rule){

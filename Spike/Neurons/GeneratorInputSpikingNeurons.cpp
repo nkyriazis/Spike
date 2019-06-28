@@ -10,17 +10,6 @@ GeneratorInputSpikingNeurons::~GeneratorInputSpikingNeurons() {
   free(temporal_lengths_of_stimuli);
 }
 
-/* Don't need this as it is inherited without change:
-// Add Group of given size as usual - nothing special in constructor
-int GeneratorInputSpikingNeurons::AddGroup(neuron_parameters_struct * group_params){
-	
-	int new_group_id = InputSpikingNeurons::AddGroup(group_params);
-	return new_group_id;
-
-}
-*/
-
-
 int GeneratorInputSpikingNeurons::add_stimulus(int spikenumber, int* ids, float* spiketimes){
 
 

@@ -31,19 +31,16 @@ namespace Backend {
 static_assert(std::has_virtual_destructor<Backend::Neurons>::value,
               "contract violated");
 
-#define PRESYNAPTIC_IS_INPUT( id ) (id < 0 ? true : false)
-#define CORRECTED_PRESYNAPTIC_ID(id, is_input) (is_input ? (-1 * (id)) - 1 : id) 
-
 /*!
-	This struct accompanies the neuron class and is used to provide the number of neurons 
-	(in a 2D grid) that are to be added to the total population.
-	This is also used as the foundation for the more sophisticated neuron parameter structs 
-	for SpikingNeurons etc.
+  This struct accompanies the neuron class and is used to provide the number of neurons 
+  (in a 2D grid) that are to be added to the total population.
+  This is also used as the foundation for the more sophisticated neuron parameter structs 
+  for SpikingNeurons etc.
 */
 struct neuron_parameters_struct {
-	neuron_parameters_struct() {}
+  neuron_parameters_struct() {}
 
-	int group_shape[2];		/**< An int array with 2 values describing the 2D shape of a neuron group */
+  int group_shape[2];   /**< An int array with 2 values describing the 2D shape of a neuron group */
 };
 
 /*!
@@ -59,14 +56,14 @@ public:
   SPIKE_ADD_BACKEND_GETSET(Neurons, SpikeBase);
   
   // Variables
-  int total_number_of_neurons;				/**< Tracks the total neuron population size. */
-  int total_number_of_groups;					/**< Tracks the number of groups (the total neuron population is split into groups e.g. layers or excitatory/inh). */
-  int number_of_neurons_in_new_group;			/**< Stores number of neurons in most recently added group */
+  int total_number_of_neurons;        /**< Tracks the total neuron population size. */
+  int total_number_of_groups;         /**< Tracks the number of groups (the total neuron population is split into groups e.g. layers or excitatory/inh). */
+  int number_of_neurons_in_new_group;     /**< Stores number of neurons in most recently added group */
 
   // Host Pointers
-  int *start_neuron_indices_for_each_group = nullptr;	/**< Indices of the beginnings of each group in the total population. */
-  int *last_neuron_indices_for_each_group = nullptr;	/**< Indices of the final neuron in each group. */
-  int **group_shapes = nullptr;							/**< The 2D shape of each group. */
+  int *start_neuron_indices_for_each_group = nullptr; /**< Indices of the beginnings of each group in the total population. */
+  int *last_neuron_indices_for_each_group = nullptr;  /**< Indices of the final neuron in each group. */
+  int **group_shapes = nullptr;             /**< The 2D shape of each group. */
 
   /**  
    *  Determines the total number of neurons by which the simulation should increase.
