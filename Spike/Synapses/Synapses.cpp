@@ -371,7 +371,7 @@ void Synapses::increment_number_of_synapses(int increment) {
     int* temp_sort_indices = (int*)realloc(synapse_sort_indices, total_number_of_synapses * sizeof(int));
     int* temp_revsort_indices = (int*)realloc(synapse_reversesort_indices, total_number_of_synapses * sizeof(int));
 
-    if (temp_presynaptic_pointer_indices != nullptr) presynaptic_pointer_indices = presynaptic_pointer_indices;
+    if (temp_presynaptic_pointer_indices != nullptr) presynaptic_pointer_indices = temp_presynaptic_pointer_indices;
     if (temp_presynaptic_neuron_indices != nullptr) presynaptic_neuron_indices = temp_presynaptic_neuron_indices;
     if (temp_postsynaptic_neuron_indices != nullptr) postsynaptic_neuron_indices = temp_postsynaptic_neuron_indices;
     if (temp_synaptic_efficacies_or_weights != nullptr) synaptic_efficacies_or_weights = temp_synaptic_efficacies_or_weights;

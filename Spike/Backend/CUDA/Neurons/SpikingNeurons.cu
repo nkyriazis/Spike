@@ -42,6 +42,7 @@ namespace Backend {
       neuron_data = new spiking_neurons_data_struct();
       memcpy(neuron_data, (static_cast<SpikingNeurons*>(this)->Neurons::neuron_data), sizeof(neurons_data_struct));
 
+      neuron_data->num_activated_neurons = num_activated_neurons;
       neuron_data->activated_neuron_ids = activated_neuron_ids;
       neuron_data->activation_subtimesteps = activation_subtimesteps;
       neuron_data->neuron_spike_time_bitbuffer = neuron_spike_time_bitbuffer;
