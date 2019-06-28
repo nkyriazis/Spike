@@ -34,7 +34,12 @@ namespace Backend {
       int num_syn_labels = 0;
       int* syn_labels = nullptr;
 
+      int num_presynaptic_pointers = 0;
       int* presynaptic_pointer_indices = nullptr;
+      int* max_efferents_per_pointer = nullptr;
+      int** efferent_synapse_counts = nullptr;
+      int** efferent_synapse_starts = nullptr;
+
       int* postsynaptic_neuron_indices = nullptr;
       int* delays = nullptr;
       float* synaptic_efficacies_or_weights = nullptr;
@@ -60,6 +65,17 @@ namespace Backend {
       // Device pointers
       int* delays = nullptr;
       int* d_syn_labels = nullptr;
+      
+      int* max_efferents_per_pointer = nullptr;
+      int** h_efferent_synapse_counts = nullptr;
+      int** efferent_synapse_counts = nullptr;
+      int** h_efferent_synapse_starts = nullptr;
+      int** efferent_synapse_starts = nullptr;
+
+      
+      spiking_neurons_data_struct* post_neuron_data;
+      std::vector<spiking_neurons_data_struct*> h_pre_neurons_data;
+      spiking_neurons_data_struct** d_pre_neurons_data;
 
       neuron_inputs_struct neuron_inputs;
 
@@ -95,8 +111,8 @@ namespace Backend {
 
     __global__ void activate_synapses(
         spiking_synapses_data_struct* synaptic_data,
-        spiking_neurons_data_struct* neurons_data,
-        spiking_neurons_data_struct* in_neurons_data,
+        spiking_neurons_data_struct* post_neuron_data,
+        spiking_neurons_data_struct** pre_neurons_data,
         int bufferloc,
         float timestep,
         unsigned int current_time_in_timesteps,

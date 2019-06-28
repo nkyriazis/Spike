@@ -6,6 +6,7 @@
 namespace Backend {
   namespace CUDA {
     Synapses::~Synapses() {
+      CudaSafeCall(cudaFree(presynaptic_pointer_indices));
       CudaSafeCall(cudaFree(presynaptic_neuron_indices));
       CudaSafeCall(cudaFree(postsynaptic_neuron_indices));
       CudaSafeCall(cudaFree(synaptic_efficacies_or_weights));
