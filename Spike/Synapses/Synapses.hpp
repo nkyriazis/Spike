@@ -106,7 +106,7 @@ public:
   std::vector<int> postpop_start_per_group;         /**< Same as prepop version but for the post-synaptic population */
 
   // Host Pointers
-  std::vector<int> presynaptic_pointer_indices = nullptr;
+  int* presynaptic_pointer_indices = nullptr;
   int* presynaptic_neuron_indices = nullptr;                /**< Indices of presynaptic neuron IDs */
   int* postsynaptic_neuron_indices = nullptr;               /**< Indices of postsynaptic neuron IDs */
   float* synaptic_efficacies_or_weights = nullptr;          /**< An array of synaptic efficacies/weights accompanying the pre/postsynaptic_neuron_indices */
@@ -114,6 +114,9 @@ public:
   bool synapses_sorted = false;
   int* synapse_sort_indices = nullptr;
   int* synapse_reversesort_indices = nullptr;       /**< Indices to undo sort -- useful for synapse dumping */
+  std::vector<std::vector<int>> efferent_starts_per_set;
+  std::vector<std::vector<int>> efferent_num_per_set;
+  std::vector<int> maximum_number_of_efferent_synapses_per_set;
 
   // Functions
 
