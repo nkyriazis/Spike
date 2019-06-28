@@ -8,27 +8,16 @@ namespace Backend {
     Synapses::~Synapses() {
       CudaSafeCall(cudaFree(presynaptic_neuron_indices));
       CudaSafeCall(cudaFree(postsynaptic_neuron_indices));
-      CudaSafeCall(cudaFree(temp_presynaptic_neuron_indices));
-      CudaSafeCall(cudaFree(temp_postsynaptic_neuron_indices));
       CudaSafeCall(cudaFree(synaptic_efficacies_or_weights));
-      CudaSafeCall(cudaFree(temp_synaptic_efficacies_or_weights));
       CudaSafeCall(cudaFree(d_synaptic_data));
-#ifdef CRAZY_DEBUG
-      std::cout << "\n!!!!!!!!!!!!!!!!!!!!---AAAAAA---!!!!!!!!!!!!!!!!!!!\n";
-#endif
     }
 
     void Synapses::reset_state() {
     }
 
     void Synapses::allocate_device_pointers() {
-#ifdef CRAZY_DEBUG
-      // if (frontend()->total_number_of_synapses == 0)
-      //   return;
-      std::cout << "DEBUG:::: " << frontend()->total_number_of_synapses << "\n"
-                << "     :::: " << &presynaptic_neuron_indices << "\n"
-        ;
-#endif
+      CudaSafeCall(cudaMalloc((void **)&presynaptic_pointer_indices,
+                              sizeof(int)*frontend()->total_number_of_synapses));
       CudaSafeCall(cudaMalloc((void **)&presynaptic_neuron_indices,
                               sizeof(int)*frontend()->total_number_of_synapses));
       CudaSafeCall(cudaMalloc((void **)&postsynaptic_neuron_indices,
@@ -41,6 +30,10 @@ namespace Backend {
 
 
     void Synapses::copy_constants_and_initial_efficacies_to_device() {
+      CudaSafeCall(cudaMemcpy(presynaptic_pointer_indices,
+                              frontend()->presynaptic_pointer_indices,
+                              sizeof(int)*frontend()->total_number_of_synapses,
+                              cudaMemcpyHostToDevice));
       CudaSafeCall(cudaMemcpy(presynaptic_neuron_indices,
                               frontend()->presynaptic_neuron_indices,
                               sizeof(int)*frontend()->total_number_of_synapses,
@@ -106,10 +99,6 @@ namespace Backend {
               cudaMemcpyHostToDevice));
       }
     }
-
-
-
-
   }
 }
 

@@ -20,13 +20,12 @@ namespace Backend {
       ~Synapses() override;
       using ::Backend::Synapses::frontend;
 
+      int* presynaptic_pointer_indices = nullptr;
       int* presynaptic_neuron_indices = nullptr;
       int* postsynaptic_neuron_indices = nullptr;
-      int* temp_presynaptic_neuron_indices = nullptr;
-      int* temp_postsynaptic_neuron_indices = nullptr;
       float* synaptic_efficacies_or_weights = nullptr;
-      float* temp_synaptic_efficacies_or_weights = nullptr;
       int max_num_blocks_per_grid = 0;
+
       
       // CUDA Specific
       ::Backend::CUDA::RandomStateManager* random_state_manager_backend = nullptr;

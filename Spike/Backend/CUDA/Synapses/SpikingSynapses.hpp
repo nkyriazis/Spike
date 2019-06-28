@@ -21,27 +21,25 @@ namespace Backend {
       CURRENT,
       VOLTAGE
     };
+
     struct neuron_inputs_struct {
       float* circular_input_buffer = nullptr;
       int input_buffersize = 0;
       int temporal_buffersize = 0;
     };
+
     struct spiking_synapses_data_struct: synapses_data_struct {
       neuron_inputs_struct neuron_inputs;
       int synapse_type = EMPTY;
       int num_syn_labels = 0;
       int* syn_labels = nullptr;
-      int* num_activated_neurons = nullptr;
-      int* num_active_synapses = nullptr;
-      int* active_synapse_counts = nullptr;
-      int* active_synapse_starts = nullptr;
-      int* active_presynaptic_neuron_indices = nullptr;
-      int* group_indices = nullptr;
 
+      int* presynaptic_pointer_indices = nullptr;
       int* postsynaptic_neuron_indices = nullptr;
       int* delays = nullptr;
       float* synaptic_efficacies_or_weights = nullptr;
     };
+
     typedef float (*injection_kernel)(
         spiking_synapses_data_struct* synaptic_data,
         spiking_neurons_data_struct* neuron_data,
@@ -51,13 +49,7 @@ namespace Backend {
         float timestep,
         int idx,
         int g);
-    typedef void (*synaptic_activation_kernel)(
-        spiking_synapses_data_struct* synaptic_data,
-        spiking_neurons_data_struct* neuron_data,
-        int timestep_group_index,
-        int preneuron_idx,
-        int timestep_index,
-        bool is_input);
+
     class SpikingSynapses : public virtual ::Backend::CUDA::Synapses,
                             public virtual ::Backend::SpikingSynapses {
     public:
@@ -65,17 +57,10 @@ namespace Backend {
       
       // Variables used to determine active/inactive synapses
       int buffersize = 0;
-      int* group_indices = nullptr;
-      int* num_active_synapses = nullptr;
-      int* num_activated_neurons = nullptr;
-      int* active_synapse_counts = nullptr;
-      int* active_synapse_starts = nullptr;
-      int* active_presynaptic_neuron_indices = nullptr;
-      int h_num_active_synapses = 0;
       // Device pointers
       int* delays = nullptr;
-
       int* d_syn_labels = nullptr;
+
       neuron_inputs_struct neuron_inputs;
 
       SpikingSynapses();
@@ -85,7 +70,6 @@ namespace Backend {
       spiking_synapses_data_struct* synaptic_data;
       spiking_synapses_data_struct* d_synaptic_data;
       injection_kernel host_injection_kernel;
-      synaptic_activation_kernel host_syn_activation_kernel;
 
       void prepare() override;
       void reset_state() override;
@@ -109,14 +93,6 @@ namespace Backend {
       int idx,
       int g);
 
-    __device__ void get_active_synapses(
-      spiking_synapses_data_struct* synaptic_data,
-      spiking_neurons_data_struct* neuron_data,
-      int timestep_group_index,
-      int preneuron_idx,
-      int timestep_index,
-      bool is_input);
-    
     __global__ void activate_synapses(
         spiking_synapses_data_struct* synaptic_data,
         spiking_neurons_data_struct* neurons_data,
