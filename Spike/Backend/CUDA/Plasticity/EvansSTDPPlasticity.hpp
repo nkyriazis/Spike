@@ -28,12 +28,9 @@ namespace Backend {
     };
     
     __global__ void ltp_and_ltd
-          (int* d_postsyns,
-           int* d_presyns,
-           int* d_syndelays,
-           spiking_neurons_data_struct* neuron_data,
-           spiking_neurons_data_struct* input_neuron_data,
-           float* d_synaptic_efficacies_or_weights,
+          (spiking_synapses_data_struct* synaptic_data,
+           spiking_neurons_data_struct* post_neuron_data,
+           spiking_neurons_data_struct** pre_neurons_data,
            float* recent_presynaptic_activities_C,
            float* recent_postsynaptic_activities_D,
            evans_stdp_plasticity_parameters_struct stdp_vars,

@@ -39,12 +39,9 @@ namespace Backend {
 
     void EvansSTDPPlasticity::update_synaptic_efficacies_or_weights(unsigned int current_time_in_timesteps, float timestep) {
         ltp_and_ltd<<<synapses_backend->number_of_synapse_blocks_per_grid, synapses_backend->threads_per_block>>>
-          (synapses_backend->postsynaptic_neuron_indices,
-           synapses_backend->presynaptic_neuron_indices,
-           synapses_backend->delays,
-           neurons_backend->d_neuron_data,
-           input_neurons_backend->d_neuron_data,
-           synapses_backend->synaptic_efficacies_or_weights,
+          (synapses_backend->d_synaptic_data,
+           synapses_backend->postsynaptic_neuron_data,
+           synapses_backend->d_pre_neurons_data,
            recent_presynaptic_activities_C,
            recent_postsynaptic_activities_D,
            *(frontend()->stdp_params),
@@ -57,12 +54,9 @@ namespace Backend {
     }
     
     __global__ void ltp_and_ltd
-          (int* d_postsyns,
-           int* d_presyns,
-           int* d_syndelays,
-           spiking_neurons_data_struct* neuron_data,
-           spiking_neurons_data_struct* input_neuron_data,
-           float* d_synaptic_efficacies_or_weights,
+          (spiking_synapses_data_struct* synaptic_data,
+           spiking_neurons_data_struct* post_neuron_data,
+           spiking_neurons_data_struct** pre_neurons_data,
            float* recent_presynaptic_activities_C,
            float* recent_postsynaptic_activities_D,
            evans_stdp_plasticity_parameters_struct stdp_vars,
@@ -81,16 +75,16 @@ namespace Backend {
         // Getting synapse details
         float recent_presynaptic_activity_C = recent_presynaptic_activities_C[indx];
         float recent_postsynaptic_activity_D = recent_postsynaptic_activities_D[indx];
-        int postid = d_postsyns[idx];
-        int preid = d_presyns[idx];
-        int bufsize = input_neuron_data->neuron_spike_time_bitbuffer_bytesize[0];
-        float old_synaptic_weight = d_synaptic_efficacies_or_weights[idx];
+        int postid = synaptic_data->postsynaptic_neuron_indices[idx];
+        int preid = synaptic_data->presynaptic_neuron_indices[idx];
+        int pointerid = synaptic_data->presynaptic_pointer_indices[idx];
+        int bufsize = pre_neurons_data[pointerid]->neuron_spike_time_bitbuffer_bytesize[0];
+        float old_synaptic_weight = synaptic_data->synaptic_efficacies_or_weights[idx];
         float new_synaptic_weight = old_synaptic_weight;
 
         // Correcting for input vs output neuron types
         bool is_input = PRESYNAPTIC_IS_INPUT(preid);
         int corr_preid = CORRECTED_PRESYNAPTIC_ID(preid, is_input);
-        uint8_t* pre_bitbuffer = is_input ? input_neuron_data->neuron_spike_time_bitbuffer : neuron_data->neuron_spike_time_bitbuffer;
 
         // Looping over timesteps
         for (int g=0; g < timestep_grouping; g++){
@@ -104,22 +98,22 @@ namespace Backend {
           prebitloc = (prebitloc < 0) ? (bufsize*8 + prebitloc) : prebitloc;
 
           // OnPre Trace Update
-          if (pre_bitbuffer[corr_preid*bufsize + (prebitloc / 8)] & (1 << (prebitloc % 8))){
+          if (pre_neurons_data[pointerid]->neuron_spike_time_bitbuffer[preid*bufsize + (prebitloc / 8)] & (1 << (prebitloc % 8))){
             recent_presynaptic_activity_C += timestep * stdp_vars.synaptic_neurotransmitter_concentration_alpha_C * (1 - recent_presynaptic_activity_C);
           }
           // OnPost Trace Update
-          if (neuron_data->neuron_spike_time_bitbuffer[postid*bufsize + (postbitloc / 8)] & (1 << (postbitloc % 8))){
+          if (post_neuron_data->neuron_spike_time_bitbuffer[postid*bufsize + (postbitloc / 8)] & (1 << (postbitloc % 8))){
             recent_postsynaptic_activity_D += timestep * stdp_vars.model_parameter_alpha_D * (1 - recent_postsynaptic_activity_D);
           }
           
           float syn_update_val = 0.0f; 
           old_synaptic_weight = new_synaptic_weight;
           // OnPre Weight Update
-          if (pre_bitbuffer[corr_preid*bufsize + (prebitloc / 8)] & (1 << (prebitloc % 8))){
+          if (pre_neurons_data[pointerid]->neuron_spike_time_bitbuffer[preid*bufsize + (prebitloc / 8)] & (1 << (prebitloc % 8))){
             syn_update_val -= (old_synaptic_weight * recent_postsynaptic_activity_D);
           }
           // OnPost Weight Update
-          if (neuron_data->neuron_spike_time_bitbuffer[postid*bufsize + (postbitloc / 8)] & (1 << (postbitloc % 8))){
+          if (post_neuron_data->neuron_spike_time_bitbuffer[postid*bufsize + (postbitloc / 8)] & (1 << (postbitloc % 8))){
             syn_update_val += ((1 - old_synaptic_weight) * recent_presynaptic_activity_C);
           }
 
@@ -131,7 +125,7 @@ namespace Backend {
         }
         
         // Weight Update
-        d_synaptic_efficacies_or_weights[idx] = new_synaptic_weight;
+        synaptic_data->synaptic_efficacies_or_weights[idx] = new_synaptic_weight;
 
         // Correctly set the trace values
         recent_presynaptic_activities_C[indx] = recent_presynaptic_activity_C;

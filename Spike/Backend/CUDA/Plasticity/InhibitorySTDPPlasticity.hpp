@@ -35,12 +35,9 @@ namespace Backend {
 
     // Kernel to carry out LTP/LTD
     __global__ void vogels_apply_stdp_to_synapse_weights_kernel
-          (int* d_postsyns,
-           int* d_presyns,
-           int* d_syndelays,
-           spiking_neurons_data_struct* neuron_data,
-           spiking_neurons_data_struct* input_neuron_data,
-           float* d_synaptic_efficacies_or_weights,
+          (spiking_synapses_data_struct* synaptic_data,
+           spiking_neurons_data_struct* post_neuron_data,
+           spiking_neurons_data_struct** pre_neurons_data,
            float* vogels_pre_memory_trace,
            float* vogels_post_memory_trace,
            float trace_decay,

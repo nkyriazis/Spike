@@ -61,6 +61,7 @@ namespace Backend {
        
       synaptic_data->num_presynaptic_pointers = frontend()->presynaptic_neuron_pointers.size();
       synaptic_data->presynaptic_pointer_indices = presynaptic_pointer_indices;
+      synaptic_data->presynaptic_neuron_indices = presynaptic_neuron_indices;
       synaptic_data->postsynaptic_neuron_indices = postsynaptic_neuron_indices;
       synaptic_data->delays = delays;
       synaptic_data->synaptic_efficacies_or_weights = synaptic_efficacies_or_weights;

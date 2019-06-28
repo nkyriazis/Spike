@@ -40,6 +40,7 @@ namespace Backend {
       int** efferent_synapse_counts = nullptr;
       int** efferent_synapse_starts = nullptr;
 
+      int* presynaptic_neuron_indices = nullptr;
       int* postsynaptic_neuron_indices = nullptr;
       int* delays = nullptr;
       float* synaptic_efficacies_or_weights = nullptr;
