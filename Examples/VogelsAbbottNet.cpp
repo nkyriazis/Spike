@@ -109,7 +109,7 @@ int main (int argc, char *argv[]){
   LIFSpikingNeurons * lif_spiking_neurons = new LIFSpikingNeurons();
   ConductanceSpikingSynapses * conductance_spiking_synapses = new ConductanceSpikingSynapses();
   // Add component choices to the model
-  BenchModel->spiking_neurons = lif_spiking_neurons;
+  BenchModel->AddNeuronType(lif_spiking_neurons);
   BenchModel->spiking_synapses = conductance_spiking_synapses;
 
   // Add a monitor for Neuron Spiking
@@ -154,8 +154,8 @@ int main (int argc, char *argv[]){
   EXC_NEURON_PARAMS->group_shape[1] = 3200;
   INH_NEURON_PARAMS->group_shape[0] = 1;
   INH_NEURON_PARAMS->group_shape[1] = 800;
-  EXCITATORY_NEURONS.push_back(BenchModel->AddNeuronGroup(EXC_NEURON_PARAMS));
-  INHIBITORY_NEURONS.push_back(BenchModel->AddNeuronGroup(INH_NEURON_PARAMS));
+  EXCITATORY_NEURONS.push_back(lif_spiking_neurons->AddGroup(EXC_NEURON_PARAMS));
+  INHIBITORY_NEURONS.push_back(lif_spiking_neurons->AddGroup(INH_NEURON_PARAMS));
 
   /*
    *    SYNAPSE PARAMETER SETUP

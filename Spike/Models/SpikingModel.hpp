@@ -33,8 +33,7 @@ public:
   ~SpikingModel();
 
   Context* context = nullptr; // Call init_backend to set this up!
-  SpikingNeurons * spiking_neurons = nullptr;
-  SpikingNeurons * input_spiking_neurons = nullptr;
+  std::vector<SpikingNeurons*> spiking_neurons_vec;
   SpikingSynapses * spiking_synapses = nullptr;
 
   
@@ -47,12 +46,13 @@ public:
   int timestep_grouping = 1;
   void SetTimestep(float timestep_parameter);
 
-  int AddNeuronGroup(neuron_parameters_struct * group_params);
-  int AddInputNeuronGroup(neuron_parameters_struct * group_params);
+  //int AddNeuronGroup(neuron_parameters_struct * group_params);
+  //int AddInputNeuronGroup(neuron_parameters_struct * group_params);
 
-  int AddSynapseGroup(int presynaptic_group_id, int postsynaptic_group_id, synapse_parameters_struct * synapse_params);
-  void AddSynapseGroupsForNeuronGroupAndEachInputGroup(int postsynaptic_group_id, synapse_parameters_struct * synapse_params);
+  //int AddSynapseGroup(int presynaptic_group_id, int postsynaptic_group_id, synapse_parameters_struct * synapse_params);
+  //void AddSynapseGroupsForNeuronGroupAndEachInputGroup(int postsynaptic_group_id, synapse_parameters_struct * synapse_params);
 
+  void AddNeuronType(SpikingNeurons* neuron_type);
   void AddPlasticityRule(STDPPlasticity * plasticity_rule);
   void AddActivityMonitor(ActivityMonitor * activityMonitor);
 

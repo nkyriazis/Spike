@@ -42,8 +42,10 @@ int main (int argc, char *argv[]){
   // CurrentSpikingSynapses * current_spiking_synapses = new CurrentSpikingSynapses();
 
   // Allocate your chosen components to the simulator
-  ExampleModel->input_spiking_neurons = generator_input_neurons;
-  ExampleModel->spiking_neurons = lif_spiking_neurons;
+  ExampleModel->AddNeuronType(generator_input_neurons);
+  ExampleModel->AddNeuronType(lif_spiking_neurons);
+  //ExampleModel->input_spiking_neurons = generator_input_neurons;
+  //ExampleModel->spiking_neurons = lif_spiking_neurons;
   ExampleModel->spiking_synapses = conductance_spiking_synapses;
 
   /*
@@ -69,7 +71,7 @@ int main (int argc, char *argv[]){
   input_neuron_params->group_shape[0] = 1;    // x-dimension of the input neuron layer
   input_neuron_params->group_shape[1] = 10;   // y-dimension of the input neuron layer
   // Create a group of input neurons. This function returns the ID of the input neuron group
-  int input_layer_ID = ExampleModel->AddInputNeuronGroup(input_neuron_params);
+  int input_layer_ID = generator_input_neurons->AddGroup(input_neuron_params);
 
   // SETTING UP NEURON GROUPS
   // Creating an LIF parameter structure for an excitatory neuron population and an inhibitory
@@ -91,8 +93,8 @@ int main (int argc, char *argv[]){
   inhibitory_population_params->somatic_leakage_conductance_g0 = 18.0*pow(10, -9);
 
   // Create populations of excitatory and inhibitory neurons
-  int excitatory_neuron_layer_ID = ExampleModel->AddNeuronGroup(excitatory_population_params);
-  int inhibitory_neuron_layer_ID = ExampleModel->AddNeuronGroup(inhibitory_population_params);
+  int excitatory_neuron_layer_ID = lif_spiking_neurons->AddGroup(excitatory_population_params);
+  int inhibitory_neuron_layer_ID = lif_spiking_neurons->AddGroup(inhibitory_population_params);
 
 
   // SETTING UP SYNAPSES
