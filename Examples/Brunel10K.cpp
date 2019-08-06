@@ -93,8 +93,8 @@ int main (int argc, char *argv[]){
 
   // Add my components to the SpikingModel
   // Note: Spike only supports a single input neuron, neuron and synapse type for now. Multiple Plasticity rules can be added
-  BenchModel->spiking_neurons = lif_spiking_neurons;
-  BenchModel->input_spiking_neurons = poisson_input_spiking_neurons;
+  BenchModel->AddNeuronType(lif_spiking_neurons);
+  BenchModel->AddNeuronType(poisson_input_spiking_neurons);
   BenchModel->spiking_synapses = voltage_spiking_synapses;
   if (plastic)
     BenchModel->AddPlasticityRule(weightdependent_stdp);
@@ -139,7 +139,7 @@ int main (int argc, char *argv[]){
   input_neuron_params->group_shape[0] = 1;    // x-dimension of the input neuron layer
   input_neuron_params->group_shape[1] = 10000;    // y-dimension of the input neuron layer
   input_neuron_params->rate = 20.0f; // Hz
-  int input_layer_ID = BenchModel->AddInputNeuronGroup(input_neuron_params);
+  int input_layer_ID = poisson_input_spiking_neurons->AddGroup(input_neuron_params);
 
   /*
     Setting up NEURON POPULATION
@@ -151,8 +151,8 @@ int main (int argc, char *argv[]){
   EXC_NEURON_PARAMS->group_shape[1] = 8000;
   INH_NEURON_PARAMS->group_shape[0] = 1;
   INH_NEURON_PARAMS->group_shape[1] = 2000;
-  EXCITATORY_NEURONS.push_back(BenchModel->AddNeuronGroup(EXC_NEURON_PARAMS));
-  INHIBITORY_NEURONS.push_back(BenchModel->AddNeuronGroup(INH_NEURON_PARAMS));
+  EXCITATORY_NEURONS.push_back(lif_spiking_neurons->AddGroup(EXC_NEURON_PARAMS));
+  INHIBITORY_NEURONS.push_back(lif_spiking_neurons->AddGroup(INH_NEURON_PARAMS));
 
   /*
     Setting up SYNAPSES
