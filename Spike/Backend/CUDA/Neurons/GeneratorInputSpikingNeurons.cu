@@ -21,7 +21,8 @@ namespace Backend {
 
     void GeneratorInputSpikingNeurons::prepare() {
       InputSpikingNeurons::prepare();
-      allocate_device_pointers();
+      if (frontend()->total_number_of_input_stimuli > 0)
+        allocate_device_pointers();
     }
 
     void GeneratorInputSpikingNeurons::reset_state() {
@@ -30,20 +31,22 @@ namespace Backend {
     }
     
     void GeneratorInputSpikingNeurons::setup_stimulus() {
-      CudaSafeCall(cudaMemcpy(neuron_ids_for_stimulus,
-                              frontend()->neuron_id_matrix_for_stimuli[frontend()->current_stimulus_index],
-                              sizeof(int)*frontend()->number_of_spikes_in_stimuli[frontend()->current_stimulus_index],
-                              cudaMemcpyHostToDevice));
-      CudaSafeCall(cudaMemcpy(spike_times_for_stimulus,
-                              frontend()->spike_times_matrix_for_stimuli[frontend()->current_stimulus_index],
-                              sizeof(float)*frontend()->number_of_spikes_in_stimuli[frontend()->current_stimulus_index],
-                              cudaMemcpyHostToDevice));
-      num_spikes_in_current_stimulus = frontend()->number_of_spikes_in_stimuli[frontend()->current_stimulus_index];
+      if (frontend()->total_number_of_input_stimuli > 0){
+        CudaSafeCall(cudaMemcpy(neuron_ids_for_stimulus,
+                                frontend()->neuron_id_matrix_for_stimuli[frontend()->current_stimulus_index],
+                                sizeof(int)*frontend()->number_of_spikes_in_stimuli[frontend()->current_stimulus_index],
+                                cudaMemcpyHostToDevice));
+        CudaSafeCall(cudaMemcpy(spike_times_for_stimulus,
+                                frontend()->spike_times_matrix_for_stimuli[frontend()->current_stimulus_index],
+                                sizeof(float)*frontend()->number_of_spikes_in_stimuli[frontend()->current_stimulus_index],
+                                cudaMemcpyHostToDevice));
+        num_spikes_in_current_stimulus = frontend()->number_of_spikes_in_stimuli[frontend()->current_stimulus_index];
+      }
     }
 
 
     void GeneratorInputSpikingNeurons::state_update(unsigned int current_time_in_timesteps, float timestep) {
-      if (frontend()->total_number_of_neurons > 0){
+      if ((frontend()->total_number_of_neurons > 0) & (frontend()->total_number_of_input_stimuli > 0)){
         ::Backend::CUDA::SpikingSynapses* synapses_backend = dynamic_cast<::Backend::CUDA::SpikingSynapses*>(frontend()->model->spiking_synapses->backend());
         if ((frontend()->temporal_lengths_of_stimuli[frontend()->current_stimulus_index] + (h_neuron_spike_time_bitbuffer_bytesize*8 + 1)*timestep) > (current_time_in_timesteps*timestep - frontend()->stimulus_onset_adjustment)){
 
