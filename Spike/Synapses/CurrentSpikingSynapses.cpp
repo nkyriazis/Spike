@@ -10,8 +10,8 @@ int CurrentSpikingSynapses::AddGroup(int presynaptic_group_id,
   
   int groupID = SpikingSynapses::AddGroup(presynaptic_group_id, 
                             postsynaptic_group_id, 
-                            neurons,
                             input_neurons,
+                            neurons,
                             timestep,
                             synapse_params);
 

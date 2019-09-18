@@ -33,8 +33,8 @@ public:
   vector<float> weight_scaling_constants;
   int AddGroup(int presynaptic_group_id, 
                 int postsynaptic_group_id, 
-                Neurons * neurons,
                 Neurons * input_neurons,
+                Neurons * neurons,
                 float timestep,
                 synapse_parameters_struct * synapse_params) override;
   void state_update(unsigned int current_time_in_timesteps, float timestep) override;

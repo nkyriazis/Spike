@@ -116,8 +116,8 @@ void Synapses::reset_state() {
 
 int Synapses::AddGroup(int presynaptic_group_id, 
                         int postsynaptic_group_id, 
-                        Neurons * post_neurons,
                         Neurons * pre_neurons,
+                        Neurons * post_neurons,
                         float timestep,
                         synapse_parameters_struct * synapse_params) {
 
