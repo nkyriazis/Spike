@@ -14,7 +14,7 @@ namespace Backend {
       void reset_state() override;
 
       void state_update(unsigned int current_time_in_timesteps,
-                                   float timestep) override;
+                                   float timestep, unsigned int timestep_grouping) override;
     };
   } // namespace Dummy
 } // namespace Backend

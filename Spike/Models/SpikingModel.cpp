@@ -151,18 +151,18 @@ void SpikingModel::reset_time() {
 void SpikingModel::perform_per_step_model_instructions(bool plasticity_on){
   
   for (int n=0; n < spiking_neurons_vec.size(); n++){
-    spiking_neurons_vec[n]->state_update(current_time_in_timesteps, timestep);
+    spiking_neurons_vec[n]->state_update(current_time_in_timesteps, timestep, timestep_grouping);
   }
   
   if (plasticity_on){
     for (int plasticity_id = 0; plasticity_id < plasticity_rule_vec.size(); plasticity_id++)
-      plasticity_rule_vec[plasticity_id]->state_update(current_time_in_timesteps, timestep);
+      plasticity_rule_vec[plasticity_id]->state_update(current_time_in_timesteps, timestep, timestep_grouping);
   }
 
-  spiking_synapses->state_update(current_time_in_timesteps, timestep);
+  spiking_synapses->state_update(current_time_in_timesteps, timestep, timestep_grouping);
   
   for (int monitor_id = 0; monitor_id < monitors_vec.size(); monitor_id++)
-    monitors_vec[monitor_id]->state_update(current_time_in_timesteps, timestep);
+    monitors_vec[monitor_id]->state_update(current_time_in_timesteps, timestep, timestep_grouping);
 
 }
 
@@ -184,7 +184,7 @@ void SpikingModel::run(float seconds, bool plasticity_on){
 
   // Carry out any final checks and outputs from recording electrodes
   for (int monitor_id = 0; monitor_id < monitors_vec.size(); monitor_id++)
-    monitors_vec[monitor_id]->final_update(current_time_in_timesteps, timestep);
+    monitors_vec[monitor_id]->final_update(current_time_in_timesteps, timestep, timestep_grouping);
 
 }
 

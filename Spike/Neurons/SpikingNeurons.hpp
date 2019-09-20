@@ -6,7 +6,6 @@
 class SpikingNeurons; // Forward Definition
 struct spiking_neuron_parameters_struct;
 
-#include "Spike/Models/SpikingModel.hpp"
 #include "Neurons.hpp"
 
 
@@ -19,7 +18,7 @@ namespace Backend {
   class SpikingNeurons : public virtual Neurons {
   public:
     SPIKE_ADD_BACKEND_FACTORY(SpikingNeurons);
-    virtual void state_update(unsigned int current_time_in_timesteps, float timestep) = 0;
+    virtual void state_update(unsigned int current_time_in_timesteps, float timestep, unsigned int timestep_grouping) = 0;
   };
 }
 
@@ -33,13 +32,10 @@ public:
   SPIKE_ADD_BACKEND_GETSET(SpikingNeurons, Neurons);
   void prepare_backend_early() override;
 
-  // Host Pointers
-  SpikingModel* model = nullptr;
-
   // Functions
   int AddGroup(neuron_parameters_struct * group_params) override;
 
-  virtual void state_update(unsigned int current_time_in_timesteps, float timestep);
+  virtual void state_update(unsigned int current_time_in_timesteps, float timestep, unsigned int timestep_grouping);
 
 private:
   std::shared_ptr<::Backend::SpikingNeurons> _backend;

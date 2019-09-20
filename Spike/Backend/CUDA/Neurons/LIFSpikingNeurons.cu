@@ -12,13 +12,12 @@ namespace Backend {
     LIFSpikingNeurons::~LIFSpikingNeurons() {
       CudaSafeCall(cudaFree(membrane_potentials_v));
       CudaSafeCall(cudaFree(membrane_time_constants_tau_m));
-      CudaSafeCall(cudaFree(membrane_decay_constants));
       CudaSafeCall(cudaFree(membrane_resistances_R));
       CudaSafeCall(cudaFree(thresholds_for_action_potential_spikes));
       CudaSafeCall(cudaFree(resting_potentials_v0));
       CudaSafeCall(cudaFree(after_spike_reset_potentials_vreset));
       CudaSafeCall(cudaFree(background_currents));
-      CudaSafeCall(cudaFree(refractory_timesteps));
+      CudaSafeCall(cudaFree(refractory_periods));
       CudaSafeCall(cudaFree(refraction_counter));
     }
 
@@ -28,9 +27,8 @@ namespace Backend {
       CudaSafeCall(cudaMalloc((void **)&resting_potentials_v0, sizeof(float)*frontend()->resting_potentials_v0.size()));
       CudaSafeCall(cudaMalloc((void **)&after_spike_reset_potentials_vreset, sizeof(float)*frontend()->after_spike_reset_potentials_vreset.size()));
       CudaSafeCall(cudaMalloc((void **)&membrane_time_constants_tau_m, sizeof(float)*frontend()->membrane_time_constants_tau_m.size()));
-      CudaSafeCall(cudaMalloc((void **)&membrane_decay_constants, sizeof(float)*frontend()->membrane_resistances_R.size()));
       CudaSafeCall(cudaMalloc((void **)&membrane_resistances_R, sizeof(float)*frontend()->membrane_resistances_R.size()));
-      CudaSafeCall(cudaMalloc((void **)&refractory_timesteps, sizeof(int)*frontend()->refractory_periods.size()));
+      CudaSafeCall(cudaMalloc((void **)&refractory_periods, sizeof(float)*frontend()->refractory_periods.size()));
       CudaSafeCall(cudaMalloc((void **)&background_currents, sizeof(int)*frontend()->background_currents.size()));
       
       
@@ -45,54 +43,35 @@ namespace Backend {
                               frontend()->spiking_thresholds_vthresh.data(),
                               sizeof(float)*frontend()->spiking_thresholds_vthresh.size(),
                               cudaMemcpyHostToDevice));
+
       CudaSafeCall(cudaMemcpy(after_spike_reset_potentials_vreset,
                               frontend()->after_spike_reset_potentials_vreset.data(),
                               sizeof(float)*frontend()->after_spike_reset_potentials_vreset.size(),
                               cudaMemcpyHostToDevice));
+
       CudaSafeCall(cudaMemcpy(membrane_time_constants_tau_m,
                               frontend()->membrane_time_constants_tau_m.data(),
                               sizeof(float)*frontend()->membrane_time_constants_tau_m.size(),
                               cudaMemcpyHostToDevice));
-     
       
-      vector<float> m_decay_constants;
-      for (int n=0; n < frontend()->membrane_time_constants_tau_m.size(); n++)
-        m_decay_constants.push_back(frontend()->model->timestep / frontend()->membrane_time_constants_tau_m[n]);
-      CudaSafeCall(cudaMemcpy(membrane_decay_constants,
-                              m_decay_constants.data(),
-                              sizeof(float)*m_decay_constants.size(),
-                              cudaMemcpyHostToDevice));
-
-      vector<float> m_resistance_constants;
-      for (int n=0; n < frontend()->membrane_resistances_R.size(); n++)
-        m_resistance_constants.push_back(m_decay_constants[n]*frontend()->membrane_resistances_R[n]);
       CudaSafeCall(cudaMemcpy(membrane_resistances_R,
-                              m_resistance_constants.data(),
-                              sizeof(float)*m_resistance_constants.size(),
+                              frontend()->membrane_resistances_R.data(),
+                              sizeof(float)*frontend()->membrane_resistances_R.size(),
                               cudaMemcpyHostToDevice));
       
-      vector<float> modified_background_currents;
-      for (int n=0; n < frontend()->background_currents.size(); n++)
-        modified_background_currents.push_back(m_decay_constants[n]*frontend()->background_currents[n]);
       CudaSafeCall(cudaMemcpy(background_currents,
-                              modified_background_currents.data(),
-                              sizeof(float)*modified_background_currents.size(),
+                              frontend()->background_currents.data(),
+                              sizeof(float)*frontend()->background_currents.size(),
                               cudaMemcpyHostToDevice));
       
-      vector<float> modified_resting_potentials_v0;
-      for (int n=0; n < frontend()->resting_potentials_v0.size(); n++)
-        modified_resting_potentials_v0.push_back(m_decay_constants[n]*frontend()->resting_potentials_v0[n]);
       CudaSafeCall(cudaMemcpy(resting_potentials_v0,
-                              modified_resting_potentials_v0.data(),
-                              sizeof(float)*modified_resting_potentials_v0.size(),
+                              frontend()->resting_potentials_v0.data(),
+                              sizeof(float)*frontend()->resting_potentials_v0.size(),
                               cudaMemcpyHostToDevice));
       
-      vector<int> tmp_refractory_timesteps;
-      for (int n=0; n < frontend()->refractory_periods.size(); n++)
-        tmp_refractory_timesteps.push_back(ceil(frontend()->refractory_periods[n] / frontend()->model->timestep));
-      CudaSafeCall(cudaMemcpy(refractory_timesteps,
-                              tmp_refractory_timesteps.data(),
-                              sizeof(int)*tmp_refractory_timesteps.size(),
+      CudaSafeCall(cudaMemcpy(refractory_periods,
+                              frontend()->refractory_periods.data(),
+                              sizeof(int)*frontend()->refractory_periods.size(),
                               cudaMemcpyHostToDevice));
       
       CudaSafeCall(cudaMemcpy(neuron_labels,
@@ -118,9 +97,8 @@ namespace Backend {
       this_neuron_data->thresholds_for_action_potential_spikes = thresholds_for_action_potential_spikes;
       this_neuron_data->resting_potentials_v0 = resting_potentials_v0;
       this_neuron_data->after_spike_reset_potentials_vreset = after_spike_reset_potentials_vreset;
-      this_neuron_data->refractory_timesteps = refractory_timesteps;
+      this_neuron_data->refractory_periods = refractory_periods;
       this_neuron_data->membrane_time_constants_tau_m = membrane_time_constants_tau_m;
-      this_neuron_data->membrane_decay_constants = membrane_decay_constants;
       this_neuron_data->membrane_resistances_R = membrane_resistances_R;
       this_neuron_data->background_currents = background_currents;
       
@@ -150,7 +128,7 @@ namespace Backend {
                               cudaMemcpyHostToDevice));
     }
 
-    void LIFSpikingNeurons::state_update(unsigned int current_time_in_timesteps, float timestep) {
+    void LIFSpikingNeurons::state_update(unsigned int current_time_in_timesteps, float timestep, unsigned int timestep_grouping) {
       ::Backend::CUDA::SpikingSynapses* synapses_backend =
         dynamic_cast<::Backend::CUDA::SpikingSynapses*>(frontend()->model->spiking_synapses->backend());
       lif_update_membrane_potentials<<<number_of_neuron_blocks_per_grid, threads_per_block>>>
@@ -158,7 +136,7 @@ namespace Backend {
          synapses_backend->d_synaptic_data,
          d_neuron_data,
          timestep,
-         frontend()->model->timestep_grouping,
+         timestep_grouping,
          current_time_in_timesteps*timestep,
          current_time_in_timesteps,
          frontend()->total_number_of_neurons);
@@ -186,11 +164,13 @@ namespace Backend {
       while (idx < total_number_of_neurons) {
 
         int neuron_label = neuron_data->neuron_labels[idx];
-        float equation_constant = neuron_data->membrane_decay_constants[neuron_label];
+        float mem_time_constant = neuron_data->membrane_time_constants_tau_m[neuron_label];
+        float mem_decay_constant = timestep / mem_time_constant;
         float resting_potential_V0 = neuron_data->resting_potentials_v0[neuron_label];
         float temp_membrane_resistance_R = neuron_data->membrane_resistances_R[neuron_label];
         float background_current = neuron_data->background_currents[neuron_label];
-        int refractory_period_in_timesteps = neuron_data->refractory_timesteps[neuron_label];
+        float refractory_period = neuron_data->refractory_periods[neuron_label];
+        int refractory_period_in_timesteps = refractory_period / timestep;
         float voltage_input_for_timestep = 0.0f;
         int bufsize = neuron_data->neuron_spike_time_bitbuffer_bytesize[0];
         
@@ -251,6 +231,7 @@ namespace Backend {
             }
           #endif
           if (neuron_data->refraction_counter[idx] <= 0){
+            membrane_potential_Vi += mem_time_constant*((resting_potential_V0 - membrane_potential_Vi) + background_current)
             membrane_potential_Vi += resting_potential_V0 - equation_constant * membrane_potential_Vi + background_current + voltage_input_for_timestep;
             
     

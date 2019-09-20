@@ -27,7 +27,7 @@ namespace Backend {
       copy_rates_to_device();
     }
 
-    void PatternedPoissonInputSpikingNeurons::state_update(unsigned int current_time_in_timesteps, float timestep) {
+    void PatternedPoissonInputSpikingNeurons::state_update(unsigned int current_time_in_timesteps, float timestep, unsigned int timestep_grouping) {
       ::Backend::CUDA::SpikingSynapses* synapses_backend =
         dynamic_cast<::Backend::CUDA::SpikingSynapses*>(frontend()->model->spiking_synapses->backend());
       poisson_update_membrane_potentials_kernel<<<random_state_manager_backend->block_dimensions, random_state_manager_backend->threads_per_block>>>(
@@ -37,7 +37,7 @@ namespace Backend {
          stimuli_rates,
          active,
          timestep,
-         frontend()->model->timestep_grouping,
+         timestep_grouping,
          next_spike_timestep_of_each_neuron,
          current_time_in_timesteps,
          frontend()->total_number_of_neurons,

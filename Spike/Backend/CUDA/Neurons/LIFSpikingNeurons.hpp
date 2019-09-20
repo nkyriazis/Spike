@@ -16,13 +16,12 @@ namespace Backend {
     struct lif_spiking_neurons_data_struct: spiking_neurons_data_struct {
       float* membrane_potentials_v; 
       float* membrane_time_constants_tau_m;
-      float* membrane_decay_constants;
       float* membrane_resistances_R;
       float* thresholds_for_action_potential_spikes;
       float* resting_potentials_v0;
       float* after_spike_reset_potentials_vreset;
       float* background_currents;
-      int* refractory_timesteps;
+      float* refractory_timesteps;
       int* refraction_counter;
       int* neuron_labels;
     };
@@ -32,13 +31,12 @@ namespace Backend {
     public:
       float* membrane_potentials_v;
       float * membrane_time_constants_tau_m = nullptr;
-      float * membrane_decay_constants = nullptr;
       float * membrane_resistances_R = nullptr;
       float* thresholds_for_action_potential_spikes = nullptr;
       float* resting_potentials_v0 = nullptr;
       float* after_spike_reset_potentials_vreset = nullptr;
       float* background_currents = nullptr;
-      int* refractory_timesteps = nullptr;
+      float* refractory_timesteps = nullptr;
 
       int* refraction_counter = nullptr;
       int* neuron_labels = nullptr;
@@ -53,7 +51,7 @@ namespace Backend {
       void copy_constants_to_device(); // Not virtual
       void allocate_device_pointers(); // Not virtual
 
-      void state_update(unsigned int current_time_in_timesteps, float timestep) override;
+      void state_update(unsigned int current_time_in_timesteps, float timestep, unsigned int timestep_grouping) override;
     };
 
     __global__ void lif_update_membrane_potentials(

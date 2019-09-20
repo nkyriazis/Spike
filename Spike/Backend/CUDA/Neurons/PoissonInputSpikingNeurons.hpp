@@ -39,7 +39,7 @@ namespace Backend {
       void allocate_device_pointers(); // Not virtual
       void copy_constants_to_device(); // Not virtual
 
-      void state_update(unsigned int current_time_in_timesteps, float timestep) override;
+      void state_update(unsigned int current_time_in_timesteps, float timestep, unsigned int timestep_grouping) override;
     };
     __global__ void poisson_update_membrane_potentials_kernel(
         spiking_synapses_data_struct* synaptic_data,
