@@ -15,7 +15,7 @@ namespace Backend {
       void reset_state() override;
 
       void collect_measurement
-      (unsigned int current_time_in_timesteps, float timestep) override;
+      (unsigned int current_time_in_timesteps, float timestep, unsigned int timestep_grouping) override;
       void copy_data_to_host() override;
     };
   }

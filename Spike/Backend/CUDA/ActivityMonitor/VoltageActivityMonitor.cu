@@ -32,7 +32,7 @@ namespace Backend {
     }
 
     void VoltageActivityMonitor::collect_measurement
-    (unsigned int current_time_in_timesteps, float timestep) {
+    (unsigned int current_time_in_timesteps, float timestep, unsigned int timestep_grouping) {
       CudaSafeCall(cudaMemcpy(measurements + num_measurements,
                               neurons_backend->membrane_potentials_v + frontend()->neuron_id,
                               sizeof(float), 

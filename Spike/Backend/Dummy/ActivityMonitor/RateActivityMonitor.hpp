@@ -15,7 +15,7 @@ namespace Backend {
       void reset_state() override;
 
       void add_spikes_to_per_neuron_spike_count
-      (unsigned int current_time_in_timesteps, float timestep) override;
+      (unsigned int current_time_in_timesteps, float timestep, unsigned int timestep_grouping) override;
       void copy_spike_count_to_host() override;
     };
   }

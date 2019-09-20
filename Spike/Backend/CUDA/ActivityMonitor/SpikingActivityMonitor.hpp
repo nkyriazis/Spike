@@ -27,7 +27,7 @@ namespace Backend {
       void copy_spikes_to_front() override;
       void copy_spikecount_to_front() override;
 
-      void collect_spikes_for_timestep(unsigned int current_time_in_timesteps, float timestep) override;
+      void collect_spikes_for_timestep(unsigned int current_time_in_timesteps, float timestep, unsigned int timestep_grouping) override;
 
       int* neuron_ids_of_stored_spikes_on_device = nullptr;
       int* total_number_of_spikes_stored_on_device = nullptr;

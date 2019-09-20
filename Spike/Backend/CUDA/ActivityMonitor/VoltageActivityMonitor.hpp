@@ -31,7 +31,7 @@ namespace Backend {
       void allocate_pointers_for_data();
 
       void copy_data_to_host() override;
-      void collect_measurement(unsigned int current_time_in_timesteps, float timestep) override;
+      void collect_measurement(unsigned int current_time_in_timesteps, float timestep, unsigned int timestep_grouping) override;
     
     private:
       ::SpikingNeurons* neurons_frontend = nullptr;

@@ -36,12 +36,12 @@ namespace Backend {
     }
 
     void RateActivityMonitor::add_spikes_to_per_neuron_spike_count
-    (unsigned int current_time_in_timesteps, float timestep) {
+    (unsigned int current_time_in_timesteps, float timestep, unsigned int timestep_grouping) {
       add_spikes_to_per_neuron_spike_count_kernel<<<neurons_backend->number_of_neuron_blocks_per_grid, neurons_backend->threads_per_block>>>
         (neurons_backend->d_neuron_data,
          per_neuron_spike_counts,
          current_time_in_timesteps,
-         frontend()->model->timestep_grouping,
+         timestep_grouping,
          frontend()->neurons->total_number_of_neurons);
          CudaCheckError();
     }

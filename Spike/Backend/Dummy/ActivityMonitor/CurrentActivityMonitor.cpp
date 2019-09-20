@@ -12,7 +12,7 @@ namespace Backend {
       ActivityMonitor::reset_state();
     }
     
-    void CurrentActivityMonitor::collect_measurement(unsigned int current_time_in_timesteps, float timestep){
+    void CurrentActivityMonitor::collect_measurement(unsigned int current_time_in_timesteps, float timestep, unsigned int timestep_grouping){
     }
 
     void CurrentActivityMonitor::copy_data_to_host() {

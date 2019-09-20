@@ -29,7 +29,7 @@ namespace Backend {
       void allocate_pointers_for_spike_count(); // Not virtual
 
       void copy_spike_count_to_host() override;
-      void add_spikes_to_per_neuron_spike_count(unsigned int current_time_in_timesteps, float timestep) override;
+      void add_spikes_to_per_neuron_spike_count(unsigned int current_time_in_timesteps, float timestep, unsigned int timestep_grouping) override;
 
     private:
       ::SpikingNeurons* neurons_frontend = nullptr;
