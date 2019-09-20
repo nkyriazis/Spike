@@ -1,10 +1,12 @@
 #ifndef ActivityMonitor_H
 #define ActivityMonitor_H
 
-#include <string>
 using namespace std;
 
 class ActivityMonitor; // forward definition
+namespace Backend {
+  class ActivityMonitor;
+}
 #include "Spike/Base.hpp"
 
 #include "Spike/Backend/Macros.hpp"

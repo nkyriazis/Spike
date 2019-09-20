@@ -5,17 +5,10 @@
 class SpikingModel; // Forward Declaration
 
 #include <stdio.h>
-#include "../Backend/Context.hpp"
-#include "../Synapses/SpikingSynapses.hpp"
-#include "../Plasticity/STDPPlasticity.hpp"
-#include "../Neurons/Neurons.hpp"
-#include "../Neurons/SpikingNeurons.hpp"
-#include "../Helpers/TimerWithMessages.hpp"
-#include "../Helpers/RandomStateManager.hpp"
-#include "../ActivityMonitor/ActivityMonitor.hpp"
+#include <vector>
 #include <string>
 #include <fstream>
-#include <vector>
+#include "../Spike.hpp"
 
 #include <iostream>
 using namespace std;
@@ -28,17 +21,15 @@ public:
   unsigned int current_time_in_timesteps = 0;
   float current_time_in_seconds = 0.0f;
   // Constructor/Destructor
-  //SpikingModel(SpikingNeurons* spiking_neurons, SpikingNeurons* input_spiking_neurons, SpikingSynapses* spiking_synapses);
   SpikingModel();
   ~SpikingModel();
 
   Context* context = nullptr; // Call init_backend to set this up!
   std::vector<SpikingNeurons*> spiking_neurons_vec;
-  SpikingSynapses * spiking_synapses = nullptr;
-
-  
   vector<STDPPlasticity*> plasticity_rule_vec; 
   vector<ActivityMonitor*> monitors_vec; 
+  SpikingSynapses * spiking_synapses = nullptr;
+  
 
   bool model_complete = false;
 
@@ -47,10 +38,8 @@ public:
   void SetTimestep(float timestep_parameter);
 
   //int AddNeuronGroup(neuron_parameters_struct * group_params);
-  //int AddInputNeuronGroup(neuron_parameters_struct * group_params);
-
   //int AddSynapseGroup(int presynaptic_group_id, int postsynaptic_group_id, synapse_parameters_struct * synapse_params);
-  //void AddSynapseGroupsForNeuronGroupAndEachInputGroup(int postsynaptic_group_id, synapse_parameters_struct * synapse_params);
+  
 
   void AddNeuronType(SpikingNeurons* neuron_type);
   void AddPlasticityRule(STDPPlasticity * plasticity_rule);
