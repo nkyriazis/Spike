@@ -10,7 +10,7 @@ namespace Backend {
   class VoltageActivityMonitor : public virtual ActivityMonitor {
   public:
     SPIKE_ADD_BACKEND_FACTORY(VoltageActivityMonitor);
-    virtual void collect_measurement(unsigned int current_time_in_timesteps, float timestep) = 0;
+    virtual void collect_measurement(unsigned int current_time_in_timesteps, float timestep, unsigned int timestep_grouping) = 0;
     virtual void copy_data_to_host() = 0;
   };
 }
@@ -30,8 +30,8 @@ public:
   int num_measurements = 0;
   float * neuron_measurements = nullptr;
 
-  void state_update(unsigned int current_time_in_timesteps, float timestep) override;
-  void final_update(unsigned int current_time_in_timesteps, float timestep) override;
+  void state_update(unsigned int current_time_in_timesteps, float timestep, unsigned int timestep_grouping) override;
+  void final_update(unsigned int current_time_in_timesteps, float timestep, unsigned int timestep_grouping) override;
   void reset_state() override;
   void save_measurements_as_txt(string path, string prefix);
   void save_measurements_as_binary(string path, string prefix);

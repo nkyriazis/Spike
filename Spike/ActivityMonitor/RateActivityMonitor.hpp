@@ -12,7 +12,7 @@ namespace Backend {
     SPIKE_ADD_BACKEND_FACTORY(RateActivityMonitor);
 
     virtual void copy_spike_count_to_host() = 0;
-    virtual void add_spikes_to_per_neuron_spike_count(unsigned int current_time_in_timesteps, float timestep) = 0;
+    virtual void add_spikes_to_per_neuron_spike_count(unsigned int current_time_in_timesteps, float timestep, unsigned int timestep_grouping) = 0;
   };
 }
 
@@ -30,10 +30,10 @@ public:
   SpikingNeurons* neurons = nullptr;
 
   void prepare_backend_early() override;
-  void state_update(unsigned int current_time_in_timesteps, float timestep) override;
-  void final_update(unsigned int current_time_in_timesteps, float timestep) override;
+  void state_update(unsigned int current_time_in_timesteps, float timestep, unsigned int timestep_grouping) override;
+  void final_update(unsigned int current_time_in_timesteps, float timestep, unsigned int timestep_grouping) override;
   void reset_state() override;
-  void add_spikes_to_per_neuron_spike_count(unsigned int current_time_in_timesteps, float timestep);
+  void add_spikes_to_per_neuron_spike_count(unsigned int current_time_in_timesteps, float timestep, unsigned int timestep_grouping);
 
 private:
   std::shared_ptr<::Backend::RateActivityMonitor> _backend;

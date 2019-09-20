@@ -26,7 +26,7 @@ namespace Backend {
 
     virtual void copy_spikes_to_front() = 0;
     virtual void copy_spikecount_to_front() = 0;
-    virtual void collect_spikes_for_timestep(unsigned int current_time_in_timesteps, float timestep) = 0;
+    virtual void collect_spikes_for_timestep(unsigned int current_time_in_timesteps, float timestep, unsigned int timestep_grouping) = 0;
   };
 }
 
@@ -59,11 +59,11 @@ public:
   void initialise_collect_neuron_spikes_recording_electrodes();
   void allocate_pointers_for_spike_store();
 
-  void state_update(unsigned int current_time_in_timesteps, float timestep) override;
-  void final_update(unsigned int current_time_in_timesteps, float timestep) override;
+  void state_update(unsigned int current_time_in_timesteps, float timestep, unsigned int timestep_grouping) override;
+  void final_update(unsigned int current_time_in_timesteps, float timestep, unsigned int timestep_grouping) override;
   void reset_state() override;
 
-  void copy_spikes_from_device_to_host_and_reset_device_spikes_if_device_spike_count_above_threshold(unsigned int current_time_in_timesteps, float timestep, bool force=false);
+  void copy_spikes_from_device_to_host_and_reset_device_spikes_if_device_spike_count_above_threshold(unsigned int current_time_in_timesteps, float timestep, unsigned int timestep_grouping, bool force=false);
 
   void save_spikes_as_txt(string path, string prefix="");
   void save_spikes_as_binary(string path, string prefix="");

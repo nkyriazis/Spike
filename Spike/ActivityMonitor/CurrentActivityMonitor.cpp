@@ -23,11 +23,11 @@ void CurrentActivityMonitor::reset_state() {
   backend()->reset_state();
 }
 
-void CurrentActivityMonitor::state_update(unsigned int current_time_in_timesteps, float timestep) {
-  backend()->collect_measurement(current_time_in_timesteps, timestep);
+void CurrentActivityMonitor::state_update(unsigned int current_time_in_timesteps, float timestep, unsigned int timestep_grouping) {
+  backend()->collect_measurement(current_time_in_timesteps, timestep, timestep_grouping);
 }
 
-void CurrentActivityMonitor::final_update(unsigned int current_time_in_timesteps, float timestep){
+void CurrentActivityMonitor::final_update(unsigned int current_time_in_timesteps, float timestep, unsigned int timestep_grouping){
   backend()->copy_data_to_host();
 }
 

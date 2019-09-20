@@ -23,11 +23,11 @@ void ConductanceActivityMonitor::reset_state() {
   backend()->reset_state();
 }
 
-void ConductanceActivityMonitor::state_update(unsigned int current_time_in_timesteps, float timestep) {
-  backend()->collect_measurement(current_time_in_timesteps, timestep);
+void ConductanceActivityMonitor::state_update(unsigned int current_time_in_timesteps, float timestep, unsigned int timestep_grouping) {
+  backend()->collect_measurement(current_time_in_timesteps, timestep, timestep_grouping);
 }
 
-void ConductanceActivityMonitor::final_update(unsigned int current_time_in_timesteps, float timestep){
+void ConductanceActivityMonitor::final_update(unsigned int current_time_in_timesteps, float timestep, unsigned int timestep_grouping){
   backend()->copy_data_to_host();
 }
 

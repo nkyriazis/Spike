@@ -5,11 +5,6 @@
 #include <fstream>
 #include "../Helpers/TerminalHelpers.hpp"
 #include <time.h>
-/*
-ActivityMonitor::ActivityMonitor(SpikingNeurons* neuron_set) {
-  neurons = neuron_set;
-}
-*/
 
 void ActivityMonitor::reset_state() {
   backend()->reset_state();
