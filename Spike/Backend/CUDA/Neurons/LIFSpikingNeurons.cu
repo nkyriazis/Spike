@@ -83,7 +83,8 @@ namespace Backend {
          current_time_in_timesteps*timestep,
          current_time_in_timesteps,
          ceil(frontend()->refractory_period_in_seconds/timestep),
-         frontend()->total_number_of_neurons);
+         frontend()->total_number_of_neurons,
+         ::LIFSpikingNeurons::hack_normalizer);
 
       CudaCheckError();
     }
@@ -99,7 +100,8 @@ namespace Backend {
         float current_time_in_seconds,
         unsigned int current_time_in_timesteps,
         int refractory_period_in_timesteps,
-        size_t total_number_of_neurons) {
+        size_t total_number_of_neurons,
+        const float hack_normalizer) {
       // Get thread IDs
       int idx = threadIdx.x + blockIdx.x * blockDim.x;
       while (idx < total_number_of_neurons) {
@@ -169,7 +171,7 @@ namespace Backend {
           #endif
           if (neuron_data->refraction_counter[idx] <= 0){
           //if ((((current_time_in_timesteps + g)*timestep) - neuron_data->last_spike_time_of_each_neuron[idx] - refractory_period_in_seconds) > 0.5f*timestep ){
-            membrane_potential_Vi = equation_constant * resting_potential_V0 + (1 - equation_constant) * membrane_potential_Vi + equation_constant * background_current + voltage_input_for_timestep;
+            membrane_potential_Vi = equation_constant * resting_potential_V0 + (1 - equation_constant) * membrane_potential_Vi + equation_constant * background_current + voltage_input_for_timestep * hack_normalizer;
             
     
             // Finally check for a spike

@@ -50,6 +50,7 @@ namespace Backend {
         float current_time_in_seconds,
         unsigned int current_time_in_timesteps,
         int refactory_period_in_timesteps,
-        size_t total_number_of_neurons);
+        size_t total_number_of_neurons,
+        const float hack_normalizer);
   }
 }
