@@ -62,12 +62,12 @@ type_name()
   }
 
 #define SPIKE_MAKE_INIT_BACKEND(TYPE)                              \
-  void TYPE::init_backend(Context* ctx) {                          \
-    auto ptr = ::Backend::TYPE::factory[ctx->backend](this, ctx);  \
-    backend(std::shared_ptr<::Backend::TYPE>(ptr));                \
-    prepare_backend();                                             \
-  } /* Below, instantiate backend factory map: */                  \
   namespace Backend { FactoryMap<::TYPE, TYPE> TYPE::factory; }    \
+  //void TYPE::init_backend(Context* ctx) {                          \
+  //  auto ptr = ::Backend::TYPE::factory[ctx->backend](this, ctx);  \
+  //  backend(std::shared_ptr<::Backend::TYPE>(ptr));                \
+  //  prepare_backend();                                             \
+  //} /* Below, instantiate backend factory map: */                  \
 
 #define SPIKE_MAKE_STUB_INIT_BACKEND(TYPE)                             \
   void TYPE::init_backend(Context* ctx) {                              \
@@ -83,21 +83,21 @@ type_name()
   }
 
 #define SPIKE_EXPORT_BACKEND_TYPE(BACKEND, TYPE)                          \
-  namespace Backend {                                                     \
-    namespace BACKEND {                                                   \
-      namespace Registry {                                                \
-        class TYPE {                                                      \
-        public:                                                           \
-          static ::Backend::TYPE* factory(::TYPE* front, Context* ctx) {  \
-            return new ::Backend::BACKEND::TYPE(front, ctx);              \
-          }                                                               \
-          TYPE() {                                                        \
-            ::Backend::TYPE::factory[#BACKEND] = factory;                 \
-          }                                                               \
-        };                                                                \
-        TYPE TYPE ## _registrar;                                          \
-      }                                                                   \
-    }                                                                     \
-  }
+  //namespace Backend {                                                     \
+  //  namespace BACKEND {                                                   \
+  //    namespace Registry {                                                \
+  //      class TYPE {                                                      \
+  //      public:                                                           \
+  //        static ::Backend::TYPE* factory(::TYPE* front, Context* ctx) {  \
+  //          return new ::Backend::BACKEND::TYPE(front, ctx);              \
+  //        }                                                               \
+  //        TYPE() {                                                        \
+  //          ::Backend::TYPE::factory[#BACKEND] = factory;                 \
+  //        }                                                               \
+  //      };                                                                \
+  //      TYPE TYPE ## _registrar;                                          \
+  //    }                                                                   \
+  //  }                                                                     \
+  //}
 
 #define STRINGIFY(s) #s
